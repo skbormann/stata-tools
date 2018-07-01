@@ -1,6 +1,6 @@
 *!Version 0.5 Converts a number to a letter
 *Development version, contain a change in return value which will break older usage of this program
-program num2base26_devel, rclass
+program num2base26, rclass
 	version 9.2
 	syntax anything(name=num) [, LOWer DISPlay]
 	local num = `num'
