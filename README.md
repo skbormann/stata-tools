@@ -2,6 +2,7 @@
 A collection of Stata scripts and dialog boxes
 These scripts are developed as a side effect of my analyses using Stata. The help files and dialog boxes are part of my learning how to write Stata programs.
 A list with the content of each program is below.
+The programs are not yet available via the SSC, but will be in the future.
 
 # Programs
 * checkdim - Checks if a variable has observations for all categories of another variable. This tool is mainly used to check if a variable has values for all time periods e.g. years.
@@ -12,3 +13,6 @@ A list with the content of each program is below.
 
 * num2base26 - An interface to the *numbase26()* function of Mata. Converts a number to a letter. 
   Useful when creating Excel tables in Stata
+  
+  # Installation
+  To install the programs, just download them and the corresponding help file and dialog box to your local ado folder
