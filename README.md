@@ -10,9 +10,8 @@ The programs are not yet available via the SSC, but will be in the future.
 * getperc - Returns the relative frequency of categorical variable for further processing. 
 * multif - Constructs multiple if-restrictions. It allows to apply the same if-restriction(s) to different variables for the same command.
    Mainly delevoped and used for the *count* command, but it works for other scenarios as well 
-
 * num2base26 - An interface to the *numbase26()* function of Mata. Converts a number to a letter. 
   Useful when creating Excel tables in Stata
   
-  # Installation
+# Installation
   To install the programs, just download them and the corresponding help file and dialog box to your local ado folder
