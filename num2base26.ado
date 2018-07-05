@@ -1,30 +1,23 @@
-*!Version 0.5 Converts a number to a letter
-*Development version, contain a change in return value which will break older usage of this program
 program num2base26, rclass
-	version 9.2
-	syntax anything(name=num) [, LOWer DISPlay]
+*!Version 0.5 Converts a number to a letter
+	syntax anything(name=num) [, LOWer]
 	local num = `num'
 	* Checking if a number was provided
 	if "`num'"==""{
-		disp as error "Enter a number to be converted into a letter"
-		exit 198
+	disp as error "Enter a number to be converted into a letter"
 	}
-	if real("`num'")==. | real("`num'")<0 | real("`num'")>16384{
-		disp as error "Enter a number between 0 and 16384"
-		exit 198
+	if real("`num'")==. {
+		disp as error "Enter an integer number"
 	}
 	
 	
-	mata: letter = strtoreal(st_local("num"))
-	mata: col = numtobase26(letter)
-	mata: st_local("letter", col)
+	mata: my_col = strtoreal(st_local("num"))
+	mata: col = numtobase26(my_col)
+	mata: st_local("col_let", col)
 	
 	if `"`lower'"'!=""{
-	local letter = strlower("`letter'")
-	}
-	if "`display'"!=""{
-		display "The letter is: `letter'"
+	local col_let = strlower("`col_let'")
 	}
 	
-	return local letter = "`letter'"
+	return local col_letter = "`col_let'"
 end
