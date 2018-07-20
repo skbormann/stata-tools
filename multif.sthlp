@@ -1,13 +1,13 @@
 {smcl}
 {* *!Version 1.15 20.06.2018}{...}
 {title:Titel}
-{cmd:multif} {hline 1} Constructs multiple if-restrictions with the same value for different variables 
+{cmd:multif} {hline 1} Constructs multiple if-restrictions with the same value for different variables. 
 
 {title:Description}
-This command was developed out of the need to apply the same if-condition like "!mi(VAR)" or "inrange(VAR,x,y)" to multiple variables.
+This command was developed out of the need to apply the same if-restriction like "!mi(VAR)" or "inrange(VAR,x,y)" to multiple variables.
 Even with only a few variables, writing the if-restrictions can be quite error prone.
-This command eases the construction of such restrictions the variables supplied in {varlist}.
-The command should work in the most common scenarios, but it does not check if the generated restriction itself is valid. 
+This command eases the construction of such restrictions for the variables supplied in {varlist}.
+The command should work in the most common scenarios, but it does not check if the generated restriction(s) itself is/are valid. 
 A dialog file is provided to make the usage of this command easier.
 
 {title:Syntax}
@@ -79,10 +79,10 @@ A dialog file is provided to make the usage of this command easier.
 {synoptset 15 tabbed}{...}
 {cmd:multif} saves the following in {cmd:r()}:
 {p2col 5 20 24 2: Macro}{p_end}
-{synopt: {cmd:r(multif)}}the multiple if-conditions containing also the condition provided by the {opt addif()} option. {p_end}
+{synopt: {cmd:r(multif)}}the multiple if-restrictions containing also the restriction provided by the {opt addif()} option. {p_end}
 
 {* p2colreset}{...}
-
+{* INCLUDE help author }
 {title:Author}
 Sven-Kristjan Bormann
 
