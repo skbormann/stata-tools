@@ -1,4 +1,4 @@
-*!Eval_var
+*!Eval_var: Version 0.7
 * Allows to use an expression for variables in in other commands
 * without needing to create them first
 * Version 0.7: 
@@ -14,15 +14,18 @@ opt[varid() specify an alternative variable identifier. To allow more commands, 
 opt[egen use egen instead of gen to create the temporay variable]
 opt[generate() allows to save the transformed variable under the given name. The variable is not allowed to exist before.]
 opt[replace() replaced an existing variable with the same an in {opt:generate()} ]
+example[{stata sysuse auto}]
+example[{stata evalvar ln(price), command(hist VAR)} ]
 author[Sven-Kristjan Bormann]
 email[sven-kristjan@gmx.de]
 return[exp returns the expression/transformation.]
 return[command returns the command as it was typed in.]
+* seealso[ Further Stata programs and development versions can be found under https://github.com/skbormann/stata-tools ]
 END HELP FILE */
 capture program drop evalvar
 program define evalvar, rclass sortpreserve byable(recall)
 version 11.0
-	syntax anything [if] , COMmand(string) [ VARid(string) egen GENerate(varname) REPlace] //Keep option probably useless, but...
+	syntax anything [if] , COMmand(string) [ VARid(string) egen GENerate(varname) REPlace] 
 	local exp `anything'
 	if "`varid'"=="" local varid VAR
 	tempvar temp
@@ -50,5 +53,4 @@ version 11.0
 	}
 	return local exp "`exp'"
 	return local command  "`command'"
-	return local copt  "`copt'"
 end

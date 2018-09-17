@@ -1,5 +1,13 @@
 *! Version 0.5 03.10.2017: Check if variable(s) exist(s) for all values of another variable
 * Displayed output tends to be overloaded, same for returned value
+/* START HELP FILE
+title[Check if variable(s) exist(s) for all values of another variable]
+desc[]
+opt[dimension() the variable for which all values ]
+opt[noshow do not show the results]
+return[misslevel ]
+return[varmiss ]
+END HELP FILE */
 capture program drop checkdim
 program define checkdim, rclass
 

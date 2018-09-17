@@ -5,7 +5,7 @@
 *!Version 1.0: Contains basic functionality
 capture program drop multif
 program define multif, rclass
-version 9.0
+version 10.0
 	syntax varlist(min=2),  CONDition(string) CONnection(string) [COMmand(string) COMOPTion(string) VARid(string) ADDif(string) ADDCon(string) test DISPlay] 
 	*Parse syntax
 	local vars `varlist'
@@ -52,9 +52,6 @@ end
 
 *Does not work yet for all cases
 program define ParseCondError
-	*syntax ,cond(string) varid(string)
-	*if "`varid'"=="" local varid VAR
-	*local 0 `cond'
 	syntax,  cond(string) varid(string)
 	local 0 `cond'
 	/*
@@ -88,11 +85,7 @@ program define ParseCondError
 	}
 end
 
-/*
-program define ParseCondSub
 
-end
-*/
 *To-Do List:
 /*
 Add return codes for better error handling.

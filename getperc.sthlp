@@ -1,6 +1,10 @@
 {smcl}
 {title:Titel}
 {cmd:getperc} {hline 2} Returns the percentage of a categorical variable/dummy variable
+
+{title:Description}
+{cmd:getperc} is meant to be used in creating custom tables like custom descriptive tables, which contain mixtures of average and percentages.
+A simple dialog box is avaiable {stata db getperc:here}.
 {title: Syntax}
 {cmd:getperc} {it:varname} [if], row(integer) [DISPplay]
 
@@ -22,9 +26,9 @@
 
 {title:Saved results}
 {cmd:getperc} saves the following in {cmd:r()}:
-{synoptset 20 tabbed}{...}
-{* p2col 5 20 24 2: Scalar}{...} 
-{synopt: {cmd:r(perc)}}percentage of the categorical variable.{p_end}
+{synoptset 10 tabbed}{...}
+Scalar:
+{synopt: {cmd:r(perc)}} percentage of the categorical variable.{p_end}
 
 {p2colreset}{...}
 
@@ -32,6 +36,5 @@
 Sven-Kristjan Bormann
 
 {title:Bug Reporting}
-{psee}
 Please submit bugs, comments and suggestions via email to:
 sven-kristjan@gmx.de

@@ -3,7 +3,7 @@ multif
 Version 1.15
 */
 
-VERSION 14.2
+VERSION 14.2 /* Should work in lower version as well*/
 INCLUDE _std_large
 *DEFINE _dlght 350 
 *DEFINE _dlwd 400
@@ -22,7 +22,7 @@ BEGIN
 	EXP exp_cond @ +20 @ .,	label("Create...:") option(condition)
 	
 	TEXT tx_con @ +30 @ .,	label("Connection between restrictions:")
-	EDIT ed_con @ +20 @ ., 	label("Connector:") error("Connector between restrictions must be set") option(connection)
+	EDIT ed_con @ +20 @ ., 	label("Connector:") error("Connector between restrictions must be set") option(connection) tooltip("Connectors are either & or |")
 	
 	TEXT tx_res @ +60 @ .,	label("Resulting restriction: (Refresh dialog to see the resulting restriction below)")
 	EDIT ed_res @ +20 @ .,	label("") default(r(multif))
@@ -47,7 +47,7 @@ BEGIN
 	TEXT tx_addcon @ +30 @ .,	label("Additional restrictions connector:")
 	EDIT ed_addcon @ +20 @ ., 	label("") default("&") option(addcon)
 
-	CHECKBOX chk_test @ +30 @ ., label("Tests if the variable identifier is the same in all restrictions") option(test)
+	CHECKBOX chk_test @ +30 @ ., label("Test if the variable identifier is the same in all restrictions") option(test)
 	CHECKBOX chk_disp @ +30 @ ., label("Display generated restriction") option(display)
 
 

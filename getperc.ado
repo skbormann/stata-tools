@@ -2,7 +2,7 @@
 *!Version 1.0
 capture program drop getperc
 program getperc, rclass
-	version 9.0
+	version 10.0
 	syntax varname [if] [in], row(integer) [DISPlay]
 	marksample touse
 	qui tabulate `varlist' if `touse', matcell(freq)
