@@ -17,11 +17,7 @@ BEGIN
 	TEXT	tx_com @ +30 @ ., label("Command")
 	EDIT	ed_com @ +20 @ ., option(command) tooltip("Command for which the above")
  	CHECKBOX	ck_egen @ +30 @ ., label("Egen") option(egen) tooltip("Use egen instead of gen to create new variable.")
-	/*TEXT tx_varid @ +30 @ .,	label("Variable identifier:")
-	EDIT ed_varid @ +20 @ ., 	label("") default("VAR") option(varid) tooltip("Specify the name under which the temporary variable is used in the command.")
-	TEXT	tx_gen @ +30 @ ., label("New variable name")
-	EDIT	ed_gen @ +20 @ ., option(generate) tooltip("Save generated temporary variable under the entered name")
-	CHECKBOX ck_replace @ +30 @ ., label("Replace") option(replace)	 tooltip("Replaces an existing variable with the same as under the option above")*/
+	
 END
 
 INCLUDE if

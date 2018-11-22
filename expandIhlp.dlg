@@ -1,29 +1,28 @@
 /*
-parseIhelp
+expandihlp
 Version 1.0
 */
 VERSION 14.2
 INCLUDE _std_medium
 INCLUDE header
 
-HELP hlp1, view("help expandIhlp")
+HELP hlp1, view("help expandihlp")
 RESET res1
 
-DIALOG main, label("expandIhlp - Integrating .ihlp-files into help files") tabtitle("Main")
+DIALOG main, label("expandihlp - Expands .ihlp-files into .sthlp files") tabtitle("Main")
 BEGIN
 	TEXT	tx_exp 	_lft _top _iwd . ,label("Help file to parse:")
 	FILE	fhelp	@ +20 @ ., label("Browse...") option(file) filter("Stata Help Files|*.sthlp|All Files|*.*") dialogtitle("Open help file") error("Help file to open")
 	TEXT	tx_suffix @ +20 @ ., label("Suffix of new file")
-	EDIT	ed_suffix @ +20 @ ., option(suffix) default("_parsed")
+	EDIT	ed_suffix @ +20 @ ., option(suffix) default("_expanded")
 	CHECKBOX ck_notest @ +30 @ ., label("No Test") tooltip("Disable test for the number of INCLUDE directives") option(notest)
 	CHECKBOX ck_rename @ +30 @ ., label("Rename") tooltip("Rename expanded file to original file") option(rename)
-	
 END
 
 PROGRAM command
 BEGIN
-	put "parseIhlp using "
-	require fhelp
+	put "expandihlp using "
+	require main.fhelp
 	varlist main.fhelp
 		beginoptions
 			optionarg main.ed_suffix
