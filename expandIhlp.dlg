@@ -21,10 +21,12 @@ END
 
 PROGRAM command
 BEGIN
-	put "expandihlp using "
-	require main.fhelp
-	varlist main.fhelp
+	put "expandihlp "
+	*require main.fhelp
+	*varlist main.fhelp
 		beginoptions
+			require main.fhelp
+			optionarg main.fhelp
 			optionarg main.ed_suffix
 			option main.ck_notest
 			option main.ck_rename

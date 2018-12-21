@@ -1,11 +1,11 @@
-*!parseIhelp Version 1.0 Date: 21.08.2018
+*!expandihlp Version 1.0 Date: 20.12.2018
 *!Inserts .ihlp-files into .sthlp-files
 
 capture program drop expandihlp
 program define expandihlp, rclass
-	syntax using/ [, REName NOTest SUFfix(string) ]
-	
-	 local version = _caller()
+	syntax , File(string) [ REName NOTest SUFfix(string) ]
+	*Issue warning if unsupported version Stata is used
+	local version = _caller()
 	if `version' < 14.2{
 	version `version'
 	disp as err "Tested only for Stata version 14.2 and higher."
@@ -15,55 +15,41 @@ program define expandihlp, rclass
 		version 14.2
 		}
 	
-	
 	tempname fhin fhout
-	*Experimental: Extended looking for a file
-	
-	local helpfile `"`using'"'
-	gettoken word rest : helpfile, parse(".")
-	if "`rest'"!=".sthlp"{
-		local helpfile `helpfile'.sthlp
-	}
-	capture findfile `helpfile'
+	*Find the help file in standard search paths in case not the full path was provided
+	capture confirm file `"`file'"'
 	if _rc{
-			disp as err " `using' is an incorrect filename."
-			disp as err "Provide a correct filename which looks like program.sthlp or provide the correct path to file `using'"
-			exit 198
-	}
-	local helpfile `r(fn)'
-	
-	/*
-	capture confirm file `"`using'"'
-	if _rc{
-		capture confirm file `using'.sthlp //Check if user forgot the sthlp-extension
-		if !_rc{
-			local using `using'.sthlp
+		local helpfile `"`file'"'
+		gettoken word rest : helpfile, parse(".")
+		if "`rest'"!=".sthlp"{
+			local helpfile `helpfile'.sthlp 
 		}
-		else{
-			disp as err " `using' is an incorrect filename."
-			disp as err "Provide a correct filename which looks like program.sthlp"
-			exit 198
+		capture findfile `helpfile'
+		if _rc{
+				disp as err " `file' is an incorrect filename."
+				disp as err "Provide a correct filename which looks like program.sthlp or provide the correct path to file `file'"
+				exit 198
 		}
+		local helpfile `r(fn)'
 	}
-	*/
+	else{
+		local helpfile `"`file'"'
+	}
+
 	*Test whether any include directives exist
 	if "`notest'"==""{
 		includeTest using `helpfile'
 		local inccnt `r(inccnt)'
 		if `r(inccnt)'==0{
-			disp as err "No include directives found. Nothing to include into `using'."
+			disp as err "No include directives found. Nothing to include into `helpfile'."
 			exit
 		}
 	}
 	
 	*Get file name to create a new parsed file
-	 _getfilename `helpfile'
-	local filename `r(filename)'
 	if "`suffix'"=="" local suffix _expanded
-	gettoken word rest : filename, parse(".")
+	gettoken word  : helpfile, parse(".")
 	local fileout `word'`suffix'.sthlp
-	gettoken path filename : helpfile ,parse("/")
-	local fileout `path'/`fileout'
 	file open `fhin' using `helpfile', read 
 	file open `fhout' using `"`fileout'"', write replace
 	file read `fhin' line
@@ -71,30 +57,20 @@ program define expandihlp, rclass
 	while r(eof)==0{
 		 local incfound 0 // Set a trigger to exclude a line with the INCLUDE
 		 if regexm(`"`line'"',"^(INCLUDE)"){
-		 *local linesave "`line'"
 		 local incfound 1
-		 *local line = subinstr("`line'", "{" ," ",.) // Remove brackets 
-		 *local line = subinstr("`line'", "}" ," ",.)
 		 local arg = word("`line'",3)
 			tempname fh2
 			*Extended file search
 			capture findfile `arg'.ihlp
 			*local ihlpfile `r(fn)'
 			if !_rc{
-			local ihelpfile `r(fn)'
+				local ihelpfile `r(fn)'
 			}
-			
 			else{
-			disp as error "File `arg'.ihlp in line `linenumber' not found. Nothing to expand here."
-			continue
+				disp as error "File `arg'.ihlp in line `linenumber' not found. Nothing to expand here."
+				continue
 			}
-			/*
-			capture confirm file `arg'.ihlp
-				if _rc{
-				 disp as error "File `arg'.ihlp in line `linenumber' not found. Nothing to expand here."
-				 continue
-				}
-*/
+
 			file open `fh2' using `ihelpfile', read
 			file read `fh2' line2
 			while r(eof)==0{
@@ -110,29 +86,25 @@ program define expandihlp, rclass
 		 file read `fhin' line
 		 local ++linenumber
 	}
-	*file write `fh' _n
 	file close `fhin'
 	file close `fhout'
-	disp as txt "File `using' expanded to file `fileout'. "
+	disp as txt "File `helpfile' expanded to file `fileout'. "
 	disp "`inccnt' .ihlp-files integrated."
 	disp "`incfiles' integrated."
 	
-	if "`rename'"!=""{ //Still buggy function!
-	renameFile `helpfile' `using' `word' `fileout'
-	/*
-		!ren `using' `word'_old.sthlp
-		!ren `fileout' `using'
-		disp "`using' renamed to `word'_old.sthlp." _n "`fileout' renamed to `using'."*
-		*/
+	if "`rename'"!=""{ 
+		copy `helpfile' `word'_old.sthlp, replace
+		copy `fileout' `helpfile', replace
+		disp "`helpfile' renamed to `word'_old.sthlp." _n "`fileout' renamed to `helpfile'." 
+		
 	}
 	
 	*Saved results
 	return local inccnt  `inccnt'
 	return local incfiles `incfiles'
-	return local origfile `using'
+	return local origfile `helpfile'
 	return local expfile `fileout'
 end
-
 
 
 
@@ -150,23 +122,8 @@ program define includeTest, rclass
 		file read `fhtest' line
 	}
 	file close `fhtest'
-	*disp "Include directives found: `inccnt'"
 	return local inccnt `inccnt'
 end
 
 
-program define renameFile, rclass
-*rename file with respect to OS
-args helpfile using word fileout
 
-if c(os)=="Windows"{
-	!ren `helpfile' `word'_old.sthlp
-	!ren `fileout' `using'
-}
-else{
-	!mv `helpfile' `word'_old.sthlp
-	!mv `fileout' `using'
-}
-
-disp "`using' renamed to `word'_old.sthlp." _n "`fileout' renamed to `using'."
-end
