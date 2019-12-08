@@ -1,0 +1,6 @@
+v 3
+d checkdim2 {cmd:checkdim2} allows you to check if a variable or multiple variables has/have missing values for all values of another variable/dimension. The results are saved in temporary variables which can be made permanent.  The results can be replayed if the {opt keep} has been specified in the first run of the command. To replay the results, just type {cmd:checkdim2} without the dimension and any variables.  It is possible to filter the output by using the {opt showcondition()} option. Variables can also be dropped based on the results by using the options {opt drop} and {opt dropcondition()} together.
+d Sven-Kristjan Bormann
+d Distribution-Date: 20190911
+f checkdim2.ado
+f checkdim2.sthlp

@@ -2,7 +2,7 @@
 A collection of Stata scripts and dialog boxes
 These scripts are developed as a side effect of my analyses using Stata. The help files and dialog boxes are part of my learning how to write Stata programs.
 A list with the content of each program is below.
-The programs are not yet available via the SSC, but will be in the future.
+Not all programs are not yet available via the SSC, but will be in the future.
 
 # Programs
 * checkdim - Checks if a variable has observations for all categories of another variable. This tool is mainly used to check if a variable has values for all time periods e.g. years.
@@ -14,4 +14,5 @@ The programs are not yet available via the SSC, but will be in the future.
   Useful when creating Excel tables in Stata
   
 # Installation
-  To install the programs, just download them and the corresponding help file and dialog box to your local ado folder
+  To install the programs, just download them and the corresponding help file and dialog box to your local ado folder.
+  Or run __net install <programname>, from(https://github.com/skbormann/stata-tools) replace__
