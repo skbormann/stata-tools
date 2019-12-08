@@ -18,8 +18,8 @@ return[dropcondition the condition under which variables are dropped.]
 return[showcondition the condition for which variables should be shown.]
 return[keepname the stub for the generated variables]
 END HELP FILE */
-capture program drop checkdim2
-program define checkdim2, rclass
+capture program drop checkdim
+program define checkdim, rclass
 
 	version 9.0
 		if replay(){
