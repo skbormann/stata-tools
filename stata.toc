@@ -6,4 +6,5 @@ p emptyvar		Finds variables containing only missing values and drops them.
 p expandIhlp	Integrates .ihlp files into normal help files to allow repeated usage of text without the need to ship the .ihlp-file(s) itself. This is mainly a convience tool for other programmers.
 p getperc		Returns the relative frequency of a category of a categorical variable for further processing.
 p multif		Constructs multiple if-restrictions. It allows to apply the same if-restriction(s) to different variables for the same command. Mainly delevoped and used for the count command, but it works for other scenarios as well.
-p num2base26 An interface to the numbase26() function of Mata. Converts a number to a letter. Useful when creating Excel tables in Stata.
+p num2base26 	An interface to the numbase26() function of Mata. Converts a number to a letter. Useful when creating Excel tables in Stata.
+p sgpv 			Calculate the Second Generation P-Values based on the R-code by Valerie F. Welty and Jeffrey D. Blume
