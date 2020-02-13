@@ -1,6 +1,6 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
-*!Version 1.0
+*!Version 0.9
 *!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code
 *! Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 /*START HELP FILE
