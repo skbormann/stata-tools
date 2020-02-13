@@ -1,30 +1,45 @@
 *!Based on the R-code sgpower
 *!Works only on one interval at the moment
 *!Not possible to plot the power function yet
+*!Version :0.9
 /* START HELP FILE
 title[Power functions for Second-Generation p-values]
-desc[]
-opt2[true() The true value for the parameter of interest at which to calculate power. 
+desc[Compute power/type I error for Second-Generation p-values approach.]
+opt[true() The true value for the parameter of interest at which to calculate power. 
 			Note that this is on the absolute scale of the parameter, and not the standard deviation or standard error scale.]
-opt2[nulllo() The lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value is based.]
-opt2[nullhi() The upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.]
-opt2[inttype() Class of interval estimate used for calculating the SGPV. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported)]
-opt2[intlevel() Level of interval estimate. If intervaltype is "confidence", the level is \alpha. 
+opt[nulllo() The lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value is based.]
+opt[nullhi() The upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.]
+opt[inttype() Class of interval estimate used for calculating the SGPV. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported)]
+opt[intlevel() Level of interval estimate. If intervaltype is "confidence", the level is \alpha. 
 				If "intervaltype" is "likelihood", the level is 1/k (not k).]
-opt2[stderr() Standard error for the distribution of the estimator for the parameter of interest. 
+opt[stderr() Standard error for the distribution of the estimator for the parameter of interest. 
 			Note that this is the standard deviation for the estimator, not the standard deviation parameter for the data itself. 
 			This will be a function of the sample size(s).]
 opt[bonus Display the additional diagnostics for error type I]
-opt[mata Use the user-provided command "integrate" for faster calculating the bonus diagnostics]
-return[]
-example[]
-references[]
+opt[nomata Do not use the user-provided command "integrate" for faster calculation of the bonus diagnostics]
+return[power0 Probability of SGPV = 0 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.alt} = P(SGPV = 0 | \theta = } {cmd:true). ]
+return[power1 Probability of SGPV = 1 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.null} = P(SGPV = 1 | \theta = } {cmd:true).]
+return[powerinc Probability of 0 < SGPV < 1 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.inc} = P(0 < SGPV < 1 | \theta = } {cmd:true).]
+return[minI is the minimum type I error over the range ({cmd:null.lo}, {cmd:null.hi}), which occurs at the midpoint of ({cmd:null.lo}, {cmd:null.hi}).]
+return[maxI is the maximum type I error over the range ({cmd:null.lo}, {cmd:null.hi}), which occurs at the boundaries of the null hypothesis, {cmd:null.lo} and {cmd:null.hi}. ]
+return[avgI is the average type I error (unweighted) over the range ({cmd:null.lo}, {cmd:null.hi}). If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error calculated assuming the true parameter value \theta is equal to 0.]
+example[
+{stata sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+]
+references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. \emph{PLoS ONE} 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
+
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. https://doi.org/10.1080/00031305.2018.1537893 ]
+
+author[Sven-Kristjan Bormann ]
+institute[School of Economics and Business Administration, University of Tartu]
+email[sven-kristjan@gmx.de]
+seealso[{help:sgpvalue} {help:fdrisk} {help:sgpv}]
 END HELP FILE*/
 
 capture program drop sgpower
 program define sgpower, rclass
-version 10
-syntax , true(real)  nulllo(real)  nullhi(real)  inttype(string)   intlevel(real) [stderr(real 1)  Bonus  Mata]
+version 14
+syntax , true(real)  nulllo(real)  nullhi(real)  inttype(string)   intlevel(real) [stderr(real 1)  Bonus  nomata]
 
 *Input checking: Not all checks yet,; no length checks yet 
 if !inlist("`inttype'", "confidence","likelihood"){
@@ -42,11 +57,11 @@ else{
 */
 
 if "`inttype'"=="confidence"{
-	local z = invnorm(1- `intervallevel'/2)
+	local z = invnorm(1- `intlevel'/2)
 }
 
 if "`inttype'"=="likelihood"{
-	local z = invnorm(1- 2*normal(-sqrt(2*log(1/`intervallevel')))/2)
+	local z = invnorm(1- 2*normal(-sqrt(2*log(1/`intlevel')))/2)
 }
 
 **P(SGPV=0 | true ) (see Blume et al. (2018) eq.(S4) for CI/LSI)
@@ -86,18 +101,6 @@ disp "Power.Alt: " round(`power0',0.0001) _skip(10)  "Power.inc: " round(`poweri
 
 if "`bonus'"!=""{
 **bonus type I error summaries
-*Uncorrect numbers
-/*  pow0 = function(x) pnorm(null.lo/std.err - x/std.err - Z) + pnorm(-null.hi/std.err + x/std.err - Z)
-
-  minI = pow0((null.lo+null.hi)/2)
-  maxI = pow0(null.lo)
-  avgI = 1/(null.hi-null.lo)*integrate(f=pow0, lower=null.lo, upper=null.hi)$value
-
-  typeI = c('min'=minI, 'max'=maxI, 'mean'=avgI)
-  if(null.lo<=0 & 0<=null.hi) {
-    typeI = c('at 0'=pow0(0), 'min'=minI, 'max'=maxI, 'mean'=avgI)
-  }
-  */
   
   *local pow0 normal(`nulllo'/`stderr' - `x'/`stderr' -`z') + normal(-`nullhi'/`stderr' + `x'/`stderr' - `z')
   local x (`nulllo'+`nullhi')/2
@@ -107,16 +110,16 @@ if "`bonus'"!=""{
   
   
   *Alternative approach using user-provided integrate command
-  if "`mata'"!=""{
+  if "`mata'"!="nomata"{
   local power normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z') 
   capture which integrate
   if _rc qui ssc install install, replace
-  integrate, f() l(`nulllo') u(`nullhi') vectorise
+  qui integrate, f(`power') l(`nulllo') u(`nullhi') vectorise
   local integral `r(integral)'
   }
-  else{
+  else if "`mata'"=="nomata"{
   *
-  *Use Stata's internal numerical integration command -> requires a new dataset
+  *Use Stata's internal numerical integration command 
   preserve
   quietly{ 
   range x `nulllo' `nullhi' 1000 //Arbitrary number of integration points could be made dependent on the distance between upper and lower limit
@@ -138,11 +141,11 @@ if "`bonus'"!=""{
   }
 }
 
-return scalar power0 `power0'
-return scalar power1 `power1'
-return scalar powerinc `powerinc'
-return scalar minI `minI'
-return scalar maxI `maxI'
-return scalar avgI `avgI'
+return local power0  `power0'
+return local power1  `power1'
+return local powerinc  `powerinc'
+return local minI  `minI'
+return local maxI  `maxI'
+return local avgI `avgI'
 
 end

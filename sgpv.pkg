@@ -1,0 +1,14 @@
+v 3
+d 'SGPV': Second Generation P-Values
+d 
+d Distribution-Date:   20200213
+d License: MIT
+d 
+F fdrisk.ado
+F sgpower.ado
+F sgpv.ado
+F sgpvalue.ado
+F fdrisk.sthlp
+F sgpower.sthlp
+F sgpv.sthlp
+F sgpvalue.sthlp
