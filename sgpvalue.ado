@@ -16,12 +16,14 @@ opt[nullhi() A numeric vector of upper bounds of null intervals. Values may be f
 opt[nulllo() A numeric vector of lower bounds of null intervals. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:nullhi}.]
 opt[nowarnings Disable showing the warnings for problematic intervals.]
 opt[nomata Don't use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if c(matsize) is smaller than these options.]
-opt[replace replace existing variables in case the nomata was used.]
+opt[replace replace existing variables in case the nomata-option was used.]
+opt[nodeltagap disable the display of the delta gap. Mainly used inside of {cmd:sgpv}, since delta-gaps are less useful to most users of p-values.  ]
 opt2[esthi() A numeric vector of upper bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used.
 A variable contained the upper bound can be also used.
 ]
 opt2[infcorrection() A small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. This option can only be invoked when one of the intervals has infinite length.]
-opt[nodeltagap disable the display of the delta gap. Mainly used inside of {cmd:sgpv}, since delta-gaps are less useful to most users of p-values.  ]
+opt2[nomata Deactive the usage of Mata for calculating the SGPVs with large matrices or variables. The Mata function depends on the external {cmd:moremata} package by Ben Jann. The package will be installed if it does not exist. If this option is set, an approach based on variables is used. Using variables instead of Mata is considerably faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata.]
+
 example[The examples are based on the original documentation for the R-code, but are modified to resemble more closely the usual Stata convention.
 
  {bf:Simple example for three estimated log odds ratios but the same null interval}{p_end}
