@@ -49,10 +49,13 @@
 
 {pstd}
 {p_end}
-{synopt:{opt nullcol(string)}}  Coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue
+{synopt:{opt nullcol(string)}}  Coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue.
 
 {pstd}
 {p_end}
+
+{synopt:{opt intcol(string)}} Coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively.
+
 {synopt:{opt noploty_axis}}   Deactive showing the y-axis.
 
 {pstd}
@@ -140,10 +143,20 @@ A variable contained the lower bound can be also used.
 {pstd}
 {p_end}
 {phang}
-{opt nullcol(string)}  Coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue. You can see the colour before plotting via 
-{stata palette color 208 216 232 }
-{p_end}
+{opt nullcol(string)}  Coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue. You can see the colour before plotting via:{p_end}
+	{stata palette color 208 216 232 }
 
+{pstd}
+{p_end}
+{phang}
+{opt intcol(string)} Coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively. 
+You can see the colour before plotting via: {p_end}
+	{stata palette color 100 149 237 } // cornflowerblue
+	{stata palette color 205 38 38 } // firebrick3
+	{stata palette color 72 61 139 } // darkslateblue
+
+{pstd}
+{p_end}
 {phang}
 {opt noploty_axis}     Deactive showing the y-axis.
 
