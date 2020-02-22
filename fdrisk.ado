@@ -1,6 +1,7 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
 *!Version 0.9
+*!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
 *!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code
 *! Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 /*START HELP FILE
@@ -17,7 +18,6 @@ opt[nullspace() Support of the null probability distribution. If "nullweights" i
 opt[altweights() Probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
 opt[altspace() Support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" is a vector of length two.]
 opt[pi0() Prior probability of the null hypothesis. Default is 0.5.]
-opt[nomata deactivates the usage of an additional user-provided command for numerical integration. The numerical integration is required to calculate the false discovery/confirmation risks. Instead the numerical integration Stata command is used.  ]
 
 example[
 {bf:false discovery risk with 95% confidence level}
@@ -34,7 +34,7 @@ author[Sven-Kristjan Bormann ]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 
-seealo[ {help:sgpvalue} {help:sgpower} {help:sgpv}  ]
+seealo[ {help:plotsgpv} {help:sgpvalue} {help:sgpower} {help:sgpv}  ]
 END HELP FILE */
 
 
@@ -44,14 +44,9 @@ program define fdrisk, rclass
 version 14
 syntax, nullhi(string) nulllo(string) STDerr(real) INTType(string) INTLevel(string) ///
 		NULLSpace(string) NULLWeights(string) ALTSpace(string) ALTWeights(string) ///
-		[sgpval(integer 0) pi0(real 0.5) nomata]
+		[sgpval(integer 0) pi0(real 0.5)]
 *Syntax parsing
-if "`mata'"!="nomata"{ //Check if necessary command is installed
-	capture which integrate
-	qui if _rc ssc install integrate, replace
-	local integrate integrate
-}
-else local integrate nomataInt
+local integrate nomataInt
 
 if !inlist(`sgpval',0,1){
 	stop "Only values 0 and 1 allowed for the option 'sgpval'"
@@ -275,7 +270,7 @@ program define stop
 end
 
 
-*In case no Mata integration is requested 
+*Shortcut to the Stata integration command, same syntax as the user-provided integrate-command.
 program define nomataInt, rclass
 syntax , Lower(real) Upper(real) Function(string) [Vectorise]
 preserve

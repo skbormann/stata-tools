@@ -2,7 +2,9 @@
 *!Version: 0.9
 *!To-Do: support for more commands
 *!To-Do: Make results exportable or change command to e-class command to allow processing in commands like esttab from Ben Jaan 
-*!To-Do: Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers
+*!To-Do: Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for than one stored estimate
+*!To-Do: Return more infos
+
 /*START HELP FILE
 title[A wrapper command for calculating the Second-Generation P-Values and their associated diagnosis.  ]
 desc[{cmd:sgpv} allows the calculation of the Second-Generation P-Values (SGPV) developed by Blume et.al.(2018,2019) for and after commonly used estimation commands. The false discovery/confirmation risks (fdr/fcr) can be also reported. The SGPVs are reported alongside the usually reported p-values. 
@@ -56,7 +58,10 @@ Calculate SPGVs for the stored estimation and only the foreign coefficient{p_end
 
 ]
 return[comparison a matrix containing the displayed results]
-
+return[sgpv_cmd sgpv]
+return[sgpv_cmdline command as typed]
+return[sgpv_coef the coefficient(s) for which the SGPVs were calculated.]
+return[sgpv_estimate the name of the estimate for which SGPVs were calculated.]
 
 
 references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. \emph{PLoS ONE} 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
@@ -72,23 +77,37 @@ seealo[ {help:sgpvalue} {help:sgpower} {help:fdrisk}  ]
 END HELP FILE*/
 
 capture program drop sgpv
-program define sgpv, rclass
+program define sgpv, eclass
 version 14
 
-*Parse the initial input -> Not captured yet the case that sgpv is called
+*Parse the initial input -> Not captured yet the case that sgpv is called only with options or further situations > Should implement a replay function to avoid repeated calculations when only selection on the matrix is required
 capture  _on_colon_parse `0'
+
+
 if _rc & "`e(cmd)'"=="" { // If the command was not prefixed and no previous estimation exists.
-	disp as error "No command or matrix for calculating SGPV provided."
-	exit 198
-} 
+	disp as error "No last estimates for calculating SGPV found."
+	exit 301
+}
+
+*if _rc & "`e(cmd)'"=="" & "`0'"!=""
 
 if !_rc{
-	local cmd `s(after)'
-	local 0 `s(before)' 
+	local cmd `"`s(after)'"'
+	local 0 `"`s(before)'"' 
 } 
 
 **Define here options
-syntax [, Quietly nulllo(real 0) nullhi(real 0) ESTImate(name) MATListopt(string) Matrix(name)  altweights(string) altspace(string) nullspace(string) nullweights(string) INTLevel(string) INTType(string) pi0(real 0.5) COEFficient(string) nomata nobonus(string)] 
+syntax [anything] [, Quietly nulllo(real 0) nullhi(real 0) ESTImate(name) MATListopt(string) Matrix(name)  altweights(string) altspace(string) nullspace(string) nullweights(string) INTLevel(string) INTType(string) pi0(real 0.5) COEFficient(string) nomata nobonus(string)] 
+
+***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
+/* Potential subcommands: value, power, fdrisk, plot
+if "`anything'"!=""{
+	if !inlist("`anything'","value","power","fdrisk","plot" ) stop "Unknown subcommand `anything'. Allowed subcommands are value, power, fdrisk and plot."
+	
+}
+
+*/
+
 
 ***Option parsing
 	*Saved Estimation
@@ -218,7 +237,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  
  ***Input processing
  mat `input' = `inputmatrix'
- return add // save existing returned results 
+* return add // save existing returned results 
  
  *Add here code for coefficient selection
  if "`coefficient'"!=""{
@@ -261,7 +280,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap'
 
 mat `comp'=r(results)
-return add
+*return add
 mat colnames `pval' = "Old_P-Values"
 
 if "`nofdrisk'"==""{
@@ -288,8 +307,17 @@ else{
  mat rownames `comp' = `rownames'
 
 matlist `comp' , title(Comparison Second Generation P-Values) rowtitle(Variables) `matlistopt'
-return add
-return matrix  comparison =  `comp'
+*return add
+*Return results
+ereturn matrix sgpv_comparison =  `comp'
+ereturn local sgpv_cmd "sgpv"
+ereturn local sgpv_cmdline `"sgpv `0'"'
+ereturn local sgpv_coef `"`coefficient'"'
+ereturn local sgpv_estimate `"`estimate'"'
+ereturn local sgpv_nulllo `"`nulllo'"'
+ereturn local sgpv_nullhi `"`nullhi'"'
+ereturn local sgpv_estlo `"`estlo'"'
+ereturn local sgpv_esthi `"`esthi'"'
 
 
 

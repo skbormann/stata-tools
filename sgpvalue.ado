@@ -7,7 +7,7 @@
 *!Version 0.95: Added support for using variables as inputs for options esthi() and estlo(); Added Mata function for SGPV calculations in case c(matsize) is smaller than the input vectors; Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
 /*START HELP FILE
 title[Second-Generation p-values]
-desc[This function computes the second-generation {it:p}-value (SGPV) and its associated delta gaps, as introduced in Blume et al. (2018).
+desc[Compute the second-generation {it:p}-value (SGPV) and its associated delta gaps, as introduced in Blume et al. (2018).
 This command and its companions commands ({cmd:sgpower}, {cmd:fdrisk}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}
 ]
 opt[esthi() A numeric vector of upper bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used.]
@@ -17,12 +17,17 @@ opt[nulllo() A numeric vector of lower bounds of null intervals. Values may be f
 opt[nowarnings Disable showing the warnings for problematic intervals.]
 opt[nomata Don't use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if c(matsize) is smaller than these options.]
 opt[replace replace existing variables in case the nomata-option was used.]
+opt[noshow do not show the outcome of the calculations. Useful for larger calculations.]
 opt[nodeltagap disable the display of the delta gap. Mainly used inside of {cmd:sgpv}, since delta-gaps are less useful to most users of p-values.  ]
 opt2[esthi() A numeric vector of upper bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used.
 A variable contained the upper bound can be also used.
 ]
+opt2[estlo() A numeric vector of lower bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used.
+A variable contained the lower bound can be also used.
+]
+
 opt2[infcorrection() A small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. This option can only be invoked when one of the intervals has infinite length.]
-opt2[nomata Deactive the usage of Mata for calculating the SGPVs with large matrices or variables. The Mata function depends on the external {cmd:moremata} package by Ben Jann. The package will be installed if it does not exist. If this option is set, an approach based on variables is used. Using variables instead of Mata is considerably faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata.]
+opt2[nomata Deactive the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. Using variables instead of Mata is considerably faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata.]
 
 example[The examples are based on the original documentation for the R-code, but are modified to resemble more closely the usual Stata convention.
 
@@ -52,14 +57,14 @@ author[Sven-Kristjan Bormann ]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 
-seealso[{help:sgpower} {help:fdrisk} {help:sgpv}]
+seealso[{help:plotsgpv} {help:sgpower} {help:fdrisk} {help:sgpv}]
 END HELP FILE*/
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 14 
-syntax [anything], esthi(string) estlo(string) nullhi(string) nulllo(string)  [noWARNings infcorrection(real 1e-5) nodeltagap save nomata noshow replace] // Allow string intervals for one-sided tests -> requires later parsing of the options -> Save option -> Saves the results as variables if matrix is too large for further processing
+syntax [anything], esthi(string) estlo(string) nullhi(string) nulllo(string)  [nowarnings infcorrection(real 1e-5) nodeltagap save nomata noshow replace] // Allow string intervals for one-sided tests -> requires later parsing of the options -> Save option -> Saves the results as variables if matrix is too large for further processing
 
-*Parse the input 
+*Parse the input : -> Allow matrices as input?
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
 	if `:word count `esthi''==1{
 		capture confirm numeric variable `esthi'
@@ -113,20 +118,14 @@ if `:word count `esthi'' != `: word count `estlo''{
 *Check if estint is larger than the current matsize
 if `estint'>=c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize)
 	*Add here alternative based on variables if inputs are variables
-	if "`mata'"=="nomata"{
+	if "`mata'"=="nomata" & `varsfound'==1{
 		local nulllo = real(trim("`nulllo'"))
 		local nullhi = real(trim("`nullhi'"))
 		sgpv_var ,esthi(`esthi') estlo(`estlo') nulllo(`nulllo') nullhi(`nullhi') `replace'
 	}
 	else if "`mata'"==""{
-		*Check for existence of moremata package and installed it if needed
-		capture findfile moremata.hlp
-		if _rc{
-			disp "Install required mata libraries"
-			qui ssc install moremata, replace
-		}
 		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi') // ONly one null interval allowed
-		*The same return as before but this time for the Mata -> not the best solution yet.
+		*The same return as before but this time for the Mata function -> not the best solution yet.
 		mat colnames results = "New_PValues" "Delta_Gap"
 		if "`deltagap'"=="nodeltagap"{
 		mat results=results[1...,1]
@@ -135,7 +134,7 @@ if `estint'>=c(matsize){ //Assuming here that this condition is only true if var
 		return matrix results = results
 	}
 }
-else{	// Run if rows less than matsize
+else{	// Run if rows less than matsize -> the "original" approach which still lacks capabilities of the original R-code
 	tempname results 
 	mat `results' = J(`estint',2,0)
 	mat colnames `results' = "New_P-Values" "Delta_Gap"
@@ -203,9 +202,6 @@ else{	// Run if rows less than matsize
 			local bottom =	min(2*`null_len',`est_len')
 			local pdelta = `overlap'/`bottom'
 		
-
-		
-		*disp "Iteration `i': Overlap `overlap' Bottom `bottom' Pdelta `pdelta'"
 		
 		***** Zero-length & Infinite-length intervals **** 
 		*These checks will be implemented once I figured out how to deal with infinites
@@ -278,14 +274,12 @@ else{	// Run if rows less than matsize
 	} 
 	matlist `results' ,names(columns) title(Second Generation P-Values)
 	return matrix results = `results'
-}
-	
- 
+}	 
 end 
 
 
 
-
+*Check if the input is valid
 program define isValid
 args valid
 if "`valid'"!="+Inf" & "`valid'"!="-Inf" & real("`valid'")==.{
@@ -295,6 +289,7 @@ if "`valid'"!="+Inf" & "`valid'"!="-Inf" & real("`valid'")==.{
 		
 end
 
+*Check if input is infinite
 program define isInfinite, rclass
 args infinite
 	if `"`infinite'"'=="+Inf"{
@@ -311,7 +306,7 @@ end
 
 *Use new variables to store and calculate the SGPVs
 program define sgpv_var, rclass
- syntax ,esthi(varname) estlo(varname) nullhi(string) nulllo(string) [replace]
+ syntax ,esthi(varname) estlo(varname) nullhi(string) nulllo(string) [replace nodeltagap]
  if "`replace'"!=""{
 	capture drop pdelta dg
  }
@@ -324,35 +319,38 @@ program define sgpv_var, rclass
  }
  
  tempvar estlen nulllen overlap bottom null_hi null_lo gap delta gapmax gapmin overlapmin overlapmax
- quietly{
-		gen	`null_hi' = real("`nullhi'")
-		gen `null_lo' =real("`nulllo'")			
- 		gen `estlen' = `esthi' - `estlo'
-		gen `nulllen' = `null_hi' -`null_lo'
-		egen `overlapmin' = rowmin(`esthi' `null_hi') 
-		egen `overlapmax' =rowmax(`estlo' `null_lo')
-		gen `overlap' = `overlapmin' - `overlapmax'
+ local type : type `esthi' // Assuming that both input variables have the same type
+ quietly{ //Set variable type to the same precision as input variables
+		gen `type'	`null_hi' = real("`nullhi'")
+		gen `type' `null_lo' =real("`nulllo'")			
+ 		gen `type' `estlen' = `esthi' - `estlo'
+		gen `type' `nulllen' = `null_hi' -`null_lo'
+		egen `type' `overlapmin' = rowmin(`esthi' `null_hi') 
+		egen `type' `overlapmax' =rowmax(`estlo' `null_lo')
+		gen `type' `overlap' = `overlapmin' - `overlapmax'
 		replace `overlap' = max(`overlap',0)
-		gen `bottom' =	min(2*`nulllen',`estlen')
-		gen pdelta = `overlap'/`bottom'
+		gen `type' `bottom' =	min(2*`nulllen',`estlen')
+		gen `type' pdelta = `overlap'/`bottom'
 		
 		replace pdelta =0 if `overlap'==0 
 		replace pdelta = 1 if (`estlen'==0 & `nulllen'>=0 & `estlo'>=`null_lo' & `esthi'<=`null_hi')
 		replace pdelta = 0.5 if (`estlen'>0 & `nulllen'==0 & `estlo'<=`null_lo' & `esthi'>=`null_hi')
 		replace pdelta =. if (`estlo'>`esthi' | `null_lo'>`null_hi')
 		/* Calculate delta gap*/
-		egen 	`gapmax' = rowmax(`estlo' `null_lo') 
-		egen	`gapmin' = rowmin(`null_hi' `esthi')
-		gen 	`gap' = `gapmax' - `gapmin'
+		egen `type'	`gapmax' = rowmax(`estlo' `null_lo') 
+		egen `type' `gapmin' = rowmin(`null_hi' `esthi')
+		gen `type'	`gap' = `gapmax' - `gapmin'
 		 
-		 gen `delta' = `nulllen'/2
-		 replace `delta' = 1 if `nulllen'==0
-		 gen dg = .
-		 replace dg = `gap'/`delta'  if (pdelta==0 & pdelta!=.)
-
+		 if "`deltagap'"!="nodeltagap"{
+			 gen `type' `delta' = `nulllen'/2
+			 replace `delta' = 1 if `nulllen'==0
+			 gen `type' dg = .
+			 replace dg = `gap'/`delta'  if (pdelta==0 & pdelta!=.)
+			 label variable dg "Delta Gap"
+		}
 		*Label variables
 		label variable pdelta "SGPV"
-		label variable dg "Delta Gap"
+		
 		}
  
  exit 
@@ -360,58 +358,62 @@ end
 
 ***Mata function(s)
 mata:
-void function sgpv(string varlist, string sgpvmat, real scalar nulllo, real scalar nullhi, | string save ){ 
+
+void function sgpv(string varlist, string sgpvmat, real scalar nulllo, real scalar nullhi){ 
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta Gaps if the desired matrix size is too large for Stata
 Still rather slow for the leukemia example dataset with more than 7000 p-values to calculate
 */
 	real matrix Sgpv
-	//real matrix Data
-	
 	V = st_varindex(tokens(varlist))
-    //Data = J(1,1,0)
-    //st_view(Data,.,V) // First column should be the lower bound and the second column the upper bound -> not sure how to check that
-	//Data=st_data(.,V) //Try alternative st_data to save time?
-	Sgpv = J(st_nobs(),2,.)	// Change rows(Data) st_nobs()
-	null_len = J(st_nobs(),1,nullhi - nulllo) 
-	 
-		est_lo =st_data(.,V[1]) 
-		est_hi=st_data(.,V[2])
-		est_len = est_hi - est_lo
-		nulllo=J(st_nobs(),1,nulllo)
-		nullhi=J(st_nobs(),1,nullhi)
-		upper_bound =(est_hi, nullhi)
-		lower_bound =(est_lo, nulllo)
-		overlap =  rowmin(upper_bound)-rowmax(lower_bound)
-		overlap = mm_cond(overlap:>0, overlap , 0 )
-		 bottom =mm_cond(2:*null_len:>est_len, est_len , 2:*null_len)
-		 pdelta = overlap:/bottom
-		 	/* Overwrite NA and NaN due to bottom = Inf*/
-		 pdelta =mm_cond(overlap:==0,0,pdelta)
-		
-		/* Interval estimate is a point (overlap=zero) but can be in null or equal null pt*/
-		pdelta =mm_cond(est_len:==0, mm_cond(null_len:>=0,mm_cond(est_lo:>nulllo,mm_cond(est_hi:<=nullhi, 1,pdelta),pdelta),pdelta),pdelta)
-
-		/* Null interval is a point (overlap=zero) but is in interval estimate*/
-		pdelta = mm_cond(est_len:>0, mm_cond(null_len:==0,mm_cond(est_lo:<=nulllo,mm_cond(est_hi:>=nullhi, 0.5,pdelta),pdelta),pdelta),pdelta)
-		/* Return Missing value for nonsense intervals*/
-		pdelta = mm_cond(est_lo:>est_hi,.,mm_cond(nulllo:>nullhi,.,pdelta))
-		/*if (est_lo>est_hi | nulllo>nullhi){
+    Data = J(1,1,0)
+    st_view(Data,.,V)
+	Sgpv = J(rows(Data),2,.)	
+	null_len = nullhi - nulllo
+	for(i=1; i<=rows(Data);i++) {
+		 est_lo = Data[i,1]
+		 est_hi = Data[i,2]
+		 est_len = est_hi - est_lo
+		 overlap = min_s(est_hi,nullhi) - max_s(est_lo,nulllo) 
+		 overlap = max_s(overlap,0) 
+		 bottom = min_s(2*null_len, est_len) 
+		 pdelta = overlap/bottom
+		 if (overlap==0) {
+				pdelta = 0
+			}
+		if (est_len==0 & null_len>=0 & est_lo>=nulllo & est_hi<=nullhi) {
+			 pdelta = 1
+		}
+		if (est_len>0 & null_len==0 & est_lo<=nulllo & est_hi>=nullhi) {
+			 pdelta = 0.5
+		}
+		if (est_lo>est_hi | nulllo>nullhi){
 			pdelta = .			
-		}*/
-		 
-		/* Calculate delta gap*/
-		gap = rowmax(lower_bound)-rowmin(upper_bound)
-		// gap = (est_lo> nulllo ? est_lo : nulllo ) - (nullhi> est_hi ? est_hi  : nullhi) // max(`est_lo', `null_lo') - min(`null_hi', `est_hi')
-		 delta = null_len:/2
-		 delta = mm_cond(null_len:==0,1,delta)
-		/*disp "Iteration i: Gap gap Delta delta"*/
-		dg = mm_cond(pdelta:==0, mm_cond(pdelta:!=., gap:/delta,.),.)
-		/*Write results*/
-		 Sgpv[.,1] = pdelta
-		 Sgpv[.,2] = dg
-	
-	
+		}
+		 gap = max_s(est_lo,nulllo) - min_s(nullhi,est_hi) // (est_lo> nulllo ? est_lo : nulllo ) - (nullhi> est_hi ? nullhi : est_hi)
+		 delta = null_len/2
+		if (null_len ==0){
+			 delta = 1
+		}
+		if (pdelta==0 & pdelta!=.){
+			 dg = gap/delta 
+		}
+		else{
+			 dg = .
+		}
+		 Sgpv[i,1] = pdelta
+		 Sgpv[i,2] = dg
+	}	
 	st_matrix(sgpvmat,Sgpv)
 }
+
+//Two convenience functions to make reading the code easier: Function names chosen to not conflict with internal Mata functions
+real scalar function min_s(real scalar x, real scalar y){
+	return(x > y ? y :x)
+}
+
+real scalar function max_s(real scalar x, real scalar y){
+	return(x>y?x:y)
+}
+
 end

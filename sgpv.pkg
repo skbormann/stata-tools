@@ -1,14 +1,17 @@
 v 3
 d 'SGPV': Second Generation P-Values
-d 
-d Distribution-Date:   20200213
+d Author: Sven-Kristjan Bormann
+d Distribution-Date:   20200220
 d License: MIT
 d 
 F fdrisk.ado
+F plotsgpv.ado
 F sgpower.ado
 F sgpv.ado
 F sgpvalue.ado
 F fdrisk.sthlp
+F plotsgpv.sthlp
 F sgpower.sthlp
 F sgpv.sthlp
 F sgpvalue.sthlp
+F leukstats.dta

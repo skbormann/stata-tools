@@ -1,7 +1,8 @@
 *!Based on the R-code sgpower
 *!Works only on one interval at the moment
 *!Not possible to plot the power function yet
-*!Version :0.9
+*!Version 0.9 	: Initial Github Release
+*!Version 0.91 	: Removed dependency on user-provided integrate-command. 
 /* START HELP FILE
 title[Power functions for Second-Generation p-values]
 desc[Compute power/type I error for Second-Generation p-values approach.]
@@ -16,7 +17,6 @@ opt[stderr() Standard error for the distribution of the estimator for the parame
 			Note that this is the standard deviation for the estimator, not the standard deviation parameter for the data itself. 
 			This will be a function of the sample size(s).]
 opt[bonus Display the additional diagnostics for error type I]
-opt[nomata Do not use the user-provided command "integrate" for faster calculation of the bonus diagnostics]
 return[power0 Probability of SGPV = 0 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.alt} = P(SGPV = 0 | \theta = } {cmd:true). ]
 return[power1 Probability of SGPV = 1 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.null} = P(SGPV = 1 | \theta = } {cmd:true).]
 return[powerinc Probability of 0 < SGPV < 1 calculated assuming the parameter is equal to {cmd:true}. That is, {cmd:power.inc} = P(0 < SGPV < 1 | \theta = } {cmd:true).]
@@ -33,7 +33,7 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 author[Sven-Kristjan Bormann ]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
-seealso[{help:sgpvalue} {help:fdrisk} {help:sgpv}]
+seealso[ {help:fdrisk} {help:plotsgpv} {help:sgpvalue}  {help:sgpv}]
 END HELP FILE*/
 
 capture program drop sgpower
@@ -109,26 +109,16 @@ if "`bonus'"!=""{
   local maxI = normal(`nulllo'/`stderr' - `x'/`stderr' -`z') + normal(-`nullhi'/`stderr' + `x'/`stderr' - `z')
   
   
-  *Alternative approach using user-provided integrate command
-  if "`mata'"!="nomata"{
-  local power normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z') 
-  capture which integrate
-  if _rc qui ssc install install, replace
-  qui integrate, f(`power') l(`nulllo') u(`nullhi') vectorise
-  local integral `r(integral)'
-  }
-  else if "`mata'"=="nomata"{
-  *
   *Use Stata's internal numerical integration command 
   preserve
   quietly{ 
-  range x `nulllo' `nullhi' 1000 //Arbitrary number of integration points could be made dependent on the distance between upper and lower limit
-  gen y = normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z')
-  integ y x
-  local intres `r(integral)'
+	  range x `nulllo' `nullhi' 1000 //Arbitrary number of integration points could be made dependent on the distance between upper and lower limit
+	  gen y = normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z')
+	  integ y x
+	  local intres `r(integral)'
   }
   restore
-  }
+
   local avgI = 1/(`nullhi'-`nulllo')*`intres'
   local pow00 = normal(`nulllo'/`stderr' - 0/`stderr' -`z') + normal(-`nullhi'/`stderr' + 0/`stderr' - `z')
   disp "type I error summaries"
