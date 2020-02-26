@@ -100,7 +100,7 @@
 
 {pstd}
 {p_end}
-{synopt:{opt *}}  Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.{p_end}
+{synopt:{opt twoway_opt(string)}}  Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}
@@ -213,7 +213,7 @@ You can see the colour before plotting via: {p_end}
 {pstd}
 {p_end}
 {phang}
-{opt *}  Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before. {p_end}
+{opt twoway_opt(string)}  Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before. {p_end}
 
 
 {marker examples}{...}

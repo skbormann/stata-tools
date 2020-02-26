@@ -7,17 +7,17 @@
 /*START HELP FILE
 title[False Discovery Risk for Second-Generation p-values]
 desc[This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk for a second-generation {it:p}-value of 1. This command should be used for single calculations. For calculations for or after estimation commands use the {cmd:sgpv} command. ]
-opt[sgpval The observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk]
-opt[nulllo() The lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
-opt[nullhi() The upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
-opt[stderr() Standard error of the point estimate.]
-opt[inttype() Class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).]
-opt[intlevel() Level of interval estimate. If inttype is "confidence", the level is \alpha. If "inttype" is "likelihood", the level is 1/k (not k).]
-opt[nullweights() Probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[nullspace() Support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. If "nullweights" is "Uniform", then "nullspace" is a vector of length two.]
-opt[altweights() Probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[altspace() Support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" is a vector of length two.]
-opt[pi0() Prior probability of the null hypothesis. Default is 0.5.]
+opt[sgpval the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk]
+opt[nulllo() the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
+opt[nullhi() the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
+opt[stderr() standard error of the point estimate.]
+opt[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).]
+opt[intlevel() level of interval estimate. If inttype is "confidence", the level is \alpha. If "inttype" is "likelihood", the level is 1/k (not k).]
+opt[nullweights() probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
+opt[nullspace() support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. If "nullweights" is "Uniform", then "nullspace" is a vector of length two.]
+opt[altweights() probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
+opt[altspace() support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" is a vector of length two.]
+opt[pi0() prior probability of the null hypothesis. Default is 0.5.]
 
 example[
 {bf:false discovery risk with 95% confidence level}
@@ -27,10 +27,10 @@ fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights
 ]
 return[fdr False discovery risk]
 return[fcr False confirmation risk ]
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. \emph{PLoS ONE} 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
+references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. {browse:https://doi.org/10.1371/journal.pone.0188299}
 
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. https://doi.org/10.1080/00031305.2018.1537893 ]
-author[Sven-Kristjan Bormann ]
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. {browse:https://doi.org/10.1080/00031305.2018.1537893} ]
+author[Sven-Kristjan Bormann]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 

@@ -1,6 +1,8 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R
-*!Version 0.9
+*!Version 0.9: Initial Github release
+*!Version 0.91: Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
+*!				Corrected minor errors in the documentation
 *! Removed setting of plot limits -> not really needed in Stata compared to R
 /*START HELP FILE
 title[Plotting Second-Generation P-Values]
@@ -11,23 +13,23 @@ opt[esthi() A numeric vector of upper bounds of interval estimates. Values may b
 opt[estlo() A numeric vector of lower bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used.]
 opt[nullhi() A numeric vector of upper bounds of null intervals. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:nulllo}.]
 opt[nulllo() A numeric vector of lower bounds of null intervals. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:nullhi}.]
+opt[nullpt() A scalar representing a point null hypothesis. Default is 0. If set, the function will draw a horizontal dashed red line at this location.]
 opt[setorder() A variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.]
 opt[nomata Don't use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if c(matsize) is smaller than these options.]
 opt[replace replace existing variables in case the nomata-option was used.]
-opt[noshow do not show the outcome of the calculations. Useful for larger calculations.]
+opt[noshow do not show the outcome of the SGPV calculations. Useful for larger calculations.]
 opt[xshow() A scalar representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.]
 opt[nullcol() Coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue]
 opt[intcol() Coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively.]
-
 opt[noplotx_axis Deactive showing the x-axis.]
 opt[noploty_axis Deactive showing the y-axis.]
-opt[nullpt() A scalar representing a point null hypothesis. Default is 0. If set, the function will draw a horizontal dashed red line at this location.]
+
 opt[nooutlinezone Deactive drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.]
 opt[title() Title of the plot.]
 opt[xtitle() Label of the x-axis label.]
 opt[ytitle() Label of the y-axis.]
 opt[nolegend Deactive plotting the legend.]
-opt[* Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.]
+opt[twoway_opt() Any additional options for the plotting go here. See {help:twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.]
 
 opt2[esthi() A numeric vector of upper bounds of interval estimates. Values may be finite or {it:-Inf} or {it:+Inf}. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used.
 A variable contained the upper bound can be also used.
@@ -51,25 +53,27 @@ opt2[nomata Deactive the usage of Mata for calculating the SGPVs with large matr
 example[
 {stata sysuse leukstats} // Load the example dataset provided with this command
 
-{stata plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) nomata replace noshow setorder(p_value) title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' "2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000") } //Replicate the example plot from the R-code
+{stata plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) nomata replace noshow setorder(p_value) title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") ylabel(\`=log10(1/1000)' "1/1000" \`=log10(1/100)' "1/100" \`=log10(1/10)' "1/10" \`=log10(1/2)' "1/2" \`=log10(2)' "2" \`=log10(10)' "10" \`=log10(100)' "100" \`=log10(1000)'  "1000") } //Replicate the example plot from the R-code
 
 ]
 
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. \emph{PLoS ONE} 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
+references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. {browse:https://doi.org/10.1371/journal.pone.0188299}
 
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. https://doi.org/10.1080/00031305.2018.1537893 ]
-author[Sven-Kristjan Bormann ]
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. {browse:https://doi.org/10.1080/00031305.2018.1537893} ]
+author[Sven-Kristjan Bormann]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 
 seealo[ {help:fdrisk} {help:sgpvalue} {help:sgpower} {help:sgpv}  ]
 
 END HELP FILE */
-program define plotsgpv, rclass
+program define plotsgpv
+
+
 syntax [if] [in] , esthi(string) estlo(string) nullhi(string) nulllo(string) /// 
-[setorder(string) xshow(string) nullcol(string)		intcol(string)	 /// 
-	 noploty_axis noplotx_axis	nullpt(real 0.0) nooutlinezone title(string) /// 
-	xtitle(string) ytitle(string) nolegend nomata noshow replace * ]  
+[setorder(string) xshow(string) nullcol(string)		intcol(string)	 ///
+	 noploty_axis noplotx_axis	nullpt(real 0.0) nooutlinezone title(string) /// Might change the behaviour of the noplotx_axis, noploty_axis options to be closer to R-code
+	xtitle(string) ytitle(string) nolegend nomata noshow replace twoway_opt(string asis) ]  // * = Further graphing options
 
 
 ***Some default values :Color settings -> translated R-colors into RGB for Stata -> Not sure how to install the colours in Stata for easier referencing.
@@ -129,7 +133,8 @@ if "`if'"!=""{
 else local if if \`x'<=`xshow'
 
 *Other graphing options
-local graphopt `options'
+
+*local graphopt `options'
 
 *Color settings
 if "`intcol'"==""{
@@ -237,11 +242,15 @@ if "`nullcol'"==""{
 	 local sgpvlegend	legend(on order(1 "Interval Null" 2 "0 < p <1"  3 "p = 1"  4 "p = 0")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) //-> Not done yet -> Not all settings in R-code are possible in Stata
 	}	
 	
-	*Removing from graphopt unnecessary options
+	*Removing from graphopt impossible options which give rise to cryptic error messages
+	/*gettoken opts opt2:0 ,parse(,)
+	gettoken opts opt2:opt2 // Get everything after the comma
+	local opts2: list uniq opts2 //Remove double options given
+	*/
 	
 	
 	***Plot: Set up the twoway plot
-	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis'  `graphopt'
+	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis'  `twoway_opt'
 	
 	restore
 end

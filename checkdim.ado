@@ -1,22 +1,27 @@
-*! Modified version of checkdim (not published on SSC) to clean up the code and implement a different result listing method
 *! Version 0.5 03.10.2017: Check if variable(s) exist(s) for all values of another variable
 *! Version 1.0 19.08.2019: Changed display of results. Allows now to save the results as variables.
 /* START HELP FILE
 title[Check if variable(s) exist(s) for all values of another variable]
-desc[ {cmd:checkdim2} allows you to check if a variable or multiple variables has/have missing values for all values of another variable/dimension. The results are saved in temporary variables which can be made permanent.  The results can be replayed if the {opt keep} has been specified in the first run of the command. To replay the results, just type {cmd:checkdim2} without the dimension and any variables.  It is possible to filter the output by using the {opt showcondition()} option. Variables can also be dropped based on the results by using the options {opt drop} and {opt dropcondition()} together. ]
+desc[ {cmd:checkdim} allows you to check if a variable or multiple variables has/have missing values for all values of another variable/dimension. The results are saved in temporary variables which can be made permanent.  The results can be replayed if the {opt keep} has been specified in the first run of the command. To replay the results, just type {cmd:checkdim} without the dimension and any variables.  It is possible to filter the output by using the {opt showcondition()} option. Variables can also be dropped based on the results by using the options {opt drop} and {opt dropcondition()} together. ]
 opt[dimension() the variable for which all values are checked. Currently only one dimension possible but extension to more variables in one go possible. ]
 opt[noshow do not show the results]
-opt[drop drop if  the drop condition is met]
-opt[dropcondition() the condition for which variable(s) should be dropped.]
+opt[drop drop if  the drop condition is met. The default drop condition is to drop variables which having missing values for all levels of a dimension. ]
+opt[dropcondition() the condition for which variable(s) should be dropped other than the default condition (dropping if missing values for all levels of a dimension).  ]
 opt[showcondition() the condition for which variables should be shown.]
 opt[sort sort the results in descending order.]
 opt[keep keep the generated variables]
 opt[keepname() the stub for the generated variables. The default stub is "mis".]
 opt[replace replace existing variables which contain the results.]
+opt2[drop drop if  the drop condition is met. The default drop condition is to drop variables which having missing values for all levels of a dimension when only the drop option is set.]
+
+example[ Generate an artificial example  dataset ]
 return[dropvar list of dropped variables]
 return[dropcondition the condition under which variables are dropped.]
 return[showcondition the condition for which variables should be shown.]
 return[keepname the stub for the generated variables]
+author[Sven-Kristjan Bormann ]
+institute[School of Economics and Business Administration, University of Tartu]
+email[sven-kristjan@gmx.de]
 END HELP FILE */
 capture program drop checkdim
 program define checkdim, rclass
@@ -95,7 +100,9 @@ program define checkdim, rclass
 		
 			*Drop variables based on missing levels
 		if "`drop'"!=""{
-			if "`dropcondition'"=="" local dropcondition "==`levelnum'" //Set default value for dropping, drop if a variable misses for all levels of a dimension
+			if "`dropcondition'"==""{
+			local dropcondition "==`levelnum'" //Set default value for dropping, drop if a variable misses for all levels of a dimension
+			} 
 			if `miscount'`dropcondition'{
 				capture drop `var'
 				if !_rc disp "Variable `var' dropped under the condition that observations for `miscount'`dropcondition' are missing for dimension `dimension'.  "
@@ -124,7 +131,7 @@ syntax , [misvar(varname) mislevel(varname) miscount(varname) showcondition(stri
 *args misvar mislevel miscount showcondition sort
 if "`misvar'"=="" | "`mislevel'"=="" | "`miscount'"==""{
 	disp as error "No variables to display found!"
-	disp as error "If you have used  -checkdim2- without a variable list to replay the results, then specify the correct prefix for the variables to display with the -keepname()- option."
+	disp as error "If you have used  -checkdim- without a variable list to replay the results, then specify the correct prefix for the variables to display with the -keepname()- option."
 	exit 198
 }
 local oldsortorder : sortedby
@@ -242,7 +249,7 @@ if strmatch("`0'","*dim*"){
 			cap confirm variable `keepname'var `keepname'level `keepname'count
 			if !_rc{
 			disp as error "No variables to display found!"
-			disp as error "If you have used  -checkdim2- without a variable list to replay the results, then specify the correct prefix for the variables to display with the -keepname()- option."
+			disp as error "If you have used  -checkdim- without a variable list to replay the results, then specify the correct prefix for the variables to display with the -keepname()- option."
 			exit 198
 			}
 			*Use list instead of check_mistable to keep "check_mistable" rather simple

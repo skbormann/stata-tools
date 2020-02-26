@@ -2,6 +2,6 @@ v 3
 d expandihlp 
 d Sven-Kristjan Bormann
 d Distribution-Date: 20181223
-f expandihlp.ado
-f expandihlp.dlg
-f expandihlp.sthlp
+f expandIhlp/expandIhlp.ado
+f expandIhlp/expandIhlp.dlg
+f eexpandIhlp/expandIhlp.sthlp

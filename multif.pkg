@@ -2,6 +2,6 @@ v 3
 d multif 
 d Sven-Kristjan Bormann
 d Distribution-Date: 20180811
-f multif.ado
-f multif.dlg
-f multif.sthlp
+f multif/multif.ado
+f multif/multif.dlg
+f multif/multif.sthlp

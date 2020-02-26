@@ -2,5 +2,5 @@ v 3
 d emptyvar 
 d Sven-Kristjan Bormann
 d Distribution-Date: 20190904
-f emptyvar.ado
-f emptyvar.sthlp
+f emptyvar/emptyvar.ado
+f emptyvar/emptyvar.sthlp

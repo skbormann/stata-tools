@@ -1,7 +1,8 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version: 0.9
+*!Version 0.9: Initial Github release
+*!Version 0.91: Fixed minor mistakes in the documentation. 
 *!To-Do: support for more commands
-*!To-Do: Make results exportable or change command to e-class command to allow processing in commands like esttab from Ben Jaan 
+*!To-Do: Make results exportable or change command to e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 *!To-Do: Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for than one stored estimate
 *!To-Do: Return more infos
 
@@ -10,74 +11,68 @@ title[A wrapper command for calculating the Second-Generation P-Values and their
 desc[{cmd:sgpv} allows the calculation of the Second-Generation P-Values (SGPV) developed by Blume et.al.(2018,2019) for and after commonly used estimation commands. The false discovery/confirmation risks (fdr/fcr) can be also reported. The SGPVs are reported alongside the usually reported p-values. 
 An ordinary user should use this command and not other commands on which {cmd:sgpv} is based upon. {cmd:sgpv} uses sensible default values for calculating the SGPVs and the accompaning fdr/fcr, which can be changed.  
 This wrapper command runs the commands translated into Stata which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"} ]
-opt[quietly suppress the output of the estimation command]
-opt[nulllo() change the upper limit of the null-hypothesis intervall.]
-opt[nullhi() change the lower limit of the null-hypothesis intervall.]
+opt[quietly suppress the output of the estimation command.]
+opt[nulllo() change the upper limit of the null-hypothesis interval.]
+opt[nullhi() change the lower limit of the null-hypothesis interval.]
 opt[estimate() takes the name of a previously stored estimation.]
 opt[matrix() takes the name of matrix as input for the calculation.]
 opt[coefficient() allows the selection of the coefficients for which the SGPVs and other statistics are calculated. The selected coefficients need to have the same names as displayed in the estimation output.]
 opt[matlistopt() change the options of the displayed matrix. The same options as for {helpb matlist:matlist} can be used.]
-opt[inttype() Class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval.]
-opt[intlevel() Level of interval estimate.]
-opt[nullweights() Probability distribution for the null parameter space.]
-opt[nullspace() Support of the null probability distribution.]
-opt[altweights() Probability distribution for the alternative parameter space. Options are currently "Uniform", and "TruncNormal".]
-opt[altspace() Support for the alternative probability distribution.  If "altweights" is  is "Uniform" or "TruncNormal", then "altspace" is a two numbers separated by a space.]
-opt[pi0() Prior probability of the null hypothesis. Default is 0.5.]
-opt[nomata deactivates the usage of an additional user-provided command for numerical integration. ]
+opt[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval.]
+opt[intlevel() level of interval estimate.]
+opt[nullweights() probability distribution for the null parameter space.]
+opt[nullspace() support of the null probability distribution.]
+opt[altweights() probability distribution for the alternative parameter space. Options are currently "Uniform", and "TruncNormal".]
+opt[altspace() support for the alternative probability distribution.  If "altweights" is  is "Uniform" or "TruncNormal", then "altspace" is a two numbers separated by a space.]
+opt[pi0() prior probability of the null hypothesis. Default is 0.5.]
+opt[nomata do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} (See also {help:matsize}) is smaller than these options.   ]
 opt[nobonus() deactive the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".]
 
-opt2[nulllo() change the upper limit of the null-hypothesis intervall. The default is 0.]
-opt2[nullhi() change the lower limit of the null-hypothesis intervall. The default is 0.]
+opt2[nulllo() change the upper limit of the null-hypothesis interval. The default is 0.]
+opt2[nullhi() change the lower limit of the null-hypothesis interval. The default is 0.]
 opt2[matrix() takes the name of matrix as input for the calculation. The matrix must follow the structure of the r(table) matrix returned after commonly used estimation commands due to the hardcoded row numbers used for identifiying the necessary numbers. Meaning that the parameter estimate has to be in the 1st row, the standard errors need to be in the 2nd row, the p-values in 4th row, the lower bound in the 5th and the upper bound in the 6th row.]
-opt2[nullweights() Probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal". The default is "Point".]
-opt2[nullspace() Support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a single number. If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" is a two numbers separated by a space.]
-opt2[intlevel() Level of interval estimate. If inttype is "confidence", the level is \alpha. If "inttype" is "likelihood", the level is 1/k (not k).]
-opt2[inttype() Class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval. The default is "confidence".]
-opt2[nomata deactivates the usage of an additional user-provided command for numerical integration. The numerical integration is required to calculate the false discovery/confirmation risks. Instead the numerical integration Stata command is used.  ]
+opt2[nullweights() probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal". The default is "Point".]
+opt2[nullspace() support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a single number. If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" is a two numbers separated by a space.]
+opt2[intlevel() level of interval estimate. If inttype is "confidence", the level is \alpha. If "inttype" is "likelihood", the level is 1/k (not k).]
+opt2[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval. The default is "confidence".]
+opt2[nomata do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} (See also {help:matsize}) is smaller than these options. These functions can be slow. An alternative approach which uses variables, is used instead. The option {cmd:replace} might be then required to replace already existing results.]
 example[ 	
 {stata sysuse auto, clear}
 
 Usage of {cmd:spgv} as a prefix-command{p_end}
-{stata sgpv: regress price mpg weight foreign} 
-
-{stata regress price mpg weight foreign}
+		{stata sgpv: regress price mpg weight foreign} 
+		{stata regress price mpg weight foreign}
 
 Save estimation for later usage {p_end}
-{stata estimate store pricereg} 
+		{stata estimate store pricereg} 
 
 The same result but this time after the last estimation.{p_end}
-{stata sgpv} 
-
-{stata qreg price mpg weight foreign}
-
-{stata estimates store priceqreg}
+	{stata sgpv} 
+	{stata qreg price mpg weight foreign}
+	{stata estimates store priceqreg}
 
 Calculate SPGVs for the stored estimation and only the foreign coefficient{p_end}
 {stata sgpv, estimate(pricereg) coeffient("foreign")} 
 
 ]
 return[comparison a matrix containing the displayed results]
-return[sgpv_cmd sgpv]
-return[sgpv_cmdline command as typed]
-return[sgpv_coef the coefficient(s) for which the SGPVs were calculated.]
-return[sgpv_estimate the name of the estimate for which SGPVs were calculated.]
 
 
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. \emph{PLoS ONE} 13(3): e0188299. https://doi.org/10.1371/journal.pone.0188299
 
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. https://doi.org/10.1080/00031305.2018.1537893 ]
+references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. {browse:https://doi.org/10.1371/journal.pone.0188299}
 
-author[Sven-Kristjan Bormann ]
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. {browse:https://doi.org/10.1080/00031305.2018.1537893} ]
+
+author[Sven-Kristjan Bormann]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 
-seealo[ {help:sgpvalue} {help:sgpower} {help:fdrisk}  ]
+seealo[ {help:plotsgpv} {help:sgpvalue} {help:sgpower} {help:fdrisk}  ]
 
 END HELP FILE*/
 
 capture program drop sgpv
-program define sgpv, eclass
+program define sgpv, rclass
 version 14
 
 *Parse the initial input -> Not captured yet the case that sgpv is called only with options or further situations > Should implement a replay function to avoid repeated calculations when only selection on the matrix is required
@@ -237,7 +232,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  
  ***Input processing
  mat `input' = `inputmatrix'
-* return add // save existing returned results 
+ return add // save existing returned results 
  
  *Add here code for coefficient selection
  if "`coefficient'"!=""{
@@ -259,7 +254,8 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  *local rownames : colnames `input'
 * Hard coded values for the rows from which necessary numbers are extracted
 *The rows could be addressed by name, but then at least Stata 14 returns a matrix
-* which requires additional steps to come to the same results as with hardcoded row numbers. Unless some one complains
+* which requires additional steps to come to the same results as with hardcoded row numbers. Unless some one complains.
+*The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
  forvalues i=1/`coln'{
 	 if `:disp `input'[2,`i']'!=.{
 		local esthi `esthi' `:disp `input'[6,`i']'
@@ -280,7 +276,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap'
 
 mat `comp'=r(results)
-*return add
+return add
 mat colnames `pval' = "Old_P-Values"
 
 if "`nofdrisk'"==""{
@@ -307,17 +303,10 @@ else{
  mat rownames `comp' = `rownames'
 
 matlist `comp' , title(Comparison Second Generation P-Values) rowtitle(Variables) `matlistopt'
-*return add
+return add
 *Return results
-ereturn matrix sgpv_comparison =  `comp'
-ereturn local sgpv_cmd "sgpv"
-ereturn local sgpv_cmdline `"sgpv `0'"'
-ereturn local sgpv_coef `"`coefficient'"'
-ereturn local sgpv_estimate `"`estimate'"'
-ereturn local sgpv_nulllo `"`nulllo'"'
-ereturn local sgpv_nullhi `"`nullhi'"'
-ereturn local sgpv_estlo `"`estlo'"'
-ereturn local sgpv_esthi `"`esthi'"'
+return matrix comparison =  `comp'
+
 
 
 

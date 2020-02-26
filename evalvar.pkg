@@ -1,0 +1,6 @@
+v 3
+d evalvar 
+d Sven-Kristjan Bormann
+f evalvar/evalvar.ado
+f evalvar/evalvar.sthlp
+f evalvar/evalvar.dlg

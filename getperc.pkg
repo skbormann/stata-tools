@@ -2,6 +2,6 @@ v 3
 d getperc 
 d Sven-Kristjan Bormann
 d Distribution-Date: 20180721
-f getperc.ado
-f getperc.dlg
-f getperc.sthlp
+f getperc/getperc.ado
+f getperc/getperc.dlg
+f getperc/getperc.sthlp
