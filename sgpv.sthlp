@@ -67,7 +67,7 @@
 
 {pstd}
 {p_end}
-{synopt:{opt intt:ype(string)}}  Class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval.
+{synopt:{opt intt:ype(string)}}  Class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval.
 
 {pstd}
 {p_end}

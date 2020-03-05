@@ -1,47 +1,61 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
-*!Version 0.9
+*!Version 0.9  : Initial Github release
 *!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
+*!Version 0.95 : Updated documentation, last Github release before submission to SSC 
 *!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code
-*! Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
-/*START HELP FILE
-title[False Discovery Risk for Second-Generation p-values]
-desc[This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk for a second-generation {it:p}-value of 1. This command should be used for single calculations. For calculations for or after estimation commands use the {cmd:sgpv} command. ]
-opt[sgpval the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk]
+*!		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
+/* START HELP FILE
+title[False Discovery or Confirmation Risk for Second-Generation p-values]
+desc[This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk for a second-generation {it:p}-value of 1. 
+This command should be used mostly for single calculations. 
+For calculations after estimation commands use the {help sgpv} command. 
+
+The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
+The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
+with r = P(H_1)/P(H_0) being the prior probability.		
+
+]
+opt[sgpval the observed second-generation {it:p}-value.]
 opt[nulllo() the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
 opt[nullhi() the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
 opt[stderr() standard error of the point estimate.]
-opt[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-\alpha)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).]
-opt[intlevel() level of interval estimate. If inttype is "confidence", the level is \alpha. If "inttype" is "likelihood", the level is 1/k (not k).]
+opt[inttype() class of interval estimate used.]
+opt[intlevel() level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).]
 opt[nullweights() probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[nullspace() support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. If "nullweights" is "Uniform", then "nullspace" is a vector of length two.]
+opt[nullspace() support of the null probability distribution.]
 opt[altweights() probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[altspace() support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" is a vector of length two.]
+opt[altspace() support for the alternative probability distribution.]
 opt[pi0() prior probability of the null hypothesis. Default is 0.5.]
+opt2[sgpval the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.]
+opt2[nullspace() support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space.]
+opt2[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).]
+opt2[altspace() support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.]
 
 example[
 {bf:false discovery risk with 95% confidence level}
 
-fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) altweights("Uniform")  altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence") intlevel(0.05)
+ fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) altweights("Uniform")  altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence") intlevel(0.05)
 
 ]
-return[fdr False discovery risk]
-return[fcr False confirmation risk ]
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. {browse:https://doi.org/10.1371/journal.pone.0188299}
+return[fdr false discovery risk]
+return[fcr false confirmation risk ]
+references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. 
+{browse "https://doi.org/10.1371/journal.pone.0188299"}
 
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}}-values. {it:The American Statistician}. In press. {browse:https://doi.org/10.1080/00031305.2018.1537893} ]
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}-values. {it:The American Statistician}. In press. {browse "https://doi.org/10.1080/00031305.2018.1537893"} ]
 author[Sven-Kristjan Bormann]
 institute[School of Economics and Business Administration, University of Tartu]
 email[sven-kristjan@gmx.de]
 
-seealo[ {help:plotsgpv} {help:sgpvalue} {help:sgpower} {help:sgpv}  ]
+seealso[ {help plotsgpv} {help sgpvalue} {help sgpower} {help sgpv}  ]
 END HELP FILE */
 
 
 capture program drop fdrisk
 
 program define fdrisk, rclass
-version 14
+version 12.0
 syntax, nullhi(string) nulllo(string) STDerr(real) INTType(string) INTLevel(string) ///
 		NULLSpace(string) NULLWeights(string) ALTSpace(string) ALTWeights(string) ///
 		[sgpval(integer 0) pi0(real 0.5)]
@@ -116,7 +130,7 @@ local intlevel = `intlevel'
 	}
     if(`nulllo' == `nullhi')  {
       if "`nulllo'" != "`nullspace'"{
-		disp as error "for a point indifference zone, specification of a different 'nullspace' not permitted; 'nullspace' set to be " round(`nulllo', 0.01)
+		disp as error "For a point indifference zone, specification of a different 'nullspace' is not permitted; 'nullspace' set to be " round(`nulllo', 0.01)
 	  } 
 	  local powerxnull : subinstr local powerx "x" "`nulllo'", all // Need substitution to emulate the parameter passing of R-functions only possible in Mata but in Stata -> Could be reworked by switching over to Mata
       local PsgpvH0 = `powerxnull'
@@ -132,7 +146,7 @@ local intlevel = `intlevel'
      * * P.sgpv.H0 @ point (=type I error at null.space)
       if("`nullweights'" == "Point")  {
         if(`:word count `nullspace''!=1){
-			stop "null space must be a vector of length 1 when using a point null probability distribution"
+			stop " 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
 			
 		} 
 		local powerxnullint : subinstr local powerx "x" "`nullspace'", all
@@ -141,12 +155,12 @@ local intlevel = `intlevel'
 	 * P.sgpv.H0 averaged: check `null.space` input
 	 if inlist("`nullweights'","Uniform","GBeta","TruncNormal"){
 		if `:word count `nullspace''<2{
-			stop "null space must not be a point to use averaging methods"
+			stop "nullspace must not be a point to use averaging methods. Set nullweights(`"Point"') instead."
 			
 		}
 		if `:word count `nullspace''==2{
 			if max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')>`nullhi' | min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')<`nulllo'{
-				disp as error "null space must be inside originally specified null hypothesis; at least one null space bound has been truncated"
+				disp as error "null space must be inside originally specified null hypothesis; at least one null space bound has been truncated."
 				
 				if max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')>`nullhi'{
 					local nullspace `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' `nullhi'
@@ -162,14 +176,12 @@ local intlevel = `intlevel'
  * P.sgpv.H0 averaged uniformly
       if("`nullweights'" == "Uniform") {
 		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') v
-		*local integrand `r(integral)'
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
 
       *P.sgpv.H0 averaged using generalized beta as weighting distribution function
       if("`nullweights'" == "GBeta") {
         disp as error "placeholder for future implementation of Generalized Beta null probability distribution"
-
         local PsgpvH0 .
       }
 	       *P.sgpv.H0 averaged using truncated normal as weighting distribution function
@@ -186,7 +198,6 @@ local intlevel = `intlevel'
 
       }
 	 } 
-	 *Next next to translate
 	 *** calculate P.sgpv.H1
 
     * P.sgpv.H1 @ point
@@ -233,8 +244,8 @@ local intlevel = `intlevel'
       * default: std. dev of Normal distr same as assumed for estimator
       local truncNormsd = `stderr'
 
-      *if(any(is.na(c(truncNorm.mu, truncNorm.sd)))) stop('error: 'trunNorm.mu' and 'truncNorm.sd' must be NULL or numeric; may not be NA') // Not sure how to check that
-	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "'trunNorm.mu' and 'truncNorm.sd' must be numeric"
+     
+	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "'trunNorm.mu' and 'truncNorm.sd' must be numeric."
 
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
         qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') v
