@@ -1,7 +1,7 @@
 v 3
 d 'SGPV': Second Generation P-Values
 d Based on: the original R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}
-d An additional {cmd:sgpv}-command makes it to calculate the SGPVs after common estimation commands.
+d An additional {cmd:sgpv}-command makes it easier to calculate the SGPVs after common estimation commands.
 d Author: Sven-Kristjan Bormann
 d Distribution-Date:   20200306
 d License: MIT

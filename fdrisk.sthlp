@@ -59,7 +59,7 @@
 
 {pstd}
 {p_end}
-{synopt:{opt sgpval(#)}}  the observed second-generation {it:p}-value.
+{synopt:{opt sgpv:al(#)}}  the observed second-generation {it:p}-value.
 
 {pstd}
 {p_end}
@@ -137,7 +137,7 @@ If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uni
 {pstd}
 {p_end}
 {phang}
-{opt sgpval(#)}  the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.
+{opt sgpv:al(#)}  the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.
 
 {pstd}
 {p_end}

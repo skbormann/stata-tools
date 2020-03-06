@@ -58,7 +58,7 @@ program define fdrisk, rclass
 version 12.0
 syntax, nullhi(string) nulllo(string) STDerr(real) INTType(string) INTLevel(string) ///
 		NULLSpace(string) NULLWeights(string) ALTSpace(string) ALTWeights(string) ///
-		[sgpval(integer 0) pi0(real 0.5)]
+		[SGPVal(integer 0) pi0(real 0.5)]
 *Syntax parsing
 local integrate nomataInt
 

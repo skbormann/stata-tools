@@ -163,7 +163,7 @@ if `estint'>=c(matsize){ //Assuming here that this condition is only true if var
 	else if "`mata'"==""{
 		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection') // Only one null interval allowed.
 		*The same return as before but this time for the Mata function -> not the best solution yet.
-		mat colnames results = "New_P-Values" "Delta_Gap"
+		mat colnames results = "SGPV" "Delta-Gap"
 		if "`deltagap'"=="nodeltagap"{
 		mat results=results[1...,1]
 		} 
@@ -174,8 +174,9 @@ if `estint'>=c(matsize){ //Assuming here that this condition is only true if var
 else{	// Run if rows less than matsize -> the "original" approach
 	tempname results 
 	mat `results' = J(`estint',2,0)
-	mat colnames `results' = "New_P-Values" "Delta_Gap"
-	if "`altlabel'"=="altlabel" 	mat colnames `results' = "SGPV" "Delta-Gap"
+	*mat colnames `results' = "New_P-Values" "Delta_Gap"
+	*if "`altlabel'"=="altlabel" 	
+	mat colnames `results' = "SGPV" "Delta-Gap"
 	***Iterate over all intervalls to implement a parallel max and min function as in R-code
 	forvalues i=1/`estint'{
 		*Reset some macros
