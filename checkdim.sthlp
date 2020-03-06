@@ -15,7 +15,7 @@
 {marker syntax}{...}
 {title:Syntax}
 {p 8 17 2}
-{cmdab:checkdim2}
+{cmdab:checkdim}
 [{help varlist}]
 [{help in}]
 [{cmd:,}

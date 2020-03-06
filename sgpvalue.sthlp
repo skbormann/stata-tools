@@ -115,8 +115,6 @@ It is defined as the distance between the intervals in δ units with δ being th
 
 {pstd}
 
-{pstd}
-
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}

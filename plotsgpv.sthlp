@@ -33,28 +33,28 @@
 {p_end}
 {synopt:{opt nulllo(string)}}  lower bound of null interval.
 {p_end}
-{synopt:{opt setorder(string)}} a variable giving the desired order along the x-axis. 
+{synopt:{opt seto:rder(string)}} a variable giving the desired order along the x-axis. 
 {p_end}
 {synopt:{opt xshow(string)}}  number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.
 {p_end}
 {synopt:{opt nullcol(string)}}  coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue.
 {p_end}
-{synopt:{opt intcol(string)}} coloring of the intervals according to SGPV ranking. 
+{synopt:{opt intc:ol(string)}} coloring of the intervals according to SGPV ranking. 
 {p_end}
-{synopt:{opt noploty_axis}}  deactive showing the y-axis.
+{synopt:{opt noploty:_axis}}  deactive showing the y-axis.
 {p_end}
-{synopt:{opt noplotx_axis}}  deactive showing the x-axis.
+{synopt:{opt noplotx:_axis}}  deactive showing the x-axis.
 {p_end}
 {synopt:{opt nullpt(#)}} a scalar representing a point null hypothesis. {p_end}
 {synopt:{opt nooutlinezone}}  deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.
 {p_end}
-{synopt:{opt title(string)}}  title of the plot.
+{synopt:{opt t:itle(string)}}  title of the plot.
 {p_end}
-{synopt:{opt xtitle(string)}}  label of the x-axis label.
+{synopt:{opt xt:itle(string)}}  label of the x-axis label.
 {p_end}
-{synopt:{opt ytitle(string)}}  label of the y-axis.
+{synopt:{opt yt:itle(string)}}  label of the y-axis.
 {p_end}
-{synopt:{opt nolegend}}  deactivate plotting the legend.
+{synopt:{opt noleg:end}}  deactivate plotting the legend.
 {p_end}
 {synopt:{opt nomata}}  do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.
 {p_end}
@@ -62,7 +62,7 @@
 {p_end}
 {synopt:{opt replace}}  replace existing variables in case the nomata-option was used.
 {p_end}
-{synopt:{opt twoway_opt(string)}}  any additional options for the plotting go here. 
+{synopt:{opt two:way_opt(string asis)}}  any additional options for the plotting go here. 
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -99,7 +99,7 @@ To specify that the upper limit is +infinity just specify the missing value . in
 {pstd}
 {p_end}
 {phang}
-{opt setorder(string)}     a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.
+{opt seto:rder(string)}     a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.
 
 {pstd}
 {p_end}
@@ -115,7 +115,7 @@ To specify that the upper limit is +infinity just specify the missing value . in
 {pstd}
 {p_end}
 {phang}
-{opt intcol(string)}  coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively. 
+{opt intc:ol(string)}  coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively. 
 You can see the colour before plotting via:
  
 		{stata palette color 100 149 237 } // cornflowerblue
@@ -125,12 +125,12 @@ You can see the colour before plotting via:
 {pstd}
 {p_end}
 {phang}
-{opt noploty_axis}     deactive showing the y-axis.
+{opt noploty:_axis}     deactive showing the y-axis.
 
 {pstd}
 {p_end}
 {phang}
-{opt noplotx_axis}    deactive showing the x-axis.
+{opt noplotx:_axis}    deactive showing the x-axis.
 
 {pstd}
 {p_end}
@@ -145,22 +145,22 @@ You can see the colour before plotting via:
 {pstd}
 {p_end}
 {phang}
-{opt title(string)}     title of the plot.
+{opt t:itle(string)}     title of the plot.
 
 {pstd}
 {p_end}
 {phang}
-{opt xtitle(string)}     label of the x-axis.
+{opt xt:itle(string)}     label of the x-axis.
 
 {pstd}
 {p_end}
 {phang}
-{opt ytitle(string)}     label of the y-axis.
+{opt yt:itle(string)}     label of the y-axis.
 
 {pstd}
 {p_end}
 {phang}
-{opt nolegend}     deactivate plotting the legend.
+{opt noleg:end}     deactivate plotting the legend.
 
 {pstd}
 {p_end}
@@ -180,7 +180,7 @@ You can see the colour before plotting via:
 {pstd}
 {p_end}
 {phang}
-{opt twoway_opt(string)}     any additional options for the plotting go here. See {help twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.
+{opt two:way_opt(string asis)}     any additional options for the plotting go here. See {help twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.
 {p_end}
 
 
@@ -189,7 +189,7 @@ You can see the colour before plotting via:
 {pstd}
 	{stata sysuse leukstats} // Load the example dataset provided with this command
 
-	plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) nomata replace noshow setorder(p_value) title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' "2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000") //Replicate the example plot from the R-code
+	plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) nomata replace noshow setorder(p_value) title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' "2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000")) //Replicate the example plot from the R-code
 
 {title:References}
 {pstd}

@@ -1,8 +1,14 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
 *!Version 0.9: Initial Github release
-*!Version 0.95: Fixed minor mistakes in the documentation, minor bugfixes. changed the way the results are presented 
+*!Version 0.95: Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
+*!Version 0.96: Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
 
 /*
+Bugfixes to implement for next release: 
+	- avoid conflicts between different options and prefix, replay modes 
+		-> what does take precedence? replaying results or matrix or estimate based calculations
+	- true replay function -> if previous results exist -> redisplay existing matrix
+
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
 	- support for more commands which do not report their results in a matrix named "r(table)".
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
@@ -10,7 +16,6 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- Return more infos
 	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations
 	- Calculate automatically a null interval based on the statistical properties of the dependent variable of an estimation to encourage the usage of interval null-hypotheses.
-	- Add a way to calculate the statistics for the whole leukemia dataset. Only parts of the code written yet -> might require some further rewrite of sgpvalue and fdrisk.
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 */
 /* START HELP FILE
@@ -112,9 +117,14 @@ version 12.0
 *Parse the initial input -> Not captured yet the case that sgpv is called only with options or further situations > Should implement a replay function to avoid repeated calculations when only a selection on the matrix is required.
 capture  _on_colon_parse `0'
 
-
-if _rc & "`e(cmd)'"=="" & !ustrregexm(`"`0'"',"matrix\(\w+\)") { // If the command was not prefixed and no previous estimation exists. -> needs changes to work with matrix option better
-	disp as error "No last estimates for calculating SGPV found."
+/*How avoid conflicts between different option and prefix, replay modes?*/
+/*if _rc & (!ustrregexm(`"`0'"',"matrix\(\w+\)") | !ustrregexm(`"`0'"',"m\(\w+\)") ) { // If the command was not prefixed and no previous estimation exists. -> needs changes to work with matrix option better -> does not work yet with allowed abbreviation of matrix option
+	disp as error "No matrix for calculating SGPV found. Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
+	exit 198
+}
+*/
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) { // If the command was not prefixed and no previous estimation exists. -> needs changes to work with matrix option better -> does not work yet with allowed abbreviation of matrix option
+	disp as error "No last estimate or matrix for calculating SGPV found. Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
 	exit 301
 }
 

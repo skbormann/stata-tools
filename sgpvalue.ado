@@ -4,8 +4,9 @@
 *!To-do: At some point rewrite the code to use Mata for a more compact code 
 *!Version 0.9: Initial release to Github 
 *!Version 0.95: Added support for using variables as inputs for options esthi() and estlo(); Added Mata function for SGPV calculations in case c(matsize) is smaller than the input vectors; Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
-*!Version 0.95a: Fixed some issues in the documentation. ->Not done yet
+*!Version 0.95a: Fixed some issues in the documentation.
 *!Version 0.98: Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes
+*!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix.
 /* START HELP FILE
 title[Second-Generation p-values]
 desc[Compute the second-generation {it:p}-value (SGPV) and its associated delta-gaps, as introduced in Blume et al. (2018).
@@ -99,7 +100,7 @@ END HELP FILE */
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax, esthi(string) estlo(string) nullhi(string) nulllo(string)  [nowarnings infcorrection(real 1e-5) nodeltagap nomata noshow replace altlabel /*undocumented yet -> change the coloumn names */] 
+syntax, esthi(string) estlo(string) nullhi(string) nulllo(string)  [nowarnings infcorrection(real 1e-5) nodeltagap nomata noshow replace debug /*enable additional messages and time measurements*/] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
@@ -153,7 +154,7 @@ if `:word count `esthi'' != `: word count `estlo''{
 	}
 
 *Check if estint is larger than the current matsize
-if `estint'>=c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize).
+if `estint'>c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize).
 	*An alternative based on variables if inputs are variables.
 	if "`mata'"=="nomata" & `varsfound'==1{
 		local nulllo = real(trim("`nulllo'"))
@@ -161,14 +162,18 @@ if `estint'>=c(matsize){ //Assuming here that this condition is only true if var
 		sgpv_var ,esthi(`esthi') estlo(`estlo') nulllo(`nulllo') nullhi(`nullhi') `replace'
 	}
 	else if "`mata'"==""{
+		
 		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection') // Only one null interval allowed.
 		*The same return as before but this time for the Mata function -> not the best solution yet.
+
 		mat colnames results = "SGPV" "Delta-Gap"
 		if "`deltagap'"=="nodeltagap"{
 		mat results=results[1...,1]
 		} 
+
 		if "`show'"!="noshow" matlist results ,names(columns) title(Second Generation P-Values)
 		return matrix results = results
+
 	}
 }
 else{	// Run if rows less than matsize -> the "original" approach
@@ -323,7 +328,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 end 
 
 
-
+*Additional commands ----------------------------------------------------------------------------------------------
 *Check if the input is valid
 program define isValid
 args valid
@@ -418,7 +423,9 @@ Might have to change the way missing values are handled -> For now they are trea
     st_view(Data,.,V)
 	Sgpv = J(rows(Data),2,.)	
 	null_len = nullhi - nulllo
-	for(i=1; i<=rows(Data);i++) {
+	n = rows(Data) // new for optimisation
+	//for(i=1; i<=rows(Data);i++) {
+	for(i=1; i<=n;i++) {
 		 est_lo = Data[i,1]
 		 est_hi = Data[i,2]
 		 est_len = est_hi - est_lo

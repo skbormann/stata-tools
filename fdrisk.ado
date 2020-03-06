@@ -2,7 +2,7 @@
 *!Based on the R-code for fdisk.R
 *!Version 0.9  : Initial Github release
 *!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
-*!Version 0.95 : Updated documentation, last Github release before submission to SSC 
+*!Version 0.95 : Updated documentation, added more possibilities to abbreviate options ,last Github release before submission to SSC 
 *!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code
 *!		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 /* START HELP FILE

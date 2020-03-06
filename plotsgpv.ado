@@ -21,8 +21,8 @@ opt[noshow do not show the outcome of the SGPV calculations. Useful for larger c
 opt[xshow() number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.]
 opt[nullcol() coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue]
 opt[intcol() coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively.]
-opt[noplotx_axis deactive showing the x-axis.]
-opt[noploty_axis deactive showing the y-axis.]
+opt[noplotx:_axis deactive showing the x-axis.]
+opt[noploty:_axis deactive showing the y-axis.]
 opt[nooutlinezone deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.]
 opt[title() title of the plot.]
 opt[xtitle() label of the x-axis.]
@@ -64,9 +64,9 @@ END HELP FILE */
 program define plotsgpv
 version 12.0
 syntax [if] [in] , esthi(string) estlo(string) nullhi(string) nulllo(string) /// 
-[setorder(string) xshow(string) nullcol(string)		intcol(string)	 ///
-	 noploty_axis noplotx_axis	nullpt(real 0.0) nooutlinezone title(string) /// 
-	xtitle(string) ytitle(string) nolegend nomata noshow replace twoway_opt(string asis) ] 
+[SETOrder(string) xshow(string) nullcol(string)		INTCol(string)	 ///
+	 noPLOTY_axis noPLOTX_axis	nullpt(real 0.0) nooutlinezone Title(string) /// 
+	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) ] 
 
 
 ***Some default values : Color settings -> translated R-colors into RGB for Stata -> Not sure how to install the colours in Stata for easier referencing.

@@ -12,7 +12,7 @@ opt[sort sort the results in descending order.]
 opt[keep keep the generated variables]
 opt[keepname() the stub for the generated variables. The default stub is "mis".]
 opt[replace replace existing variables which contain the results.]
-opt2[drop drop if  the drop condition is met. The default drop condition is to drop variables which having missing values for all levels of a dimension when only the drop option is set.]
+opt[drop drop if  the drop condition is met. The default drop condition is to drop variables which having missing values for all levels of a dimension when only the drop option is set.]
 
 example[ Generate an artificial example  dataset ]
 return[dropvar list of dropped variables]

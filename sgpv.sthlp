@@ -187,7 +187,9 @@ The matrix must follow the structure of the r(table) matrix returned after commo
 Meaning that the parameter estimate has to be in the 1st row, the standard errors need to be in the 2nd row, the p-values in 4th row, the lower bound in the 5th and the upper bound in the 6th row.
 As additional check, the row names of the supplied matrix need to match the rownames of the r(table) matrix.
 The rownames are: b se t pvalue ll ul{break}
-To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul
+To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {break}
+Example code is located in the file {cmd:leukemia-example.do} which can be viewed {stata viewsource leukemia-example.do:here}.
+To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
 {dlgtab:Null Hypothesis}
 {phang}
@@ -238,70 +240,79 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
 
 {marker examples}{...}
 {title:Examples}
-{pstd}
-		{stata sysuse auto, clear}
+{* pstd}
+  {stata sysuse auto, clear}
 
-		Usage of {cmd:sgpv} as a prefix-command
-		{stata "sgpv: regress price mpg weight foreign"} 
-		
-		Example Output:
-				
-			  Source |       SS           df       MS      Number of obs   =        74
-		    -------------+----------------------------------   F(3, 70)        =     23.29
-			   Model |   317252881         3   105750960   Prob > F        =    0.0000
-			Residual |   317812515        70  4540178.78   R-squared       =    0.4996
-		    -------------+----------------------------------   Adj R-squared   =    0.4781
-			   Total |   635065396        73  8699525.97   Root MSE        =    2130.8
-
-		    ------------------------------------------------------------------------------
-			   price |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
-		    -------------+----------------------------------------------------------------
-			     mpg |    21.8536   74.22114     0.29   0.769    -126.1758     169.883
-			  weight |   3.464706    .630749     5.49   0.000     2.206717    4.722695
-			 foreign |    3673.06   683.9783     5.37   0.000     2308.909    5037.212
-			   _cons |  -5853.696   3376.987    -1.73   0.087    -12588.88    881.4934
-		    ------------------------------------------------------------------------------
-
-
-		Comparison of ordinary P-Values and Second Generation P-Values
-
-		   Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
-		-------------+-------------------------------------------------------
-			 mpg |  .7692938         .5          .          .          . 
-		      weight |  5.99e-07          0   2.206717    .047926          . 
-		     foreign |  9.72e-07          0   2308.909   .0480251          . 
-		       _cons |  .0874262         .5          .          .          . 
- 
-
-		Interpretation: There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
-		Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
-		This is the standard null-hypothesis of no effect.	
-		You will usually have a more relastic interval which is larger than 0 due to measurement errors, scientific relevance, etc. 
-		The delta-gap can be used to compare two different studies for the same model/estimation when both report second-generation p-values of zero (p_δ = 0).
-		So for this example, the delta-gap is not needed, but still provides information about the distance
-		between either the upper or the lower bound of the confidence interval and 0.
-		Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance
-		that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
-		Whether 5% is much, is for you to decide.
-		
-		{bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019). 
-		I cannot guarantee that my understanding is correct.
-		These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
-		
-		
-		Save estimation for later usage 
-		{stata estimate store pricereg} 
+  Usage of {cmd:sgpv} as a prefix-command:
+  {stata "sgpv: regress price mpg weight foreign"} 
+  
+  Example Output:
+  		
+  	  Source |       SS           df       MS      Number of obs   =        74
+      -------------+----------------------------------   F(3, 70)        =     23.29
+  	   Model |   317252881         3   105750960   Prob > F        =    0.0000
+  	Residual |   317812515        70  4540178.78   R-squared       =    0.4996
+      -------------+----------------------------------   Adj R-squared   =    0.4781
+  	   Total |   635065396        73  8699525.97   Root MSE        =    2130.8
+  
+      ------------------------------------------------------------------------------
+  	   price |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+      -------------+----------------------------------------------------------------
+  	     mpg |    21.8536   74.22114     0.29   0.769    -126.1758     169.883
+  	  weight |   3.464706    .630749     5.49   0.000     2.206717    4.722695
+  	 foreign |    3673.06   683.9783     5.37   0.000     2308.909    5037.212
+  	   _cons |  -5853.696   3376.987    -1.73   0.087    -12588.88    881.4934
+      ------------------------------------------------------------------------------
+  
+  
+  Comparison of ordinary P-Values and Second Generation P-Values
+  
+     Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
+  -------------+-------------------------------------------------------
+  	 mpg |  .7692938         .5          .          .          . 
+        weight |  5.99e-07          0   2.206717    .047926          . 
+       foreign |  9.72e-07          0   2308.909   .0480251          . 
+         _cons |  .0874262         .5          .          .          . 
+   
+  
+  Interpretation: There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
+  Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
+  This is the standard null-hypothesis of no effect.	
+  You will usually have a more relastic interval which is larger than 0 due to measurement errors, scientific relevance, etc. 
+  The delta-gap can be used to compare two different studies for the same model/estimation when both report second-generation p-values of zero (p_δ = 0).
+  So for this example, the delta-gap is not needed, but still provides information about the distance
+  between either the upper or the lower bound of the confidence interval and 0.
+  Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance
+  that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
+  Whether 5% is much, is for you to decide.
+  
+  {bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019). 
+  I cannot guarantee that my understanding is correct.
+  These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
+  
+  
+  Save estimation for later usage 
+  {stata estimate store pricereg} 
 
 {pstd}
 The same result but this time after the last estimation.{break}
-	{stata sgpv} 
-	{stata qreg price mpg weight foreign}
+	{stata sgpv} {break}
+	{stata qreg price mpg weight foreign} {break}
 	{stata estimates store priceqreg}
 
 {pstd}
 Calculate sgpvs for the stored estimation and only the foreign coefficient {break}
 {stata sgpv, estimate(pricereg) coefficient("foreign")} {break}
 {stata sgpv, estimate(priceqreg) coefficient("foreign")}
+
+{marker leukemia-example}{...}
+    Calculate the SGPVs and bonus statistics for the leukemia dataset:
+	{stata do leukemia-example.do}
+    This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
+    Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
+    You can run {stata display `=c(matsize)'} to see your current setting.
+    
+	
 
 {title:Stored results}
 Besides its own calculations, {cmd:sgpv} also preserves the returned results from the estimation command including everything returned in r().
