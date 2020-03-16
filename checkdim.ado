@@ -149,8 +149,8 @@ else{
 qui levelsof `misvar' ,local(misvarlevels) clean
 local varcount : word count `misvarlevels'
 qui levelsof `mislevel' ,local(mislevels)
-local w1 0
-local w2 0
+local w1 8
+local w2 14
 *Find the maximum width of the columns
 forvalues l=1/`varcount'{
 	local w1 = max(`w1', length("`: word `l' of `misvarlevels''"))

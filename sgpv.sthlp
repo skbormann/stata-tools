@@ -158,29 +158,20 @@ It is defined as the distance between the intervals in δ units with δ being th
 {phang}
 {opt q:uietly}     suppress the output of the estimation command.
 
-{pstd}
-{p_end}
-
 {phang}
 {opt e:stimate(name)}     takes the name of a previously stored estimation.
 
-{pstd}
-{p_end}
 {phang}
 {opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
 
-{pstd}
-{p_end}
 {phang}
 {opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
 The selected coefficients need to have the same names as displayed in the estimation output.
 Multiple coefficients must be separated with a space.
-{p_end}
+
 {phang}
 {opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
 
-{pstd}
-{p_end}
 {phang}
 {opt m:atrix(name)}  takes the name of matrix as input for the calculation. 
 The matrix must follow the structure of the r(table) matrix returned after commonly used estimation commands due to the hardcoded row numbers used for identifiying the necessary numbers. 
@@ -195,48 +186,35 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 {phang}
 {opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
 
-{pstd}
-{p_end}
 {phang}
 {opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
 
-{pstd}
-{p_end}
 {dlgtab:Fdrisk}
 {phang}
 {opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are currently "Uniform", and "TruncNormal".
 
-{pstd}
-{p_end}
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution.  
 If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.
-{p_end}
+
 {phang}
 {opt nulls:pace(string)}  support of the null probability distribution. 
 If "nullweights" is "Point", then "nullspace" is a single number. 
 If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" are two numbers separated by a space.
-{p_end}
+
 {phang}
 {opt nullw:eights(string)}  probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal". 
 The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set to the same value. 
 If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".
-{p_end}
+
 {phang}
 {opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
 
-{pstd}
-{p_end}
 {phang}
 {opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval. The default is "confidence".
 
-{pstd}
-{p_end}
 {phang}
 {opt pi0(#)}     prior probability of the null hypothesis. Default is 0.5.
-
-{pstd}
-{p_end}
 
 {marker examples}{...}
 {title:Examples}
@@ -306,8 +284,8 @@ Calculate sgpvs for the stored estimation and only the foreign coefficient {brea
 {stata sgpv, estimate(priceqreg) coefficient("foreign")}
 
 {marker leukemia-example}{...}
-    Calculate the SGPVs and bonus statistics for the leukemia dataset:
-	{stata do leukemia-example.do}
+    Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code}):
+	{stata do sgpv-leukemia-example.do}
     This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
     Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
     You can run {stata display `=c(matsize)'} to see your current setting.
@@ -339,8 +317,7 @@ Sven-Kristjan Bormann, School of Economics and Business Administration, Universi
 {psee}
 Please submit bugs, comments and suggestions via email to:	{browse "mailto:sven-kristjan@gmx.de":sven-kristjan@gmx.de}{p_end}
 {psee}
-Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools}{p_end}
-
+Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools} {p_end}
 
 
 {title:See Also}

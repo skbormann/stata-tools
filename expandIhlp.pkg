@@ -1,0 +1,9 @@
+v 3
+d expandIhlp - Integrates .ihlp files into normal help files .
+d This allows the repeated usage of text without the need to ship the .ihlp-file(s) itself/themselves. 
+d This is mainly a convience tool for other programmers.
+d Author: Sven-Kristjan Bormann
+d Distribution-Date: 20181223
+f expandIhlp/expandIhlp.ado
+f expandIhlp/expandIhlp.dlg
+f expandIhlp/expandIhlp.sthlp

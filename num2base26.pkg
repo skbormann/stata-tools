@@ -1,6 +1,7 @@
 v 3
-d num2base26 
-d Sven-Kristjan Bormann
+d num2base26 - An interface to the numbase26() function of Mata. 
+d Converts a number to a letter. Useful when creating Excel tables in Stata.
+d Author: Sven-Kristjan Bormann
 d Distribution-Date: 20180720
-f num2base26.ado
-f num2base26.sthlp
+f num2base26/num2base26.ado
+f num2base26/num2base26.sthlp

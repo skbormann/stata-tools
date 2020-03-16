@@ -1,7 +1,7 @@
 *!leukemia-example.do
 *!Example code how to calculate SGPVs and Bonus Statistics for the leukemia dataset without modifying the existing code.
 *!The leukemia dataset does not contain missing values/ rows or columns with no usuable information
-*!You have to make sure that this condition holds for your own large matrix or dataset
+*!You have to make sure that this condition holds for your own large matrix or dataset.
 preserve
 sysuse leukemia, clear
 sort p_value // To show the results the same way they are shown in the example for plotsgpv

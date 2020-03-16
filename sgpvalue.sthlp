@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0  3 Mar 2020}{...}
+{* *! version 1.0  14 Mar 2020}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "Install command2" "ssc install command2"}{...}
 {vieweralsosee "Help command2 (if installed)" "help command2"}{...}
@@ -24,44 +24,24 @@
 {synoptline}
 {syntab:Main}
 {synopt:{opt esthi(string)}}   upper bound of interval estimate. Values may be finite or infinite.
-
-{pstd}
 {p_end}
 {synopt:{opt estlo(string)}}  lower bound of interval estimate. Values may be finite or infinite.
-
-{pstd}
 {p_end}
 {synopt:{opt nullhi(string)}}  upper bound of null interval.
-
-{pstd}
 {p_end}
 {synopt:{opt nulllo(string)}}  lower bound of null interval.
-
-{pstd}
 {p_end}
 {synopt:{opt nowarnings}}  disable showing the warnings about potentially problematic intervals.
-
-{pstd}
 {p_end}
 {synopt:{opt infcorrection(#)}}  a small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5.
-
-{pstd}
 {p_end}
-{synopt:{opt nodeltagap}}  disable the display of the delta-gap. Mainly used inside of {help sgpv}, since delta-gaps are less useful to most users of p-values. 
-
-{pstd}
+{synopt:{opt nodeltagap}}  disable the display of the delta-gap. 
 {p_end}
 {synopt:{opt nomata}}  do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.
-
-{pstd}
 {p_end}
 {synopt:{opt noshow}}  do not show the outcome of the calculations. Useful for larger calculations.
-
-{pstd}
 {p_end}
 {synopt:{opt replace}}  replace existing variables in case the nomata-option was used.
-
-{pstd}
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -72,8 +52,12 @@
 {pstd}
 Compute the second-generation {it:p}-value (SGPV) and its associated delta-gaps, as introduced in Blume et al. (2018). 
 This command and its companions commands ({cmd:sgpower}, {cmd:fdrisk}, {cmd:plotsgpv}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
-A wrapper command {help sgpv} also exists  which the computation after common estimation commands easier.
-The {cmd:sgpvalue} command should be used mostly for individual SGPV calculations. {p_end}
+A wrapper command {help sgpv} also exists  which makes the computation after common estimation commands easier.
+The {cmd:sgpvalue} command should be used mostly for individual SGPV calculations.
+A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
+{pstd}
+When {it:"nullhi"} and {it:"nulllo"} are of length 1, the same null interval is used for every interval estimate of [{it:"estlo"}, {it:"esthi"}]. 
+If {it:"nullhi"} is not of length 1, its length must match that of {it:"esthi"}.{p_end}
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
 {col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
@@ -107,13 +91,18 @@ It is defined as the distance between the intervals in δ units with δ being th
 		The delta-gap is calculated as: gap   	  = max(θ_l, H_0l) - min(H_0u, θ_u) 
 						delta 	  = |H_0|/2 
 						delta.gap = gap/delta 
-								
-	For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
-	Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. 
-	If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. 
-	If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.
+						
+{pstd}								
+For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. {break}
+Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. {break}
+If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. {break}
+If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.{p_end}
 
 {pstd}
+When possible, one should compute the second-generation {it:p}-value on a scale that is symmetric about the null hypothesis. 
+For example, if the parameter of interest is an odds ratio, computations are typically done on the log scale. 
+This keeps the magnitude of positive and negative delta-gaps comparable. 
+Also, recall that the delta-gaps magnitude is not comparable across different null intervals.{p_end}
 
 {marker options}{...}
 {title:Options}
@@ -121,78 +110,69 @@ It is defined as the distance between the intervals in δ units with δ being th
 {phang}
 {opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
 To specify that the upper limit is +infinity just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used. A variable contained the upper bound can be also used.
-{p_end}
-{phang}
-{opt estlo(string)}  lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.
 
-{pstd}
-{p_end}
+{phang}
+{opt estlo(string)}  lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. 
+Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.
+
 {phang}
 {opt nullhi(string)}     upper bound of null interval.
 
-{pstd}
-{p_end}
 {phang}
 {opt nulllo(string)}     lower bound of null interval.
 
-{pstd}
-{p_end}
 {phang}
 {opt nowarnings}     disable showing the warnings about potentially problematic intervals.
 
-{pstd}
-{p_end}
 {phang}
-{opt infcorrection(#)}  a small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. This option can only be invoked when one of the intervals has infinite length.
+{opt infcorrection(#)}  a small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. 
+This option can only be invoked when one of the intervals has infinite length.
 
-{pstd}
-{p_end}
 {phang}
-{opt nodeltagap}     disable the display of the delta-gap. Mainly used inside of {cmd:sgpv}, since delta-gaps are less useful to most users of p-values. 
+{opt nodeltagap}     disable the display of the delta-gap. Mainly used inside of {help sgpv}, since delta-gaps are less useful to most users of p-values. 
 
-{pstd}
-{p_end}
 {phang}
-{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. Using variables instead of Mata is considerably faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata.
+{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. 
+Using variables instead of Mata will be faster, but new variables containing the results are created. 
+If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata because it takes time to return a large matrix.
 
-{pstd}
-{p_end}
 {phang}
 {opt noshow}     do not show the outcome of the calculations. Useful for larger calculations.
 
-{pstd}
-{p_end}
 {phang}
 {opt replace} replace    replace existing variables in case the nomata-option was used.
-
-{pstd}
-{p_end}
-
 
 {marker examples}{...}
 {title:Examples}
 {pstd}
-The examples are based on the original documentation for the R-code, but are modified to resemble more closely the usual Stata convention.
+The following examples are based on the original documentation for the R-code, but are modified to resemble more closely the usual Stata conventions.
 
 {pstd}
  {bf:Simple example for three estimated log odds ratios but the same null interval} (To run this example copy the following lines into Stata and hit return.)
-
-{* pstd}
-		 local lb log(1.05) log(1.3) log(0.97)
-		
-		 local ub log(1.8) log(1.8) log(1.02)
-		
+ 
+		 local lb log(1.05) log(1.3) log(0.97)	
+		 local ub log(1.8) log(1.8) log(1.02)	
 		 sgpvalue , estlo(`lb') esthi(`ub') nulllo(log(1/1.1)) nullhi(log(1.1))
-		
-	{bf: A simple more Stata-like example with a point null hypothesis}{p_end}
+		 
+	{bf:One sided intervals/infinite interval bounds}
+	{stata sgpvalue, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
+	{stata sgpvalue, estlo(`=log(1.05)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
 	
+	 {bf:Example t-test with simulated data}
+	 {stata sgpvalue_examples ttest_sim} (see the code {view sgpvalue_examples.ado##ttest:here})
+	 
+	 {bf:Simulated two-group dichotomous data for different parameters}
+	 {stata sgpvalue_examples dichdata_sim} (see the code {view sgpvalue_examples.ado##dichdata:here})
+	 
+		
+	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}{p_end}	
 		{stata sysuse auto, clear}
 		{stata regress price mpg}
 		{stata mat table = r(table)}  //Copies the regression results into a new matrix for the next calculations
 		
-		The numbers for the options could be also copied by hand, we use here directly the matrix.
-		
+	The numbers for the options could be also copied by hand, we use here directly the matrix.
 		 {stata sgpvalue, esthi(table[6,1]) estlo(table[5,1]) nullhi(0) nulllo(0)} 
+		 
 
 {title:Stored results}
 
@@ -221,8 +201,6 @@ Sven-Kristjan Bormann, School of Economics and Business Administration, Universi
 Please submit bugs, comments and suggestions via email to:	{browse "mailto:sven-kristjan@gmx.de":sven-kristjan@gmx.de}{p_end}
 {psee}
 Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools}{p_end}
-
-
 
 {title:See Also}
 Related commands:

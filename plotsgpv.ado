@@ -1,79 +1,31 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R
-*!Version 0.9: Initial Github release
-*!Version 0.91: Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
+*!Version 1.00 : Initial SSC release, no changes compared to the last Github version. Soon to be released.
+*!Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
+*!				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used
+*!				 Fixed intcol-option -> now parses correctly color names and  RGB-values
+*!				 Changed behaviour of intcol-option -> now three separate color options for easier providing custom colors,
+*!				 the change is necessary to make it possible (easier) to set the colors in the dialog box 
+*!Version 0.91 : Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
 *!				Corrected minor errors in the documentation
+*!Version 0.90 : Initial Github release
 *! Removed setting of plot limits -> not really needed in Stata compared to R
-/*START HELP FILE
-title[Plotting Second-Generation P-Values]
-desc[Plot the second-generation {it:p}-value (SGPV), as introduced in Blume et al. (2018), for user supplied interval estimates (support intervals, confidence intervals, credible intervals, etc.) according to its associated second-generation {it:p}-value ranking.
-This command and its companions commands  ({cmd:sgpvalue}, {cmd:sgpower}, {cmd:fdrisk}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}
-]
-opt[esthi() upper bound of interval estimate. Values may be finite or infinite.]
-opt[estlo() lower bound of interval estimate. Values may be finite or infinite.]
-opt[nullhi() upper bound of null interval.]
-opt[nulllo() lower bound of null interval.]
-opt[nullpt() a scalar representing a point null hypothesis.]
-opt[setorder() a variable giving the desired order along the x-axis.]
-opt[nomata do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.]
-opt[replace replace existing variables in case the nomata-option was used.]
-opt[noshow do not show the outcome of the SGPV calculations. Useful for larger calculations.]
-opt[xshow() number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.]
-opt[nullcol() coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue]
-opt[intcol() coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively.]
-opt[noplotx:_axis deactive showing the x-axis.]
-opt[noploty:_axis deactive showing the y-axis.]
-opt[nooutlinezone deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.]
-opt[title() title of the plot.]
-opt[xtitle() label of the x-axis.]
-opt[ytitle() label of the y-axis.]
-opt[nolegend deactivate plotting the legend.]
-opt[twoway_opt() any additional options for the plotting go here. See {help twoway} for more information about the possible options. Options set here {bf:do not} override the values set in other options before.]
-opt2[esthi() upper bound of interval estimate. Values may be finite or infinite.
-To specify that the upper limit is +infinity just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. Typically the upper bound of a confidence interval can be used. A variable contained the upper bound can be also used.]
-opt2[estlo() lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.]
-opt2[nullpt() a scalar representing a point null hypothesis. Default is 0. If set, the command will draw a horizontal dashed red line at this location.]
-opt2[setorder() a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.]
-opt2[nullcol() coloring of the null interval (indifference zone). Default is the R-colour Hawkes Blue. You can see the colour before plotting via 
-{stata palette color 208 216 232 }]
-opt2[intcol() coloring of the intervals according to SGPV ranking. Default are the R-colours ("cornflowerblue","firebrick3","darkslateblue")} for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively. You can see the colour before plotting via: 
-{stata palette color 100 149 237 } // cornflowerblue
-{stata palette color 205 38 38 } // firebrick3
-{stata palette color 72 61 139 } // darkslateblue
-]
-opt2[nomata deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. Using variables instead of Mata is considerably faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata.]
 
-example[
-{stata sysuse leukstats} // Load the example dataset provided with this command
-
- plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) nomata replace noshow setorder(p_value) title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") ///
- twoway_opt(ylabel(\`=log10(1/1000)' "1/1000" \`=log10(1/100)' "1/100" \`=log10(1/10)' "1/10" \`=log10(1/2)' "1/2" \`=log10(2)' "2" \`=log10(10)' "10" \`=log10(100)' "100" \`=log10(1000)'  "1000"))  //Replicate the example plot from the R-code
-
-]
-
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. {browse "https://doi.org/10.1371/journal.pone.0188299"}
-
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}-values. {it:The American Statistician}. In press. {browse "https://doi.org/10.1080/00031305.2018.1537893"} ]
-author[Sven-Kristjan Bormann]
-institute[School of Economics and Business Administration, University of Tartu]
-email[sven-kristjan@gmx.de]
-
-seealso[ {help fdrisk} {help sgpvalue} {help sgpower} {help sgpv}  ]
-
-END HELP FILE */
 program define plotsgpv
 version 12.0
 syntax [if] [in] , esthi(string) estlo(string) nullhi(string) nulllo(string) /// 
-[SETOrder(string) xshow(string) nullcol(string)		INTCol(string)	 ///
-	 noPLOTY_axis noPLOTX_axis	nullpt(real 0.0) nooutlinezone Title(string) /// 
+[SETOrder(string) Xshow(string) NULLCol(string asis) intcol1(string asis) intcol2(string asis) intcol3(string asis)	 ///
+	 noPLOTY_axis noPLOTX_axis	nullpt(real 0.0) noOUTlinezone Title(string) /// 
 	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) ] 
 
 
 ***Some default values : Color settings -> translated R-colors into RGB for Stata -> Not sure how to install the colours in Stata for easier referencing.
-local cornflowerblue 100 149 237
 local firebrick3 205 38 38
+local cornflowerblue 100 149 237
 local darkslateblue 72 61 139
-local intcoldefault cornflowerblue firebrick3 darkslateblue 
+
+
+*local intcoldefault firebrick3 cornflowerblue  darkslateblue 
 local nullcoldefault 208 216 232
 ***Input parsing
 *Need additional checks and conversions of matrix names  to work with the example in the R-code
@@ -128,37 +80,26 @@ else local if if \`x'<=`xshow'
 **Other graphing options
 
 *Color settings
-if "`intcol'"==""{
-	local intcol `intcoldefault'
+
+
+
+*Change of the color logic compared to R-code
+if `"`intcol1'"'==""{ // firebrick3 for SGPV = 0
+	local intcol1 `firebrick3' 
 }
-else if `: word count `intcol'' ==3{
-		disp as error "Three distinct colors need to be specified for option 'intcol'. Colors should be names or RGB values."
-		exit 198
-	}
-else{
-	local color1 `:word 1 of `intcol''
-	local color2 `:word 2 of `intcol''
-	local color3 `:word 3 of `intcol''
-	local intcol color1 color2 color3
+if `"`intcol2'"'==""{ // cornflowerblue for 0 < SGPV < 1
+	local intcol2 `cornflowerblue' 
+}
 
-}	
+if `"`intcol3'"'==""{ // darkslateblue for SGPV = 1
+	local intcol3 `darkslateblue'
+}
 
-if "`nullcol'"==""{
+
+if `"`nullcol'"'==""{
 	local nullcol `nullcoldefault'
 }
 	
-
-/*
-
-#### Set order of x-axis
-	if (is.na(set.order[1]))  {set.order <- x}
-	if "`setorder'"=="" local setorder x
-	if "`setorder'"=="sgpv" local setorder `sgpv.combo' // Not correct yet; needs differnt variable if matrix or variable is used
-	if (set.order[1]=="sgpv") {set.order <- order(sgpv.combo)}	
-
-	*/	
-
-
 	**** Compute SGPVs for plotting
 	tempname sgpvs sgpvcombo
 	tempvar sgpvcomb x nlo nhi
@@ -203,33 +144,40 @@ if "`nullcol'"==""{
 	if "`order'"!="" sort `order'
 	else if "`setorder_var'"!="" sort `setorder_var'
 	gen `x'=_n
-	gen `nhi' =`nullhi'
+	gen `nhi' = `nullhi'
 	gen `nlo' = `nulllo'
 	***Set up graphs
 	*Null interval
-	local nullint (rarea `nlo' `nhi' `x', sort lcolor("`nullcoldefault'") fcolor("`nullcoldefault'"))
-	* Intervals where 0<SGPV<1
-	local sgpv01 (rbar `estlo' `esthi' `x' if pdelta<1 & dg==., sort lcolor("``:word 1 of `intcol'''") fcolor("``:word 1 of `intcol'''"))
-
-	* Intervals where SGPV==1
-	local sgpv1 (rbar `estlo' `esthi' `x' if pdelta==1 & dg==., sort lcolor("``:word 3 of `intcol'''") fcolor("``:word 3 of `intcol'''"))
-
+	local nullint (rarea `nlo' `nhi' `x', sort lcolor("`nullcol'") fcolor("`nullcol'"))
+	
 	* Intervals where SGPV==0
-	local sgpv0  (rbar `estlo' `esthi' `x' if pdelta==0 & dg!=., sort lcolor("``:word 2 of `intcol'''") fcolor("``:word 2 of `intcol'''"))
-	*Detail indifference zone
-		local ynullpt yline(`nullpt', lpattern(dash))
+	local sgpv0  (rbar `estlo' `esthi' `x' if pdelta==0 & dg!=., sort lcolor("`intcol1'") fcolor("`intcol1'"))
+	
+	
+	* Intervals where 0<SGPV<1
+	local sgpv01 (rbar `estlo' `esthi' `x' if pdelta<1 & dg==., sort lcolor("`intcol2'") fcolor("`intcol2'"))
 
-		if "`outlinezone'"!="nooutlinezone"{
-			local ynulllo	yline(`nulllo',  lcolor(white))
-			local ynullhi	 yline(`nullhi', lcolor(white))
-		}
+	
+	* Intervals where SGPV==1
+	local sgpv1 (rbar `estlo' `esthi' `x' if pdelta==1 & dg==., sort lcolor("`intcol3'") fcolor("`intcol3'"))
+
+	*Detail indifference zone
+	local ynullpt yline(`nullpt', lpattern(dash))
+
+	if "`outlinezone'"!="nooutlinezone"{
+		local ynulllo yline(`nulllo', lcolor(white))
+		local ynullhi yline(`nullhi', lcolor(white))
+	}
 	*Turning off axis	
 	if "`ploty_axis'"=="noploty_axis" local yaxis yscale(off)
 	if "`plotx_axis'"=="noplotx_axis" local xaxis xscale(off)
 	
 	*Legend
 	if "`legend'"!="nolegend"{
-	 local sgpvlegend	legend(on order(1 "Interval Null" 2 "0 < p <1"  3 "p = 1"  4 "p = 0")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) //-> Not done yet -> Not all settings in R-code are possible in Stata
+	 local sgpvlegend	legend(on order(1 "Interval Null" 2 "0 < p <1"  3 "p = 1"  4 "p = 0")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) // Not all settings in R-code are possible in Stata
+	}
+	else if "`legend'"=="nolegend"{
+		local sgpvlegend legend(off)
 	}	
 
 	

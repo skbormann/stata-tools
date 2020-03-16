@@ -1,55 +1,13 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
-*!Version 0.9  : Initial Github release
+*!Version 1.00 : Initial submission to SSC, no changes compared to last Github release
+*!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
+*!Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probablyF last Github release before submission to SSC 
 *!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
-*!Version 0.95 : Updated documentation, added more possibilities to abbreviate options ,last Github release before submission to SSC 
-*!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code
+*!Version 0.90 : Initial Github release
+*!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
 *!		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
-/* START HELP FILE
-title[False Discovery or Confirmation Risk for Second-Generation p-values]
-desc[This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk for a second-generation {it:p}-value of 1. 
-This command should be used mostly for single calculations. 
-For calculations after estimation commands use the {help sgpv} command. 
-
-The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
-The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
-with r = P(H_1)/P(H_0) being the prior probability.		
-
-]
-opt[sgpval the observed second-generation {it:p}-value.]
-opt[nulllo() the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
-opt[nullhi() the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value was based.]
-opt[stderr() standard error of the point estimate.]
-opt[inttype() class of interval estimate used.]
-opt[intlevel() level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).]
-opt[nullweights() probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[nullspace() support of the null probability distribution.]
-opt[altweights() probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".]
-opt[altspace() support for the alternative probability distribution.]
-opt[pi0() prior probability of the null hypothesis. Default is 0.5.]
-opt2[sgpval the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.]
-opt2[nullspace() support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space.]
-opt2[inttype() class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).]
-opt2[altspace() support for the alternative probability distribution. If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.]
-
-example[
-{bf:false discovery risk with 95% confidence level}
-
- fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) altweights("Uniform")  altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence") intlevel(0.05)
-
-]
-return[fdr false discovery risk]
-return[fcr false confirmation risk ]
-references[ Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. 
-{browse "https://doi.org/10.1371/journal.pone.0188299"}
-
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}-values. {it:The American Statistician}. In press. {browse "https://doi.org/10.1080/00031305.2018.1537893"} ]
-author[Sven-Kristjan Bormann]
-institute[School of Economics and Business Administration, University of Tartu]
-email[sven-kristjan@gmx.de]
-
-seealso[ {help plotsgpv} {help sgpvalue} {help sgpower} {help sgpv}  ]
-END HELP FILE */
+*!		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box
 
 
 capture program drop fdrisk
@@ -82,6 +40,8 @@ if !inlist("`altweights'", "Point", "Uniform", "TruncNormal"){
 
 
 *Code taken from sgpower.ado -> in R-code things are handled directly by the sgpower() function. This would be only possible in Mata in the same way.
+local intlevel = `intlevel' 
+
 if "`inttype'"=="confidence"{
 	local z = invnorm(1- `intlevel'/2)
 }
@@ -110,8 +70,6 @@ if `: word count `altspace''==2{
 	local altspace2 = `altspace2'
 	local altspace `altspace1' `altspace2'
 } 
-
-local intlevel = `intlevel'
 
 
 *Power functions
@@ -175,7 +133,7 @@ local intlevel = `intlevel'
 	 }
  * P.sgpv.H0 averaged uniformly
       if("`nullweights'" == "Uniform") {
-		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') v
+		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
 
@@ -193,7 +151,7 @@ local intlevel = `intlevel'
         local truncNormsd  `stderr'
 
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
-        qui `integrate', f(`integrand') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') v
+        qui `integrate', f(`integrand') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 `r(integral)'
 
       }
@@ -226,7 +184,7 @@ local intlevel = `intlevel'
 
     * P.sgpv.H1 averaged uniformly
     if("`altweights'" == "Uniform") {
-	 qui `integrate', f(`powerx') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') v
+	 qui `integrate', f(`powerx') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') 
       local PsgpvH1 = 1/(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') * `r(integral)'
     }
 
@@ -248,7 +206,7 @@ local intlevel = `intlevel'
 	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "'trunNorm.mu' and 'truncNorm.sd' must be numeric."
 
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
-        qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') v
+        qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') 
       
       local PsgpvH1 = `r(integral)'
 
@@ -263,10 +221,10 @@ local intlevel = `intlevel'
   }
   
   if "`fdr'"!="" | !mi(real("`fdr'")){
-	disp "False discovery risk is: `fdr'"
+	disp _n "The false discovery risk (fdr) is: " %9.0g `fdr'
   }
   if "`fcr'"!="" | !mi(real("`fcr'")){
-	disp "False confirmation rate is: `fcr'"
+	disp _n "The false confirmation rate (fcr) is: " %9.0g `fcr'
   }
 
   return local fdr  `fdr'
@@ -283,7 +241,7 @@ end
 
 *Shortcut to the Stata integration command, same syntax as the user-provided integrate-command.
 program define nomataInt, rclass
-syntax , Lower(real) Upper(real) Function(string) [Vectorise]
+syntax , Lower(real) Upper(real) Function(string)
 preserve
 range x `lower' `upper' 1000
 gen y  = `function'
