@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0  14 Mar 2020}{...}
+{* *! version 0.92  14 Mar 2020}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "Install command2" "ssc install sgpv"}{...}
 {vieweralsosee "Help sgpv (if installed)" "help sgpv"}{...}
