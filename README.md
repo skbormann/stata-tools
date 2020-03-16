@@ -13,7 +13,7 @@ Not all programs are not yet available via the SSC, but will be in the future.
    Mainly delevoped and used for the *count* command, but it works for other scenarios as well 
 * num2base26 - An interface to the *numbase26()* function of Mata. Converts a number to a letter. 
   Useful when creating Excel tables in Stata
-* sgpv -  Calculate Second Generation P-Values (SGPV) based on the R-code by  Jeffrey D. Blume and Valerie F. Welty available [here](https://github.com/weltybiostat/sgpv) 
+* [sgpv](https://github.com/skbormann/stata-tools/tree/master/sgpv) -  Calculate Second Generation P-Values (SGPV) based on the R-code by  Jeffrey D. Blume and Valerie F. Welty available [here](https://github.com/weltybiostat/sgpv) 
 In addition to the translation of the R-code into Stata code, a new wrapper command was added which allows the calculation of the SGPVs after commonly used estimation commands. 
 The *sgpv* command is the main command for normal users. It offers features which are not available in the original R-code.  
   

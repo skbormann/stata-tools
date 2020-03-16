@@ -1,5 +1,4 @@
 *!Based on the R-code for the sgpvalue function from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version. Soon to be released.
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 *!				Fixed a bug with the nodeltagap-option.
 *!Version 0.98 : Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes

@@ -7,6 +7,9 @@ The changelog is taken from the ado-files
 
 ### General
 General remarks if updates come in larger "packages".
+* 16.03.2020: 
+  * Added more examples for the original R-code to the help-files
+  * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective *command*.dlg file.
 
 ### fdrisk
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details

@@ -1,5 +1,4 @@
 *!Based on the R-code for sgpower.R
-*!Version 1.0	: Initial SSC release,  Soon to be released.
 *!Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 *!Version 0.91 	: Removed dependency on user-provided integrate-command. 
 *!Version 0.90 	: Initial Github Release

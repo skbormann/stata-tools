@@ -1,5 +1,4 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 *!Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
 *!Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented

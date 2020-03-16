@@ -1,6 +1,5 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
-*!Version 1.00 : Initial submission to SSC, no changes compared to last Github release
 *!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
 *!Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probablyF last Github release before submission to SSC 
 *!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option

@@ -1,6 +1,5 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version. Soon to be released.
 *!Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
 *!				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used
 *!				 Fixed intcol-option -> now parses correctly color names and  RGB-values
