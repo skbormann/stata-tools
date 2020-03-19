@@ -2,7 +2,7 @@
 sgpvalue dialog version 0.98a, 15.03.2020, Sven-Kristjan Bormann
 for sgpvalue version 0.98a
 
-To install in User Statistics menu via Stata commands:
+To install in the User Statistics menu via Stata commands:
   
   . window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue"
 

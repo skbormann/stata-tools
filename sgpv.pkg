@@ -1,16 +1,22 @@
 v 3
 d 'SGPV': Second Generation P-Values
-d Based on the original R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}
+d Based on the original R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
 d An additional {cmd:sgpv}-command makes it easier to calculate the SGPVs after common estimation commands.
-d Second Generation P-Values are proportion of null-hypotheses supported by the data.
+d Second Generation P-Values are the proportion of null-hypotheses supported by the data.
 d They are easier to understand than ordinary p-values.
 d See the {help sgpv:help file} after installation for introduction.
-d Additional dialog boxes further help with using the commands are available (not for the sgpv-command yet). 
-* and can also be added to the User-menubar by running {stata sgpv menuInstall}.
+d Additional dialog boxes further help with using the commands are available. 
+d and can also be added to the User-menubar by running {stata sgpv menuInstall}.
+d
+d KW: p-value
+d KW: second generation
+d KW: postestimation
+d
+d
 d Requires: Stata 12.0
 d Author: Sven-Kristjan Bormann
 d Support: email sven-kristjan@gmx.de
-d Distribution-Date: 20200316
+d Distribution-Date: 20200319
 d
 d 
 d License: MIT
@@ -29,7 +35,8 @@ f sgpvalue.dlg
 f fdrisk.dlg
 f plotsgpv.dlg
 f sgpower.dlg
-f leukstats.dta
+f sgpv.dlg
+F leukstats.dta
 f sgpv-leukemia-example.do
 f sgpower-plot-example.do
-f sgpvalue-examples.ado
+* f sgpvalue-examples.do

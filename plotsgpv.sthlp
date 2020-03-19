@@ -21,7 +21,7 @@
 [{cmd:,}
 {it:options}]
 
-{synoptset 20 tabbed}{...}
+{synoptset 25 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}

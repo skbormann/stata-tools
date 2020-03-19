@@ -16,7 +16,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpv}
-[anything(name=subcmd)]
+[menuInstall]
 [{cmd:,}
 {it:options}]
 
@@ -25,67 +25,42 @@
 {synoptline}
 {syntab:Main}
 {synopt:{opt q:uietly}}  suppress the output of the estimation command.
-
-{pstd}
 {p_end}
 {synopt:{opt e:stimate(name)}}  takes the name of a previously stored estimation.
-
-{pstd}
 {p_end}
 {synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
-
-{pstd}
 {p_end}
 {synopt:{opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
-
-{pstd}
 {p_end}
 {synopt:{opt coef:ficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
-
-{pstd}
 {p_end}
-{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
-
-{pstd}
+{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
 {p_end}
+
 {syntab:Null Interval}
 {synopt:{opt nulllo(#)}}  change the upper limit of the null-hypothesis interval.
-
-{pstd}
 {p_end}
 {synopt:{opt nullhi(#)}}  change the lower limit of the null-hypothesis interval.
-
-{pstd}
 {p_end}
 
 {syntab:Fdrisk}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
-
-{pstd}
 {p_end}
 {synopt:{opt alts:pace(string)}}  support for the alternative probability distribution.
-
-{pstd}
 {p_end}
 {synopt:{opt nulls:pace(string)}}  support of the null probability distribution.
-
-{pstd}
 {p_end}
 {synopt:{opt nullw:eights(string)}}  probability distribution for the null parameter space.
-
-{pstd}
 {p_end}
 {synopt:{opt intl:evel(string)}}  level of interval estimate.
-
-{pstd}
 {p_end}
 {synopt:{opt intt:ype(string)}}  class of interval estimate used.
-
-{pstd}
 {p_end}
 {synopt:{opt pi0(#)}}  prior probability of the null hypothesis. Default is 0.5.
+{p_end}
 
-{pstd}
+{syntab:menuInstall}
+{synopt:{opt perm}} install permanently the dialog boxes into the User menubar.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -96,15 +71,19 @@
 {pstd}
 {cmd:sgpv} allows the calculation of the Second-Generation P-Values (SGPV) developed by Blume et.al.(2018,2019) for and after commonly used estimation commands. 
 The false discovery/confirmation risks (fdr/fcr) can be also reported. 
-The SGPVs are reported alongside the usually reported p-values. 
+The SGPVs are reported alongside the usually reported p-values. {break}
 An ordinary user should use this command and not other commands on which {cmd:sgpv} is based upon. 
 {cmd:sgpv} uses sensible default values for calculating the SGPVs and the accompaning fdr/fcr, which can be changed.  
-This wrapper command runs the commands translated into Stata which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}. 
-This package comes also with the example leukemia dataset from {browse "https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)"}
+This wrapper command runs the commands translated into Stata, which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}. 
+This package comes also with the example leukemia dataset from {browse "https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)"}.{break}
+Dialog boxes for each command are also provided to make the usage of the commands easier.
+The dialog boxes can be installed into the User menubar. 
+See {help sgpv##menuInstall:this example} for how to do it.{p_end}
+
+{pstd}
 The formulas below are taking from the help-files of {helpb sgpvalue} and {helpb fdrisk}.
 An example about how to interpret the results is given in the {help sgpv##examples:example section} .
 {p_end}
-
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
 {col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
@@ -173,13 +152,14 @@ Multiple coefficients must be separated with a space.
 {opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
 
 {phang}
+{marker matrix_opt}
 {opt m:atrix(name)}  takes the name of matrix as input for the calculation. 
 The matrix must follow the structure of the r(table) matrix returned after commonly used estimation commands due to the hardcoded row numbers used for identifiying the necessary numbers. 
 Meaning that the parameter estimate has to be in the 1st row, the standard errors need to be in the 2nd row, the p-values in 4th row, the lower bound in the 5th and the upper bound in the 6th row.
 As additional check, the row names of the supplied matrix need to match the rownames of the r(table) matrix.
 The rownames are: b se t pvalue ll ul{break}
 To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {break}
-Example code is located in the file {cmd:leukemia-example.do} which can be viewed {stata viewsource leukemia-example.do:here}.
+Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}.
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
 {dlgtab:Null Hypothesis}
@@ -191,7 +171,7 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 
 {dlgtab:Fdrisk}
 {phang}
-{opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are currently "Uniform", and "TruncNormal".
+{opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal".
 
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution.  
@@ -203,7 +183,7 @@ If "nullweights" is "Point", then "nullspace" is a single number.
 If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" are two numbers separated by a space.
 
 {phang}
-{opt nullw:eights(string)}  probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal". 
+{opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
 The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set to the same value. 
 If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".
 
@@ -216,6 +196,10 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
 {phang}
 {opt pi0(#)}     prior probability of the null hypothesis. Default is 0.5.
 
+{dlgtab: menuInstall}
+{phang}
+{opt perm} install permanently the dialog boxes into the User menubar. The necessary commands are added to the user's profile.do. If no profile.do exists or can be found then a new profile.do is created in the current directory. Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. The dialog boxes can be accessed as usual by for example {stata db sgpv}.
+
 {marker examples}{...}
 {title:Examples}
 {* pstd}
@@ -227,15 +211,15 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
   Example Output:
   		
   	  Source |       SS           df       MS      Number of obs   =        74
-      -------------+----------------------------------   F(3, 70)        =     23.29
+    -------------+----------------------------------   F(3, 70)        =     23.29
   	   Model |   317252881         3   105750960   Prob > F        =    0.0000
   	Residual |   317812515        70  4540178.78   R-squared       =    0.4996
-      -------------+----------------------------------   Adj R-squared   =    0.4781
+    -------------+----------------------------------   Adj R-squared   =    0.4781
   	   Total |   635065396        73  8699525.97   Root MSE        =    2130.8
   
       ------------------------------------------------------------------------------
   	   price |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
-      -------------+----------------------------------------------------------------
+      -----------+------------------------------------------------------------------
   	     mpg |    21.8536   74.22114     0.29   0.769    -126.1758     169.883
   	  weight |   3.464706    .630749     5.49   0.000     2.206717    4.722695
   	 foreign |    3673.06   683.9783     5.37   0.000     2308.909    5037.212
@@ -247,7 +231,7 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
   
      Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
   -------------+-------------------------------------------------------
-  	 mpg |  .7692938         .5          .          .          . 
+  	   mpg |  .7692938         .5          .          .          . 
         weight |  5.99e-07          0   2.206717    .047926          . 
        foreign |  9.72e-07          0   2308.909   .0480251          . 
          _cons |  .0874262         .5          .          .          . 
@@ -264,33 +248,36 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
   that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
   Whether 5% is much, is for you to decide.
   
-  {bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019). 
+  {bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019).
   I cannot guarantee that my understanding is correct.
   These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
   
   
   Save estimation for later usage 
-  {stata estimate store pricereg} 
+	  {stata estimate store pricereg} 
 
-{pstd}
-The same result but this time after the last estimation.{break}
-	{stata sgpv} {break}
-	{stata qreg price mpg weight foreign} {break}
-	{stata estimates store priceqreg}
+  The same result but this time after the last estimation.
+		{stata sgpv} 
+		{stata qreg price mpg weight foreign} 
+		{stata estimates store priceqreg}
 
-{pstd}
-Calculate sgpvs for the stored estimation and only the foreign coefficient {break}
-{stata sgpv, estimate(pricereg) coefficient("foreign")} {break}
-{stata sgpv, estimate(priceqreg) coefficient("foreign")}
+{* pstd}
+  Calculate sgpvs for the stored estimation and only the foreign coefficient
+	{stata sgpv, estimate(pricereg) coefficient("foreign")} 
+	{stata sgpv, estimate(priceqreg) coefficient("foreign")}
 
 {marker leukemia-example}{...}
-    Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code}):
+  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code}):
 	{stata do sgpv-leukemia-example.do}
+	
     This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
     Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
     You can run {stata display `=c(matsize)'} to see your current setting.
     
-	
+{marker menuInstall}{...}
+{* phang}
+  Install the dialog boxes permanently in the User menubar: User -> Statistics {* p_end}
+	{stata sgpv menuInstall, perm} //	install permanently the dialog boxes into the User menubar. 
 
 {title:Stored results}
 Besides its own calculations, {cmd:sgpv} also preserves the returned results from the estimation command including everything returned in r().

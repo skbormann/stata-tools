@@ -12,10 +12,16 @@ To permanently install, place the commands in your -profile.do- file.
 */
 
 VERSION 12.0
+POSITION . . 420 470
 INCLUDE _std_large
-INCLUDE header
+//INCLUDE _ht320
+//INCLUDE header
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit") 
 HELP hlp1,   view("help fdrisk")  
 RESET res1
+COPY copy1
 
 
 LIST nullweights_list
@@ -31,12 +37,6 @@ BEGIN
 	TruncNormal
 END
 
-LIST nobonus_list
-BEGIN
-	deltagap
-	fdrisk
-	all
-END
 
 LIST inttype_list
 BEGIN
@@ -54,41 +54,65 @@ DIALOG main, label("Fdrisk 0.96 - False discovery/confirmation risk") tabtitle("
 BEGIN
 
 
-	GROUPBOX gb_null	   _lft  _top   170     110, label("Null-Hypothesis Interval")
+	GROUPBOX gb_null	   _lft  _top   270     110, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 		   +10   _ss    80       ., label("Lower Bound") 
-	EXP ex_nulllo		    @     _ss   150      ., label("Expression")  option(nulllo) ///
+	EXP ex_nulllo		    @     _ss   250      ., label("Expression")  option(nulllo) ///
 													tooltip("Set lower bound of the null-hypothesis interval") error(Lower Bound null-hypothesis interval)
 										   
 	TEXT tx_nullhi 		    20   +20     80      ., label("Upper Bound")
-	EXP ex_nullhi	 	    @	 _ss    150      ., label("Expression") option(nullhi) ///
+	EXP ex_nullhi	 	    @	 _ss    250      ., label("Expression") option(nullhi) ///
 													tooltip("Set upper bound of the null-hypothesis interval") error(Upper Bound null-hypothesis interval)
 	
-	TEXT tx_se			    @   _xls    80      ., label("Standard Error")
-	EDIT ed_se			    @     _ss     @     ., option(stderr) default(1) numonly error(Standard error)
-
-	TEXT tx_nullspace      200    10    100    ., label("Nullspace:")
-	EDIT ed_nullspace       @    _ss     @    ., option(nullspace) error(Nullspace)
+	TEXT tx_se			    300   -60   80      ., label("Standard Error")
+	EDIT ed_se			    @     _ss     @     ., option(stderr) default(1) numonly error(Standard error) tooltip("Standard error of the point estimate")
 	
-	TEXT tx_nullweights     @    _ls     @    ., label("Nullweights:")
-	COMBOBOX cb_nullweights @    _ss     @    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights)
+	TEXT tx_nullspace      10    +90    100    ., label("Nullspace:")
+	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression")
 	
-	TEXT tx_altspace     +150   -70      @    ., label("Altspace:")
-	EDIT ed_altspace        @   _ss      @    ., option(altspace) error(Altspace)
+	TEXT tx_nullweights     10    _ls    @    ., label("Nullweights:")
+	COMBOBOX cb_nullweights @    _ss     100    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights)
 	
-	TEXT tx_altweights      @   _ls      @    ., label("Altweights:")
+	//FRAME fr_altspace		5  	+20		410		120
+	TEXT tx_altspace     	10   _ls      @    ., label("Altspace:")
+	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression")
+	
+	TEXT tx_altweights      @   _ls      100    ., label("Altweights:")
 	COMBOBOX cb_altweights  @   _ss      @    ., dropdown content(altweights_list) option(altweights) error(Altweights)
 	
-	TEXT tx_inttpye       -150  _ls      @    ., label("Interval type:")
-	COMBOBOX cb_inttype      @  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) // values()
+	TEXT tx_inttpye       	@  _xxls      @    ., label("Interval type:")
+	COMBOBOX cb_inttype     @  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) 
 	
 	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
 	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level)
 	
 	TEXT tx_pi0           +150  -70     120   ., label("Prior probability of H0:")
 	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly
+
+	// TEXT tx_nullspace      200    10    100    ., label("Nullspace:")
+	// EDIT ed_nullspace       @    _ss     @    ., option(nullspace) error(Nullspace)
+	
+	// TEXT tx_nullweights     @    _ls     @    ., label("Nullweights:")
+	// COMBOBOX cb_nullweights @    _ss     @    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights)
+	
+	// TEXT tx_altspace     +150   -70      @    ., label("Altspace:")
+	// EDIT ed_altspace        @   _ss      @    ., option(altspace) error(Altspace)
+	
+	// TEXT tx_altweights      @   _ls      @    ., label("Altweights:")
+	// COMBOBOX cb_altweights  @   _ss      @    ., dropdown content(altweights_list) option(altweights) error(Altweights)
+	
+	// TEXT tx_inttpye       -150  _ls      @    ., label("Interval type:")
+	// COMBOBOX cb_inttype      @  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) // values()
+	
+	// TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
+	// EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level)
+	
+	// TEXT tx_pi0           +150  -70     120   ., label("Prior probability of H0:")
+	// EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly
 	
 	TEXT tx_sgpval           @  _ls       @   ., label("SGPV:")
 	COMBOBOX cb_sgpval       @  _ss      40   20, option(sgpval) content(sgpval_list) dropdownlist  
+	
+	
 END
 
 PROGRAM command

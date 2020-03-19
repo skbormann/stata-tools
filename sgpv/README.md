@@ -7,9 +7,13 @@ The changelog is taken from the ado-files
 
 ### General
 General remarks if updates come in larger "packages".
+*19.03.2020: 
+ * Added a dialog box for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the sgpv.dlg file. 
+ * The dialog boxes can be also added now by running __sgpv menuInstall__ or permanently added by running __sgpv menuInstall, perm__
+
 * 16.03.2020: 
   * Added more examples for the original R-code to the help-files
-  * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective *command*.dlg file.
+  * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details
@@ -32,10 +36,12 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 * Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 * Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
 * Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
 * Version 0.90 : Initial Github release
+
 ### sgpvalue
 * Version 0.98a: 
 	* Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
@@ -49,6 +55,7 @@ General remarks if updates come in larger "packages".
 
 ## To-Do-List and Limitations
 A collection of things that I want to do at some point + some limitations of the current versions of the commands
+
 ### fdrisk
 *   Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
 * 	Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
@@ -62,6 +69,7 @@ A collection of things that I want to do at some point + some limitations of the
 * The standard error has to be a number and cannot be an expression like in the R-code
 * Not possible to plot directly the power function yet, an example how to plot the power function is located in the file sgpower_plot_example.do
 * The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
+
 ### sgpv
 * support for more commands which do not report their results in a matrix named "r(table)".
 * Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 

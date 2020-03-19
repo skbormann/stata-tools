@@ -1,0 +1,239 @@
+/*
+Draft of a dialog box for SGPV
+To-Do: Add additional input checks for nullweights and altweighs to allow only certain inputs for nullspace and altspace
+*/
+/*
+sgpv dialog version 0.98, 19.03.2020, Sven-Kristjan Bormann
+for sgpv version 0.98
+
+To install in User Statistics menu via Stata commands:
+  
+  . window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv"
+
+  . window menu refresh
+
+To permanently install, place the commands in your -profile.do- file.
+
+*The color setting does not work yet
+*/
+
+VERSION 12.0
+POSITION . . 420 400
+INCLUDE _std_large
+//INCLUDE _ht320
+//INCLUDE header
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit") 
+HELP hlp1,   view("help sgpv")  
+RESET res1
+COPY copy1
+
+
+LIST nullweights_list
+BEGIN
+	Point
+	Uniform
+	TruncNormal
+END
+
+LIST altweights_list
+BEGIN
+	Uniform
+	TruncNormal
+END
+
+LIST nobonus_values
+BEGIN
+	deltagap
+	fdrisk
+	all
+END
+
+LIST nobonus_list
+BEGIN
+	Delta-Gap
+	False discovery/confirmation risk
+	Both
+END
+
+
+LIST nobonus_action
+BEGIN
+	 script fdrisk_on 
+	 script fdrisk_off
+	 script fdrisk_off
+END
+
+LIST inttype_list
+BEGIN
+	confidence
+	likelihood
+END
+
+
+DIALOG main, label("sgpv 0.98 - Second Generation P-Values") tabtitle("Main")
+BEGIN
+
+	GROUPBOX gp_calcfor 		5 	5 		410 	110,label("Calculate SGPVs for:")
+	RADIO 	r1 				_lft	20		50 		.,first label("Replay") onclickon(script replay_on) ///
+													tooltip("Replay the previous estimation command and calculate the SGPVs and bonus statistics for it")
+	RADIO 	r2 				+70		@ 	 	150 	., 	middle label("Stored Estimate") onclickon(script estimate_on)
+	COMBOBOX cb_estimate 	80	 	_ss	 	150		., dropdown content(estimates) option(estimate)
+
+	RADIO 	r3 				+180 	20	 	@ 		., middle label("Matrix") onclickon(script matrix_on)
+	COMBOBOX cb_matrix	 	@ 		_ss 	150	 	., dropdown content(matrix) option(matrix)
+	RADIO 	r4  			10 		_ls 	150		 ., last label("Estimation command") onclickon(script cmd_on) ///
+														tooltip("Enter the estimation command for which you want to calculate the SGPVs and bonus statistcs.")
+	EDIT ed_cmd 			@ 		_ss 	400 	., label(resource LBL_STATA_COMMAND_TO_RUN) 
+	
+	CHECKBOX ck_coefficient 10  	_ls 	400 	., label(resource ESTIMATES_TABLE_OPT_CK_KEEP) ///
+														clickon(main.vl_coefficient.enable) clickoff(main.vl_coefficient.disable)
+	VARLIST vl_coefficient 	@ 		_ss 	@ 		., option(coefficient) numeric
+	TEXT tx_coefficient 	@ 		_ss		@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP)
+	TEXT tx_coefficient2 	@ 		_vss 	@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP2)
+	
+	GROUPBOX gb_null 		5 		_ls 	190 	80,label("Null-Hypothesis Interval")
+	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 
+	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) numonly
+	
+	TEXT tx_nullhi 			+100 	-20 	70 		., label("Upper Bound") 
+	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) numonly
+	
+
+END
+
+DIALOG display ,tabtitle("Display options")
+BEGIN
+
+	CHECKBOX ck_quiet 		10 		_lft 	100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
+	
+	TEXT tx_matlist 		10 		_ls 	200 	., label("Further results display options")
+	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt)
+	BUTTON bu_matlist 		+320	@ 		60 		., label("Help") onpush("view help matlist") 
+			
+	TEXT tx_nobonus 		10 		_ss 	150 	., label("Deactivate Bonus Statistics:")
+	COMBOBOX cb_nobonus 	10 		_ss 	180 	., dropdown content(nobonus_list) values(nobonus_values) option(nobonus) tooltip("Deactivate") ///
+														onselchangelist(nobonus_action) 
+	
+END
+
+DIALOG fdrisk, tabtitle("Fdrisk options")
+BEGIN
+	//FRAME fr_nullspace		5 	5		410		110				
+	TEXT tx_nullspace      10    10    100    ., label("Nullspace:")
+	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression")
+	
+	TEXT tx_nullweights     10    _ls    @    ., label("Nullweights:")
+	COMBOBOX cb_nullweights @    _ss     100    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights)
+	
+	//FRAME fr_altspace		5  	+20		410		120
+	TEXT tx_altspace     	10   _ls      @    ., label("Altspace:")
+	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression")
+	
+	TEXT tx_altweights      @   _ls      100    ., label("Altweights:")
+	COMBOBOX cb_altweights  @   _ss      @    ., dropdown content(altweights_list) option(altweights) error(Altweights)
+	
+	TEXT tx_inttpye       	@  _xxls      @    ., label("Interval type:")
+	COMBOBOX cb_inttype     @  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) 
+	
+	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
+	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level)
+	
+	TEXT tx_pi0           +150  -70     120   ., label("Prior probability of H0:")
+	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly
+
+	
+END
+
+
+SCRIPT replay_on
+BEGIN
+	main.cb_estimate.disable
+	main.cb_matrix.disable
+	main.ed_cmd.disable
+END
+
+SCRIPT estimate_on
+BEGIN
+	main.cb_estimate.enable
+	main.cb_matrix.disable
+	main.ed_cmd.disable
+END
+
+SCRIPT matrix_on
+BEGIN
+	main.cb_estimate.disable
+	main.cb_matrix.enable
+	main.ed_cmd.disable
+END
+
+SCRIPT cmd_on
+BEGIN
+	main.cb_estimate.disable
+	main.cb_matrix.disable
+	main.ed_cmd.enable
+END
+
+
+//Deactive display of fdrisk options if nobonus is set to all or fdrisk 
+SCRIPT fdrisk_off
+BEGIN
+	fdrisk.ex_nullspace.disable
+	fdrisk.ex_altspace.disable
+	fdrisk.cb_altweights.disable
+	fdrisk.cb_nullweights.disable
+	fdrisk.cb_inttype.disable
+	fdrisk.ed_intlevel.disable
+	fdrisk.ed_pi0.disable
+END
+
+SCRIPT fdrisk_on
+BEGIN
+	fdrisk.ex_nullspace.enable
+	fdrisk.ex_altspace.enable
+	fdrisk.cb_altweights.enable
+	fdrisk.cb_nullweights.enable
+	fdrisk.cb_inttype.enable
+	fdrisk.ed_intlevel.enable
+	fdrisk.ed_pi0.enable
+END
+
+
+PROGRAM sgpv_options
+BEGIN
+	put "sgpv "
+	
+	beginoptions
+		
+		optionarg main.cb_matrix
+		optionarg main.cb_estimate
+		optionarg main.vl_coefficient
+		optionarg /hidedefault main.ed_nullhi
+		optionarg /hidedefault main.ed_nulllo
+		
+		option display.ck_quiet
+		
+		optionarg display.ed_matlist
+		optionarg display.cb_nobonus
+		
+		optionarg fdrisk.ex_nullspace
+		optionarg fdrisk.cb_nullweights 
+		optionarg fdrisk.ex_altspace
+		optionarg fdrisk.cb_altweights 
+		optionarg fdrisk.cb_inttype 
+		optionarg fdrisk.ed_intlevel
+		optionarg fdrisk.ed_pi0
+	endoptions
+END
+
+PROGRAM command // inspired by the structure use in bootstrap.dlg
+BEGIN
+	put /program sgpv_options
+	
+	if main.ed_cmd.isenabled(){
+		put " " ": "
+		put main.ed_cmd
+	} 
+END
+

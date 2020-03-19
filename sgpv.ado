@@ -1,4 +1,5 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 *!Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 *!Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
 *!Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
@@ -25,10 +26,12 @@ capture  _on_colon_parse `0'
 
 
 *Check if anything to calculate is given
-if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem
-	disp as error "No last estimate or matrix or saved estimate for calculating SGPV found." 
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !ustrregexm(`"`0'"',"menuInstall") { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem
+	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
+	disp as error "No subcommand found either"
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
 	disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'm(stored estimate name)' . "
+	disp as error "The only currently available subcommand is `"menuInstall"' "
 	exit 198
 }
 
@@ -39,7 +42,7 @@ if !_rc{
 } 
 
 **Define here options
-syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string) NULLSpace(string) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5)  debug /*Display additional messages: undocumented*/] 
+syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string) NULLSpace(string) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5)  debug perm /*Display additional messages: undocumented*/] 
 
 ***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
 /* Potential subcommands: value, power, fdrisk, plot
@@ -50,13 +53,13 @@ if "`subcmd'"!=""{
 	ParseSubcmd `subcmd', 
 	
 }
-
-if ustrregexm(`"`0'"',"menuInstall"){
-	gettoken menu 0:0
-	menuInstall `0'
+*/
+if "`subcmd'"=="menuInstall"{
+	menuInstall , `perm'
+	exit
 }
 
-*/
+
 
 
 ***Option parsing
@@ -283,21 +286,27 @@ program define stop
  exit 198
 end
 
-*Make the dialog boxes accessible from the User-menu
+*Make the dialog boxes accessible from the User-menu -> not called yet
 program define menuInstall
- args perm 
+ syntax [, perm *] 
  if "`perm'"=="perm"{
-	 capture findfile profile.do
-	 if _rc{
-		disp as error "File profile.do not found." 
-		disp as error "To make the dialog boxes permanently available in your menu bar, please create a profile.do file in your home directory."
-		disp as error "You can create this file by running: " {stata }
-		exit 
-	 }
-	 tempname fh
-	 file open `fh' using profile.do , read write append
+		capture findfile profile.do
+		if _rc{
+			local replace replace
+			disp "profile.do not found."
+			disp "profile.do will be created in the current folder."
+			local profile profile.do
+		}
+		else{
+			local replace append
+			local profile `"`r(fn)'"'
+			disp "Append your existing profile.do"
+		}
 	 
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV (Main command) (&sgpv)" "db sgpv" "' _n
+	 tempname fh
+	 file open `fh' using `profile' , write text `replace'
+	 
+	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Power Calculations (&sgpower)" "db sgpower" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" "' _n
@@ -307,12 +316,14 @@ program define menuInstall
 
  
  }
-	window menu append item "stUserStatistics" "SGPV (Main command) (&sgpv)" "db sgpv" 
-	window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue"
-	window menu append item "stUserStatistics" "SGPV Power Calculations (&sgpower)" "db sgpower" 
-	window menu append item "stUserStatistics" "SGPV False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" 
-	window menu append item "stUserStatistics" "SGPV Plot Interval Estimates (&plotsgpv)" "db plotsgpv"
+	window menu clear // Assuming that no one else installs 
+	window menu append submenu "stUserStatistics"  "SGPV"
+	window menu append item "SGPV" "SGPV (Main command) (&sgpv)" "db sgpv" 
+	window menu append item "SGPV" "SGPV Value Calculations (sgp&value)" "db sgpvalue"
+	window menu append item "SGPV" "SGPV Power Calculations (sg&power)" "db sgpower" 
+	window menu append item "SGPV" "False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" 
+	window menu append item "SGPV" "SGPV Plot Interval Estimates (p&lotsgpv)" "db plotsgpv"
 
 	window menu refresh
- 
+	
 end

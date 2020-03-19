@@ -33,7 +33,7 @@
 {synopt:{opt alts:pace(string)}}  support for the alternative probability distribution.{p_end}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space. {p_end}
 {synopt:{opt sgpv:al(#)}}  the observed second-generation {it:p}-value.{p_end}
-{synopt:{opt pi0(#)}}  prior probability of the null hypothesis. Default is 0.5.{p_end}
+{synopt:{opt pi0(#)}}  prior probability of the null hypothesis.{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}
@@ -83,7 +83,7 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 {opt intl:evel(string)}     level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
 
 {phang}
-{opt nulls:pace(string)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is a scalar. 
+{opt nulls:pace(string)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is one number. 
 If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space.
 
 {phang}
@@ -91,7 +91,7 @@ If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a s
 
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution. 
-If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.
+If "altweights" is "Point", then "altspace" is one number. If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.
 
 {phang}
 {opt altw:eights(string)}     probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
@@ -105,24 +105,23 @@ If "altweights" is "Point", then "altspace" is a scalar. If "altweights" is "Uni
 {marker examples}{...}
 {title:Examples}
 
-{* pstd}
-	{bf:false discovery risk with 95% confidence level:}{* p_end}
-	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) altweights("Uniform") ///
-		altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence") intlevel(0.05)
+{pstd}{bf:False discovery risk with 95% confidence level:}{p_end}
+	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) /// 
+		altweights("Uniform") altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence")  intlevel(0.05) 
 		
-	{bf:false discovery risk with 1/8 likelihood support level:}
-	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("Uniform") ///
-		altspace(2-1*invnorm(1-0.041/2)*0.8 2+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8) 
+	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}{p_end}
+	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0) /// 
+		altweights("Uniform") altspace(2-1*invnorm(1-0.041/2)*0.8 2+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8) 
 
 	{bf:with truncated normal weighting distribution:}
 	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("TruncNormal") ///
 		altspace(2-1*invnorm(1-0.041/2)*0.8 2+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8)
 
-	{bf:false discovery risk with LSI and wider null hypothesis:}
+{pstd}	{bf:False discovery risk with LSI and wider null hypothesis:}{p_end}
 	fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("Uniform") ///
 		altspace(2.5-1*invnorm(1-0.041/2)*0.8 2.5+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8)
 
-	{bf:false confirmation risk example:}
+{pstd}	{bf:False confirmation risk example:} {p_end}
 	fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform") nullspace(0.01-1*invnorm(1-0.041/2)*0.15 0.01+1*invnorm(1-0.041/2)*0.15) ///
 		altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5))  inttype("likelihood")  intlevel(1/8)
 

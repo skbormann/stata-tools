@@ -142,7 +142,7 @@ BEGIN
 	
 	TEXT 	tx_twoway 	20 		_ls		100		.,label("Additional plotting options:")
 	EDIT 	ed_twoway 	+100 	@		250		.,option(twoway_opt) tooltip("Any additional options for the plotting")
-	BUTTON  bt_twoway   +255	@  		40 	.,label("Help") onpush("view help twoway")
+	BUTTON  bu_twoway   +255	@  		40 	.,label("Help") onpush("view help twoway")
 	
 		
 END
