@@ -97,9 +97,11 @@ BEGIN
 	
 	CHECKBOX ck_coefficient 10  	_ls 	400 	., label(resource ESTIMATES_TABLE_OPT_CK_KEEP) ///
 														clickon(main.vl_coefficient.enable) clickoff(main.vl_coefficient.disable)
-	VARLIST vl_coefficient 	@ 		_ss 	@ 		., option(coefficient) numeric
+	VARLIST vl_coefficient 	@ 		_ss 	@ 		., option(coefficient) numeric ///
+														tooltip("The variable name needs to be exactly the same as returned by estimation output in the matrix r(table). If you did not use factor-variable notation, then the names are identical to the variable names. Otherwise you have to use the factor-variable notation e.g. 1.foreign if you estimated 'reg price mpg i.foreign'.")
 	TEXT tx_coefficient 	@ 		_ss		@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP)
 	TEXT tx_coefficient2 	@ 		_vss 	@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP2)
+	//TEXT tx_coefficient3	@		_vss	@		., label("The variable name needs to be exactly the same as returned by estimation output in the matrix r(table). If you did not use factor-variable notation, then the names are identical to the variable names.  For example: 1.foreign ")
 	
 	GROUPBOX gb_null 		5 		_ls 	190 	80, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 

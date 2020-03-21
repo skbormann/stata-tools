@@ -13,7 +13,7 @@
 {viewerjumpto "Examples" "sgpv##examples"}{...}
 {title:Title}
 {phang}
-{bf:sgpv} {hline 2} A wrapper command for calculating the Second-Generation P-Values and their associated diagnosis.  
+{bf:sgpv} {hline 2} A wrapper command for calculating the Second-Generation P-Value(s) (SGPV) and their associated diagnosis.  
 
 {marker syntax}{...}
 {title:Syntax}
@@ -27,8 +27,6 @@
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{p2coldent :* {opt replay}} the default behaviour if no estimation command, matrix or stored estimate is set.
-{p_end}
 {p2coldent :* {opt e:stimate(name)}}  takes the name of a previously stored estimation.
 {p_end}
 {p2coldent :* {opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
@@ -75,10 +73,10 @@
 {it:estimation_command} can be any of Stata's or user-provided estimation commands which return their results in a matrix named {it:r(table)}.
 This should be true so long the estimation command runs {help ereturn display:ereturn display} at some point.
 If you want to calculate SGPVs for an estimation command or any other command which does not follow this convention, then you can use the {it: matrix(matrixname)} option. The matrix must be pre-processed to meet the expectations of {cmd:sgpv}.
- See the description {help sgpv##matrix_opt:here} for more information.
- 
+ See the description {help sgpv##matrix_opt:here} for more information.{p_end}
  {p 4 6 2}
- * ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
+ * ONLY one thing can be used to calculate the SGPVs: an estimation command, a stored estimation result or a matrix with the necessary information.
+ 
  
 
 {marker description}{...}
@@ -94,6 +92,9 @@ This package comes also with the example leukemia dataset from {browse "https://
 Dialog boxes for each command are also provided to make the usage of the commands easier.
 The dialog boxes can be installed into the User menubar. 
 See {help sgpv##menuInstall:this example} for how to do it.{p_end}
+
+{pstd}
+{cmd:sgpv} typed without any options calculates the SGPVs for the last estimation command with the default settings. All options except for {it:estimate()} and {it:matrix()} can be used. {p_end}
 
 {pstd}
 For more information about how to interpret the SGPVs and other common questions, 
@@ -120,7 +121,7 @@ This works only if no other commands did run after {cmd:sgpv}.
 
 {phang}
 {opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
-The selected coefficients need to have the same names as displayed in the estimation output.
+The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
 
 {phang}

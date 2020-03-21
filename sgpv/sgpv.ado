@@ -63,7 +63,7 @@ if "`subcmd'"=="menuInstall"{
 
 
 ***Option parsing
-if ("`cmd'"!="" | "`e(cmd)'"!="" ) & ("`estimate'"!="" | "`matrix'"!=""){
+if ("`cmd'"!="" & "`e(cmd)'"!="" ) & ("`estimate'"!="" & "`matrix'"!=""){
 	stop "Options 'matrix' and 'estimate' cannot be used in combination with replaying an existing estimation or a new estimation."
 } 
 
