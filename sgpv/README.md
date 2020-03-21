@@ -7,12 +7,12 @@ The changelog is taken from the ado-files.
 
 ### General
 General remarks if updates come in larger "packages".
-*21.03.2020: 
- * Added a dialog box for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the sgpv.dlg file. 
- * The dialog boxes can be also added now by running __sgpv menuInstall__ or permanently added by running __sgpv menuInstall, perm__
- * Restructured all help files to allow a better understanding which options are mandatory and which are optional.
- * Restructured and improved the layout of all dialog boxes.
- * Added more examples for the original R-code to the help-files.
+* 21.03.2020: 
+  * Added a dialog box for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the sgpv.dlg file. 
+  * The dialog boxes can be also added now by running __sgpv menuInstall__ or permanently added by running __sgpv menuInstall, perm__
+  * Restructured all help files to allow a better understanding which options are mandatory and which are optional.
+  * Restructured and improved the layout of all dialog boxes.
+  * Added more examples for the original R-code to the help-files.
 
 * 16.03.2020: 
   * Added more examples for the original R-code to the help-files.
