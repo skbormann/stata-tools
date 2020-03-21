@@ -193,9 +193,7 @@ if `"`nullcol'"'==""{
 	}	
 
 	*Setting xlabel limit according to xshow -> the ticks are multiples of 10, assuming a large number of inputs
-	multiple10 `xshow'
-	local step = 10^r(step)
-	local xlabel xlabel(0(`step')`xshow')
+	local xlabel xlabel(0(`=10^(floor(log10(`xshow')))')`xshow')
 	
 	***Plot: Set up the twoway plot
 	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `twoway_opt'
@@ -203,12 +201,3 @@ if `"`nullcol'"'==""{
 	restore
 end
 
-*A helper command to the step length of the xlabel as a multiple of 10
-program define multiple10, rclass
-	args xshow
-	local i 0
-	while 10^(`i'+1)<`xshow' {
-		local ++i
-	}
-	return scalar step = `i'
-end
