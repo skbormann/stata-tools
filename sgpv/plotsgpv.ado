@@ -1,20 +1,25 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R
+*!Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
+*!				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
+*!				 Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
+*!				 Changed the default behaviour of xtitle() option -> now a default title is shown if not set
+*!				 Added do-file to make running the example in the help-file easier.
 *!Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
-*!				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used
+*!				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used.
 *!				 Fixed intcol-option -> now parses correctly color names and  RGB-values
 *!				 Changed behaviour of intcol-option -> now three separate color options for easier providing custom colors,
 *!				 the change is necessary to make it possible (easier) to set the colors in the dialog box 
 *!Version 0.91 : Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
 *!				Corrected minor errors in the documentation
 *!Version 0.90 : Initial Github release
-*! Removed setting of plot limits -> not really needed in Stata compared to R
+
 
 program define plotsgpv
 version 12.0
-syntax [if] [in] , esthi(string) estlo(string) nullhi(string) nulllo(string) /// 
+syntax [if] [in] ,  estlo(string) esthi(string) nulllo(string) nullhi(string)  /// 
 [SETOrder(string) Xshow(string) NULLCol(string asis) intcol1(string asis) intcol2(string asis) intcol3(string asis)	 ///
-	 noPLOTY_axis noPLOTX_axis	nullpt(real 0.0) noOUTlinezone Title(string) /// 
+	 noPLOTY_axis noPLOTX_axis	nullpt(string) noOUTlinezone Title(string) /// 
 	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) ] 
 
 
@@ -80,8 +85,6 @@ else local if if \`x'<=`xshow'
 
 *Color settings
 
-
-
 *Change of the color logic compared to R-code
 if `"`intcol1'"'==""{ // firebrick3 for SGPV = 0
 	local intcol1 `firebrick3' 
@@ -143,9 +146,16 @@ if `"`nullcol'"'==""{
 	if "`order'"!="" sort `order'
 	else if "`setorder_var'"!="" sort `setorder_var'
 	gen `x'=_n
+	*Define default title of x-axis
+	if "`setorder'"!="" local xtitlevar `"`setorder'"'
+	else if "`setorder_var'"!="" local xtitlevar `"`setorder_var'"'
+	else if	("`setorder'"=="" & "`setorder_var'"=="") local xtitlevar original ordering
+	
+	label variable `x' "Ranking according to `xtitlevar'"
 	gen `nhi' = `nullhi'
 	gen `nlo' = `nulllo'
 	***Set up graphs
+
 	*Null interval
 	local nullint (rarea `nlo' `nhi' `x', sort lcolor("`nullcol'") fcolor("`nullcol'"))
 	
@@ -161,7 +171,10 @@ if `"`nullcol'"'==""{
 	local sgpv1 (rbar `estlo' `esthi' `x' if pdelta==1 & dg==., sort lcolor("`intcol3'") fcolor("`intcol3'"))
 
 	*Detail indifference zone
-	local ynullpt yline(`nullpt', lpattern(dash))
+	if "`nullpt'"!=""{
+		local ynullpt yline(`=real("`nullpt'")', lpattern(dash))
+	}
+	
 
 	if "`outlinezone'"!="nooutlinezone"{
 		local ynulllo yline(`nulllo', lcolor(white))
@@ -179,10 +192,23 @@ if `"`nullcol'"'==""{
 		local sgpvlegend legend(off)
 	}	
 
+	*Setting xlabel limit according to xshow -> the ticks are multiples of 10, assuming a large number of inputs
+	multiple10 `xshow'
+	local step = 10^r(step)
+	local xlabel xlabel(0(`step')`xshow')
 	
 	***Plot: Set up the twoway plot
-	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis'  `twoway_opt'
+	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `twoway_opt'
 	
 	restore
 end
 
+*A helper command to the step length of the xlabel as a multiple of 10
+program define multiple10, rclass
+	args xshow
+	local i 0
+	while 10^(`i'+1)<`xshow' {
+		local ++i
+	}
+	return scalar step = `i'
+end

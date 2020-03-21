@@ -1,12 +1,14 @@
 {smcl}
-{* *! version 0.92  14 Mar 2020}{...}
+{* *! version 0.92  19 Mar 2020}{...}
 {vieweralsosee "" "--"}{...}
-{vieweralsosee "Install command2" "ssc install sgpv"}{...}
-{vieweralsosee "Help sgpv (if installed)" "help sgpv"}{...}
+{vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
+{vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
+{vieweralsosee "SGPV False Confirmation/Discovery Risk" "help fdrisk"}{...}
+{vieweralsosee "SGPV Plot Interval Estimates" "help plotsgpv"}{...}
 {viewerjumpto "Syntax" "sgpower##syntax"}{...}
 {viewerjumpto "Description" "sgpower##description"}{...}
 {viewerjumpto "Options" "sgpower##options"}{...}
-{viewerjumpto "Remarks" "sgpower##remarks"}{...}
+{* viewerjumpto "Remarks" "sgpower##remarks"}{...}
 {viewerjumpto "Examples" "sgpower##examples"}{...}
 {title:Title}
 {phang}
@@ -16,8 +18,8 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpower}
-[{cmd:,}
-{it:options}]
+{cmd:,} true(#) nulllo(#) nullhi(#) inttype(interval_type) intlevel(#)
+[{it:options}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
@@ -33,9 +35,10 @@
 {p_end}
 {synopt:{opt intl:evel(#)}}  level of interval estimate. 
 {p_end}
+{syntab:Further options}
 {synopt:{opt std:err(#)}}  standard error for the distribution of the estimator for the parameter of interest. 
 {p_end}
-{synopt:{opt b:onus}}  display the additional diagnostics for error type I
+{synopt:{opt b:onus}}  display the additional diagnostics for error type I.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -44,21 +47,24 @@
 {marker description}{...}
 {title:Description}
 {pstd}
-Compute power/type I error for Second-Generation P-Values approach.
+Compute power/type I error for Second-Generation P-Values approach. See {help sgpvalue##description:here} for more information about the Second-Generation P-Values.{p_end}
+{pstd}
+An additional {stata db sgpower:GUI} makes using this command easier.
+To make the GUI available from the User-menubar, you have to run {stata sgpv menuInstall}.{p_end}
+{pstd}
 The power functions are the following based on the equations (S4), (S6), (S8) and (S9) 
 from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s001&type=supplementary":the supplementary material} to Blume et al.(2018): {p_end}
-		P_θ(p_δ = 0) 	 = ϕ[(θ_0 - δ) /SE - θ/SE + Z_α/2 ] + ϕ[ -(θ_0 + δ) /SE + θ/SE - Z_α/2 ] 
-		P_θ(p_δ = 1) 	 = ϕ[(θ_0 + δ) /SE - θ/SE - Z_α/2 ] - ϕ[ (θ_0 - δ) /SE - θ/SE + Z_α/2 ] 
+		P_θ(p_δ = 0) 	   = ϕ[(θ_0 - δ) /SE - θ/SE + Z_α/2 ] + ϕ[ -(θ_0 + δ) /SE + θ/SE - Z_α/2 ] 
+		P_θ(p_δ = 1) 	   = ϕ[(θ_0 + δ) /SE - θ/SE - Z_α/2 ] - ϕ[  (θ_0 - δ) /SE - θ/SE + Z_α/2 ] 
 		P_θ(0 < p_δ < 1) = 1 - ϕ[ (θ_0 - δ) /SE - θ/SE - Z_α/2 ] + ϕ[ -(θ_0 + δ) /SE + θ/SE - Z_α/2 ]
-							 - ϕ[ (θ_0 + δ) /SE - θ/SE - Z_α/2 ] - ϕ[ (θ_0 - δ) /SE - θ/SE + Z_α/2 ] 
+				     - ϕ[ (θ_0 + δ) /SE - θ/SE - Z_α/2 ] - ϕ[  (θ_0 - δ) /SE - θ/SE + Z_α/2 ] 
 							when δ > Z_α/2 * SE 				 
 		P_θ(0 < p_δ < 1) = 1 - ϕ[ (θ_0 - δ) /SE - θ/SE - Z_α/2 ] + ϕ[ -(θ_0 + δ) /SE + θ/SE - Z_α/2 ] 
 					 when δ <= Z_α/2 * SE					 
 
-SE denotes the standard error, (θ_0 - δ)  and (θ_0 + δ) denote the lower and upper bound of the null interval.
-See {help sgpvalue##description:here} for more information about the Second-Generation P-Values.
-An additional {stata db sgpower:GUI} makes using this command easier.
-{* To make the GUI available from the User-menubar, you have to run {stata sgpv menuInstall}.}
+		SE denotes the standard error, (θ_0 - δ) and (θ_0 + δ) denote the lower and upper bound of the null interval.
+
+
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}
@@ -73,7 +79,8 @@ An additional {stata db sgpower:GUI} makes using this command easier.
 {opt nullhi(#)}     the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 
 {phang}
-{opt intt:ype(string)}     class of interval estimate used for calculating the SGPV. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).
+{opt intt:ype(string)}     class of interval estimate used for calculating the SGPV. 
+Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).
 
 {phang}
 {opt intl:evel(#)}     level of interval estimate. If "inttype" is "confidence", the level is α. 
@@ -81,6 +88,8 @@ An additional {stata db sgpower:GUI} makes using this command easier.
 				
 {pstd}
 {p_end}
+
+{dlgtab:Further options}
 {phang}
 {opt std:err(#)}     standard error for the distribution of the estimator for the parameter of interest. 
 			Note that this is the standard deviation for the estimator, not the standard deviation parameter for the data itself. 
@@ -101,7 +110,7 @@ An additional {stata db sgpower:GUI} makes using this command easier.
 {stata sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
 {stata sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
 
-Plot the power curve examples (view the {view sgpower-plot-example.do:code})
+Plot the power curve examples (view the {view sgpower-plot-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
 {stata do sgpower-plot-example.do}
 
 
@@ -140,5 +149,5 @@ Further Stata programs and development versions can be found under {browse "http
 
 {title:See Also}
 Related commands:
- {help fdrisk} {help plotsgpv} {help sgpvalue} {help sgpv}
+ {help fdrisk}, {help plotsgpv}, {help sgpvalue}, {help sgpv}
 

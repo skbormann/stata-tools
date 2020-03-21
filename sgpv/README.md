@@ -3,25 +3,35 @@
 Second Generation P-Values (SGPV) based on the R-code by  Jeffrey D. Blume and Valerie F. Welty available [here](https://github.com/weltybiostat/sgpv)
 
 ## Changelog
-The changelog is taken from the ado-files
+The changelog is taken from the ado-files.
 
 ### General
 General remarks if updates come in larger "packages".
-*19.03.2020: 
+*21.03.2020: 
  * Added a dialog box for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the sgpv.dlg file. 
  * The dialog boxes can be also added now by running __sgpv menuInstall__ or permanently added by running __sgpv menuInstall, perm__
+ * Restructured all help files to allow a better understanding which options are mandatory and which are optional.
+ * Restructured and improved the layout of all dialog boxes.
+ * Added more examples for the original R-code to the help-files.
 
 * 16.03.2020: 
-  * Added more examples for the original R-code to the help-files
+  * Added more examples for the original R-code to the help-files.
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details
 * Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
 * Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
+* Version 0.98a: 
+  * The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
+  *	Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
+  * Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
+  *	Changed the default behaviour of xtitle() option -> now a default title is shown if not set.
+  * Added do-file to make running the example in the help-file easier.
 * Version 0.98 : 
   * Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
   * Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used
@@ -31,6 +41,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpower
+* Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 * Version 0.91a	: Fixed some issues in the documentation.
 * Version 0.91 	: Removed dependency on user-provided integrate-command. 
 * Version 0.90 	: Initial Github Release
@@ -46,6 +57,7 @@ General remarks if updates come in larger "packages".
 * Version 0.98a: 
 	* Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 	* Fixed a bug with the nodeltagap-option.
+	* Added more examples from the R-code (as a do-file).
 * Version 0.98 : Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes
 * Version 0.95a: Fixed some issues in the documentation.
 * Version 0.95 : 

@@ -15,7 +15,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- Calculate automatically a null interval based on the statistical properties of the dependent variable of an estimation to encourage the usage of interval null-hypotheses.
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	- improve the speed of fdrisk.ado -> probably the integration part takes too long.
-	- add an imediate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent 
+	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent 
 */
 
 capture program drop sgpv
@@ -42,7 +42,7 @@ if !_rc{
 } 
 
 **Define here options
-syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string) NULLSpace(string) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5)  debug perm /*Display additional messages: undocumented*/] 
+syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5) perm debug  /*Display additional messages: undocumented*/] 
 
 ***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
 /* Potential subcommands: value, power, fdrisk, plot
@@ -95,15 +95,15 @@ if "`estimate'"!="" & "`matrix'"!=""{
 		  //Initial check if rows are correctly named as a crude check that the rows contain the expected numbers
 		   local matrown : rownames `matrix'
 			if "`:word 1 of `matrown''"!="b" | "`:word 2 of `matrown''"!="se" | "`:word 4 of `matrown''"!="pvalue" | "`:word 5 of `matrown''"!="ll" | "`:word 6 of `matrown''" !="ul"{
-			stop "The matrix `matrix' does not have the required format. See the help file for the required format and make sure that the rows of the matrix are labelled correctly."
+			stop "The matrix `matrix' does not have the required format. See the {help sgpv##matrix_opt:help file} for the required format and make sure that the rows of the matrix are labelled correctly."
 			}
 			local inputmatrix `matrix'
 	  }
 	}
 
 	**Process fdrisk options
-	if `nulllo' ==. stop "No missing value for option 'nulllo' allowed. One-sided intervals not yet supported."
-	if `nullhi' ==. stop "No missing value for option 'nullhi' allowed. One-sided intervals not yet supported."
+	if `nulllo' ==. stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
+	if `nullhi' ==. stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
 	*Nullspace option
 	if "`nullspace'"!=""{
 		local nullspace `nullspace'
@@ -153,14 +153,14 @@ if "`estimate'"!="" & "`matrix'"!=""{
 	}
 	
 	*Pi0
-	if !(`pi0'>0 & 1>`pi0'){
-		stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability of 0 or 1 is not sensible."
+	if !(`pi0'>0 & `pi0'<1){
+		stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
 	}
 	
 	
 **Parse nobonus option
-if !inlist("`nobonus'","deltagap","fdrisk","all",""){
-	stop `"nobonus option incorrectly specified. It takes only values `"deltagap"', `"fdrisk"' or `"all"'. "'
+if !inlist("`nobonus'","deltagap","fdrisk","all","none",""){
+	stop `"nobonus option incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
 }
 if "`nobonus'"=="deltagap"{
 	local nodeltagap nodeltagap
@@ -255,7 +255,7 @@ if "`nofdrisk'"==""{
 	*}
 	forvalues i=1/`:word count `rownames''{
 	if inlist(`=`comp'[`i',1]',0,1){
-		qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights("Uniform") sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
+		qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
 		if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
 		if "`r(fcr)'"!= "" mat `fdrisk'[`i',2] = `r(fcr)'
 				
@@ -316,7 +316,7 @@ program define menuInstall
 
  
  }
-	window menu clear // Assuming that no one else installs 
+	window menu clear // Assuming that no one else installs dialog boxes into the menubar. If this assumption is wrong then the code will be changed.
 	window menu append submenu "stUserStatistics"  "SGPV"
 	window menu append item "SGPV" "SGPV (Main command) (&sgpv)" "db sgpv" 
 	window menu append item "SGPV" "SGPV Value Calculations (sgp&value)" "db sgpvalue"

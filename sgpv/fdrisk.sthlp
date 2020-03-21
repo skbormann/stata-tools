@@ -1,12 +1,15 @@
 {smcl}
-{* *! version 0.96  15 Mar 2020}{...}
+{* *! version 0.97  21 Mar 2020}{...}
+{viewerdialog fdrisk "dialog fdrisk"}{...}
 {vieweralsosee "" "--"}{...}
-{vieweralsosee "Install command2" "ssc install command2"}{...}
-{vieweralsosee "Help command2 (if installed)" "help command2"}{...}
+{vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
+{vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
+{vieweralsosee "SGPV Power Calculations" "help sgpower"}{...}
+{vieweralsosee "SGPV Plot Interval Estimates" "help plotsgpv"}{...}
 {viewerjumpto "Syntax" "fdrisk##syntax"}{...}
 {viewerjumpto "Description" "fdrisk##description"}{...}
 {viewerjumpto "Options" "fdrisk##options"}{...}
-{viewerjumpto "Remarks" "fdrisk##remarks"}{...}
+{* viewerjumpto "Remarks" "fdrisk##remarks"}{...}
 {viewerjumpto "Examples" "fdrisk##examples"}{...}
 {title:Title}
 {phang}
@@ -16,15 +19,16 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:fdrisk}
-[{cmd:,}
-{it:options}]
+{cmd:,} nulllo(string) nullhi(string) stderr(#) inttype(string) intlevel(string) nullspace(string) nullweights(string) altspace(string) altweights(string)
+[{it:pi0(#)}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{synopt:{opt nullhi(string)}}  the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
+{synopt:{opt sgpv:al(#)}}  the observed second-generation {it:p}-value.{p_end}
 {synopt:{opt nulllo(string)}}  the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
+{synopt:{opt nullhi(string)}}  the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
 {synopt:{opt std:err(#)}}  standard error of the point estimate.{p_end}
 {synopt:{opt intt:ype(string)}}  class of interval estimate used.{p_end}
 {synopt:{opt intl:evel(string)}}  level of interval estimate. {p_end}
@@ -32,8 +36,7 @@
 {synopt:{opt nullw:eights(string)}}  probability distribution for the null parameter space.{p_end}
 {synopt:{opt alts:pace(string)}}  support for the alternative probability distribution.{p_end}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space. {p_end}
-{synopt:{opt sgpv:al(#)}}  the observed second-generation {it:p}-value.{p_end}
-{synopt:{opt pi0(#)}}  prior probability of the null hypothesis.{p_end}
+{synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}
@@ -60,17 +63,20 @@ If {it:"TruncNormal"} is used for {it:"nullweights"}, then the distribution used
 and standard deviation equal to {it:"stderr"}, truncated to the support of {it:"nullspace"}. 
 If {it:"TruncNormal"} is used for {it:"altweights"}, then the distribution used is a truncated Normal distribution with mean equal to the midpoint of {it:"altspace"}, 
 and standard deviation equal to {it:"stderr"}, truncated to the support of {it:"altspace"}. 
-Further customization of these parameters for the truncated Normal are currently not possible, 
+Further customization of these parameters for the truncated Normal distribution are currently not possible, 
 although they may be implemented in future versions.{p_end}
 
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt nullhi(string)}     the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.
+{opt sgpv:al(#)}  the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.
 
 {phang}
 {opt nulllo(string)}     the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.
+
+{phang}
+{opt nullhi(string)}     the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.
 
 {phang}
 {opt std:err(#)}     standard error of the point estimate.
@@ -83,48 +89,50 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 {opt intl:evel(string)}     level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
 
 {phang}
-{opt nulls:pace(string)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is one number. 
-If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space.
+{opt nulls:pace(string asis)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is one number. 
+If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space. These numbers can be also formulas which must enclosed in " "
 
 {phang}
 {opt nullw:eights(string)}     probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
 
 {phang}
-{opt alts:pace(string)}  support for the alternative probability distribution. 
-If "altweights" is "Point", then "altspace" is one number. If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.
+{opt alts:pace(string asis)}  support for the alternative probability distribution. 
+If "altweights" is "Point", then "altspace" is one number. If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space.
+These numbers can be also formulas which must enclosed in " "
 
 {phang}
 {opt altw:eights(string)}     probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
 
 {phang}
-{opt sgpv:al(#)}  the observed second-generation {it:p}-value. Default is 0, which gives the false discovery risk. Setting it to 1 gives the false confirmation risk.
-
-{phang}
-{opt pi0(#)}     prior probability of the null hypothesis. Default is 0.5.
+{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive).
 
 {marker examples}{...}
 {title:Examples}
-
-{pstd}{bf:False discovery risk with 95% confidence level:}{p_end}
+ To run the examples copy the lines into a Stata or use the file {view fdrisk-examples.do} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
+{pstd}{bf:False discovery risk with 95% confidence level:} (Click to {stata do fdrisk-examples.do example1:run} the example.){p_end}
 	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) /// 
-		altweights("Uniform") altspace(2-1*invnorm(1-0.05/2)*0.8 2+1*invnorm(1-0.05/2)*0.8) inttype("confidence")  intlevel(0.05) 
+		altweights("Uniform") altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") inttype("confidence")  intlevel(0.05)
+
 		
-	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}{p_end}
+	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata do fdrisk-examples.do example2a:run} the example.){p_end}
 	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0) /// 
-		altweights("Uniform") altspace(2-1*invnorm(1-0.041/2)*0.8 2+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8) 
-
-	{bf:with truncated normal weighting distribution:}
+		altweights("Uniform") altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
+	 
+	
+	{bf:with truncated normal weighting distribution:}(Click to {stata do fdrisk-examples.do example2b:run} the example.)
 	fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("TruncNormal") ///
-		altspace(2-1*invnorm(1-0.041/2)*0.8 2+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8)
+		altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
 
-{pstd}	{bf:False discovery risk with LSI and wider null hypothesis:}{p_end}
+
+{pstd}	{bf:False discovery risk with LSI and wider null hypothesis:}(Click to {stata do fdrisk-examples.do example3:run} the example.){p_end}
 	fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("Uniform") ///
-		altspace(2.5-1*invnorm(1-0.041/2)*0.8 2.5+1*invnorm(1-0.041/2)*0.8)  inttype("likelihood")  intlevel(1/8)
+		altspace("2.5-1*invnorm(1-0.041/2)*0.8" "2.5+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
+ 
 
-{pstd}	{bf:False confirmation risk example:} {p_end}
-	fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform") nullspace(0.01-1*invnorm(1-0.041/2)*0.15 0.01+1*invnorm(1-0.041/2)*0.15) ///
+{pstd}	{bf:False confirmation risk example:}(Click to {stata do fdrisk-examples.do example4:run} the example.) {p_end}
+	fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform") nullspace("0.01 - 1*invnorm(1-0.041/2)*0.15" "0.01 + 1*invnorm(1-0.041/2)*0.15") ///
 		altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5))  inttype("likelihood")  intlevel(1/8)
-
+ 
 
 
 {title:Stored results}
@@ -157,5 +165,5 @@ Further Stata programs and development versions can be found under {browse "http
 
 {title:See Also}
 Related commands:
- {help plotsgpv} {help sgpvalue} {help sgpower} {help sgpv}  
+ {help plotsgpv}, {help sgpvalue}, {help sgpower}, {help sgpv}  
 

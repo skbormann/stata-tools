@@ -1,12 +1,15 @@
 {smcl}
-{* *! version 0.97  13 Mar 2020}{...}
+{* *! version 0.98  19 Mar 2020}{...}
+{viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
-{vieweralsosee "Install command2" "ssc install command2"}{...}
-{vieweralsosee "Help command2 (if installed)" "help command2"}{...}
+{vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
+{vieweralsosee "SGPV Power Calculations" "help sgpower"}{...}
+{vieweralsosee "SGPV False Confirmation/Discovery Risk" "help fdrisk"}{...}
+{vieweralsosee "SGPV Plot Interval Estimates" "help plotsgpv"}{...}
 {viewerjumpto "Syntax" "sgpv##syntax"}{...}
 {viewerjumpto "Description" "sgpv##description"}{...}
 {viewerjumpto "Options" "sgpv##options"}{...}
-{viewerjumpto "Remarks" "sgpv##remarks"}{...}
+{* viewerjumpto "Remarks" "sgpv##remarks"}{...}
 {viewerjumpto "Examples" "sgpv##examples"}{...}
 {title:Title}
 {phang}
@@ -16,31 +19,34 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpv}
-[menuInstall]
+[{help sgpv##menuInstall:menuInstall}]
 [{cmd:,}
-{it:options}]
+{it:options}] [{cmd::} {help sgpv##estimation_command:{it:estimation_command}}]
 
 {synoptset 25 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{synopt:{opt q:uietly}}  suppress the output of the estimation command.
+{p2coldent :* {opt replay}} the default behaviour if no estimation command, matrix or stored estimate is set.
 {p_end}
-{synopt:{opt e:stimate(name)}}  takes the name of a previously stored estimation.
+{p2coldent :* {opt e:stimate(name)}}  takes the name of a previously stored estimation.
 {p_end}
-{synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
-{p_end}
-{synopt:{opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
+{p2coldent :* {opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
 {p_end}
 {synopt:{opt coef:ficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
-{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
-{p_end}
-
-{syntab:Null Interval}
+{* syntab:Null hypothesis}
 {synopt:{opt nulllo(#)}}  change the upper limit of the null-hypothesis interval.
 {p_end}
 {synopt:{opt nullhi(#)}}  change the lower limit of the null-hypothesis interval.
+{p_end}
+
+{syntab:Display}
+{synopt:{opt q:uietly}}  suppress the output of the estimation command.
+{p_end}
+{synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. 
+{p_end}
+{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
 {p_end}
 
 {syntab:Fdrisk}
@@ -56,7 +62,7 @@
 {p_end}
 {synopt:{opt intt:ype(string)}}  class of interval estimate used.
 {p_end}
-{synopt:{opt pi0(#)}}  prior probability of the null hypothesis. Default is 0.5.
+{synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.
 {p_end}
 
 {syntab:menuInstall}
@@ -64,7 +70,16 @@
 {p_end}
 {synoptline}
 {p2colreset}{...}
+{marker estimation_command}{...}
 {p 4 6 2}
+{it:estimation_command} can be any of Stata's or user-provided estimation commands which return their results in a matrix named {it:r(table)}.
+This should be true so long the estimation command runs {help ereturn display:ereturn display} at some point.
+If you want to calculate SGPVs for an estimation command or any other command which does not follow this convention, then you can use the {it: matrix(matrixname)} option. The matrix must be pre-processed to meet the expectations of {cmd:sgpv}.
+ See the description {help sgpv##matrix_opt:here} for more information.
+ 
+ {p 4 6 2}
+ * ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
+ 
 
 {marker description}{...}
 {title:Description}
@@ -74,82 +89,39 @@ The false discovery/confirmation risks (fdr/fcr) can be also reported.
 The SGPVs are reported alongside the usually reported p-values. {break}
 An ordinary user should use this command and not other commands on which {cmd:sgpv} is based upon. 
 {cmd:sgpv} uses sensible default values for calculating the SGPVs and the accompaning fdr/fcr, which can be changed.  
-This wrapper command runs the commands translated into Stata, which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}. 
+This wrapper command runs commands which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}. 
 This package comes also with the example leukemia dataset from {browse "https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)"}.{break}
 Dialog boxes for each command are also provided to make the usage of the commands easier.
 The dialog boxes can be installed into the User menubar. 
 See {help sgpv##menuInstall:this example} for how to do it.{p_end}
 
 {pstd}
-The formulas below are taking from the help-files of {helpb sgpvalue} and {helpb fdrisk}.
-An example about how to interpret the results is given in the {help sgpv##examples:example section} .
-{p_end}
-
- {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
-{col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
-	{col 10}				    = 1/2*|I ∩ H_0|/|I| 	when |I|> 2|H_0| 
-		{col 10}			  with I = {θ_l,θ_u} and |I|= θ_u - θ_l.  
-								 
-{pstd}								 
-θ_u and θ_l are typically the upper and lower bound of a (1-α)100% confidence interval but any other interval estimate is also possible. {break}
-H_0 is the null hypothesis and |H_0| its length. {break}
-The null hypothesis should be an interval which contains all effects that are not scientifically relevant. {break}
-The p-values reported by most of Stata's estimation commands are based on the null hypothesis of exactly 0. {break}
-Point null-hypothesis are supported by SGPVs, but they are discouraged. 
-See answer 11 in the {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s002&type=supplementary":Frequently asked questions} to Blume et al. (2018).
-You could set a small null-hypothesis interval which includes effects of less than 1% or 0.1%. The exact numbers depend on what you deem a priori as not scientifically relevant.
-
-{pstd}
-p_δ lies between 0 and 1. {break}
-A p_δ of 0 indicates that 0% of the null hypotheses are compatible with the data.  {break} 
-A p_δ of 1 indicates that 100% of the null hypotheses are compatible with the data. {break}
-A p_δ between 0 and 1 indicates inconclusive evidence. {break}
-A p_δ of 1/2 indicates strictly inconclusive evidence.  {break} 
-
-{pstd}
 For more information about how to interpret the SGPVs and other common questions, 
 see {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s002&type=supplementary":Frequently Asked Questions} by Blume et al. (2018).
+An example of how to interpret the result from {cmd:sgpv} can be found in the {help sgpv##interpretation_example:examples section} of this help file.{p_end}
 
 {pstd}
-The delta-gap is have a way of ranking two studies that both have second-generation p-values of zero (p_δ = 0). 
-It is defined as the distance between the intervals in δ units with δ being the half-width of the interval null hypothesis.{p_end}
-
-		The delta-gap is calculated as: gap   	  = max(θ_l, H_0l) - min(H_0u, θ_u) 
-						delta 	  = |H_0|/2 
-						delta.gap = gap/delta 
-								
-	For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
-	Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. 
-	If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. 
-	If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.
-	
-	
-		The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
-		The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
-		with r = P(H_1)/P(H_0) being the prior probability.	
-		See equation(4) in Blume et.al.(2018)
-
-{pstd}
+The formulas for the Second-Generation P-Values can be found {help sgpv##formulas:here}.{p_end}
 
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt q:uietly}     suppress the output of the estimation command.
+{opt replay} the default behaviour if no estimation command, matrix or stored estimate is set. 
+There is {bf:no} explicit replay option but instead {cmd:sgpv} behave like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
+At the moment, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
+To see the results from a previous run of {cmd:sgpv} without recalculation, you can run something like {stata matlist r(comparison)}.
+This works only if no other commands did run after {cmd:sgpv}.
+
+{phang} ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
 
 {phang}
 {opt e:stimate(name)}     takes the name of a previously stored estimation.
 
 {phang}
-{opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
-
-{phang}
 {opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
 The selected coefficients need to have the same names as displayed in the estimation output.
 Multiple coefficients must be separated with a space.
-
-{phang}
-{opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
 
 {phang}
 {marker matrix_opt}
@@ -162,25 +134,38 @@ To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {brea
 Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}.
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
-{dlgtab:Null Hypothesis}
+
 {phang}
 {opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
 
 {phang}
 {opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
 
-{dlgtab:Fdrisk}
+{dlgtab:Display}
 {phang}
-{opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal".
+{opt q:uietly}     suppress the output of the estimation command.
+
+{phang}
+{opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
+
+{phang}
+{opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
+
+{dlgtab:Fdrisk}
+{pstd}These options are only needed for the calculations of the False Confirmation/Discovery Risk. The default values should give sensible results in most situations.{p_end}
+
+{phang}
+{opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal". The default is "Uniform".
 
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution.  
-If "altweights" is "Uniform" or "TruncNormal", then "altspace" are two numbers separated by a space.
+If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space. These numbers can be also formulas which must be enclosed in " ".
 
 {phang}
 {opt nulls:pace(string)}  support of the null probability distribution. 
 If "nullweights" is "Point", then "nullspace" is a single number. 
-If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" are two numbers separated by a space.
+If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" contains two numbers separated by a space. 
+These numbers can be also formulas which must be  enclosed in " ".
 
 {phang}
 {opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
@@ -188,13 +173,17 @@ The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set
 If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".
 
 {phang}
-{opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
+{opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k). The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. 
 
 {phang}
-{opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval. The default is "confidence".
+{opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. 
+Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval. 
+The default is "confidence".
 
 {phang}
-{opt pi0(#)}     prior probability of the null hypothesis. Default is 0.5.
+{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
+A prior probability outside of this interval is not sensible. 
+The default value assumes that both hypotheses are equally likely.
 
 {dlgtab: menuInstall}
 {phang}
@@ -203,8 +192,9 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
 {marker examples}{...}
 {title:Examples}
 {* pstd}
-  {stata sysuse auto, clear}
 
+  {stata sysuse auto, clear}
+{marker prefix}{...}
   Usage of {cmd:sgpv} as a prefix-command:
   {stata "sgpv: regress price mpg weight foreign"} 
   
@@ -229,14 +219,14 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
   
   Comparison of ordinary P-Values and Second Generation P-Values
   
-     Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
-  -------------+-------------------------------------------------------
-  	   mpg |  .7692938         .5          .          .          . 
-        weight |  5.99e-07          0   2.206717    .047926          . 
-       foreign |  9.72e-07          0   2308.909   .0480251          . 
-         _cons |  .0874262         .5          .          .          . 
+       Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
+    -------------+-------------------------------------------------------
+    	     mpg |  .7692938         .5          .          .          . 
+          weight |  5.99e-07          0   2.206717    .047926          . 
+         foreign |  9.72e-07          0   2308.909   .0480251          . 
+           _cons |  .0874262         .5          .          .          . 
    
-  
+  {marker interpretation_example}{...}
   Interpretation: There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
   Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
   This is the standard null-hypothesis of no effect.	
@@ -267,12 +257,14 @@ If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, th
 	{stata sgpv, estimate(priceqreg) coefficient("foreign")}
 
 {marker leukemia-example}{...}
-  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code}):
+  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here}):
 	{stata do sgpv-leukemia-example.do}
 	
     This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
     Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
-    You can run {stata display `=c(matsize)'} to see your current setting.
+    You can run {stata display c(matsize)} to see your current setting.
+
+
     
 {marker menuInstall}{...}
 {* phang}
@@ -285,6 +277,56 @@ Besides its own calculations, {cmd:sgpv} also preserves the returned results fro
 {p2col 5 15 19 2: Matrices}{p_end}
 {synopt:{cmd:r(comparison)}}  a matrix containing the displayed results {p_end}
 
+{marker formulas}{...}
+{title:Formulas & Interpretation}
+{pstd}
+The formulas below are taking from the help-files of {helpb sgpvalue} and {helpb fdrisk}.
+An example about how to interpret the results is given in the {help sgpv##interpretation_example:example section} .
+{p_end}
+
+ {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
+{col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
+	{col 10}				    = 1/2*|I ∩ H_0|/|I| 	when |I|> 2|H_0| 
+		{col 10}		      with I = {θ_l,θ_u} and |I|= θ_u - θ_l.  
+								 
+{pstd}								 
+θ_u and θ_l are typically the upper and lower bound of a (1-α)100% confidence interval but any other interval estimate is also possible. {break}
+H_0 is the null hypothesis and |H_0| its length. {break}
+The null hypothesis should be an interval which contains all effects that are not scientifically relevant. {break}
+The p-values reported by most of Stata's estimation commands are based on the null hypothesis of a parameter being exactly 0. {break}
+Point null-hypothesis are supported by SGPVs, but they are discouraged. 
+See answer 11 in the {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s002&type=supplementary":Frequently asked questions} to Blume et al. (2018).
+You could set a small null-hypothesis interval which includes effects of less than 1% or 0.1%. The exact numbers depend on what you deem a priori as not scientifically relevant.
+
+{pstd}
+p_δ lies between 0 and 1. {break}
+A p_δ of 0 indicates that 0% of the null hypotheses are compatible with the data.  {break} 
+A p_δ of 1 indicates that 100% of the null hypotheses are compatible with the data. {break}
+A p_δ between 0 and 1 indicates inconclusive evidence. {break}
+A p_δ of 1/2 indicates strictly inconclusive evidence.  {break} 
+
+{pstd}
+For more information about how to interpret the SGPVs and other common questions, 
+see {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s002&type=supplementary":Frequently Asked Questions} by Blume et al. (2018).
+
+{pstd}
+The delta-gap is have a way of ranking two studies that both have second-generation p-values of zero (p_δ = 0). It is defined as the distance between the intervals in δ units with δ being the half-width of the interval null hypothesis.{p_end}
+
+		The delta-gap is calculated as: gap   	  = max(θ_l, H_0l) - min(H_0u, θ_u) 
+						delta 	  = |H_0|/2 
+						delta.gap = gap/delta 
+								
+    For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
+    Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. 
+    If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. 
+    If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.
+		
+    The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
+    The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
+    with r = P(H_1)/P(H_0) being the prior probability.	
+    See equation(4) in Blume et.al.(2018)
+
+{pstd}
 
 {title:References}
 {pstd}
@@ -309,5 +351,5 @@ Further Stata programs and development versions can be found under {browse "http
 
 {title:See Also}
 Related commands:
- {help plotsgpv} {help sgpvalue} {help sgpower} {help fdrisk}  
+ {help plotsgpv}, {help sgpvalue}, {help sgpower}, {help fdrisk}  
 

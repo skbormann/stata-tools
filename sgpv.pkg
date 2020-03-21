@@ -16,27 +16,28 @@ d
 d Requires: Stata 12.0
 d Author: Sven-Kristjan Bormann
 d Support: email sven-kristjan@gmx.de
-d Distribution-Date: 20200319
+d Distribution-Date: 20200321
 d
 d 
 d License: MIT
 d 
-f fdrisk.ado
-f plotsgpv.ado
-f sgpower.ado
-f sgpv.ado
-f sgpvalue.ado
-f fdrisk.sthlp
-f plotsgpv.sthlp
-f sgpower.sthlp
-f sgpv.sthlp
-f sgpvalue.sthlp
-f sgpvalue.dlg
-f fdrisk.dlg
-f plotsgpv.dlg
-f sgpower.dlg
-f sgpv.dlg
-F leukstats.dta
-f sgpv-leukemia-example.do
-f sgpower-plot-example.do
-* f sgpvalue-examples.do
+f sgpv/fdrisk.ado
+f sgpv/plotsgpv.ado
+f sgpv/sgpower.ado
+f sgpv/sgpv.ado
+f sgpv/sgpvalue.ado
+f sgpv/fdrisk.sthlp
+f sgpv/plotsgpv.sthlp
+f sgpv/sgpower.sthlp
+f sgpv/sgpv.sthlp
+f sgpv/sgpvalue.sthlp
+f sgpv/sgpvalue.dlg
+f sgpv/fdrisk.dlg
+f sgpv/plotsgpv.dlg
+f sgpv/sgpower.dlg
+f sgpv/sgpv.dlg
+F sgpv/leukstats.dta
+f sgpv/fdrisk-examples.do
+f sgpv/sgpv-leukemia-example.do
+f sgpv/sgpower-plot-example.do
+f sgpv/plotsgpv-leukemia-example.do

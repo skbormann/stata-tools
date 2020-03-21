@@ -1,6 +1,7 @@
 *!Based on the R-code for the sgpvalue function from the sgpv-package from https://github.com/weltybiostat/sgpv
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 *!				Fixed a bug with the nodeltagap-option.
+*!				Added more examples from the R-code (as a do-file).
 *!Version 0.98 : Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes
 *!Version 0.95a: Fixed some issues in the documentation.
 *!Version 0.95 : Added support for using variables as inputs for options esthi() and estlo(); Added Mata function for SGPV calculations in case c(matsize) is smaller than the input vectors; 
@@ -14,7 +15,7 @@
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax, esthi(string) estlo(string) nullhi(string) nulllo(string)  [nowarnings infcorrection(real 1e-5) nodeltagap nomata noshow replace ] 
+syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings infcorrection(real 1e-5) nodeltagap nomata noshow replace ] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
@@ -46,7 +47,7 @@ syntax, esthi(string) estlo(string) nullhi(string) nulllo(string)  [nowarnings i
 
 *Potential Errors
 if `:word count `nullhi'' != `: word count `nulllo''{
-	disp as error " `"nullhi"' and `"nulllo"' are of different length "
+	disp as error " `"nullhi"' and `"nulllo"' are of different length."
 	exit 198
 }
 
@@ -96,7 +97,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 	*mat colnames `results' = "New_P-Values" "Delta_Gap"
 	*if "`altlabel'"=="altlabel" 	
 	mat colnames `results' = "SGPV" "Delta-Gap"
-	***Iterate over all intervalls to implement a parallel max and min function as in R-code
+	***Iterate over all intervalls to implement a parallel max and min function as in the R-code
 	forvalues i=1/`estint'{
 		*Reset some macros
 		local est_len
@@ -142,14 +143,14 @@ else{	// Run if rows less than matsize -> the "original" approach
 				if (`est_len'<0  ) & (`null_len'<0){
 					disp as error "The `i'th interval length is negative." 
 				}
-				*if isinfinite(abs(`est_len'))+abs(`null_len'){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
+				*if isinfinite(abs(`est_len')+abs(`null_len')){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
 				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
 					disp as error "The `i' th interval has infinite length."
 				}
 				
 				
 				if (`est_len'==0 | `null_len'==0 ) {
-					disp as error "The `i'th interval has a zero length  ."
+					disp as error "The `i'th interval has a zero length."
 				}
 		
 		}
@@ -327,7 +328,6 @@ mata:
 void function sgpv(string varlist, string sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection){ 
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta-Gaps if the desired matrix size is too large for Stata
-Still rather slow for the leukemia example dataset with more than 7000 p-values to calculate
 Might have to change the way missing values are handled -> For now they are treated as meaning infinite.
 */
 	real matrix Sgpv

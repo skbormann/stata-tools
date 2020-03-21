@@ -1,5 +1,6 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
+*!Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
 *!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
 *!Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
 *!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
@@ -13,30 +14,32 @@ capture program drop fdrisk
 
 program define fdrisk, rclass
 version 12.0
-syntax, nullhi(string) nulllo(string) STDerr(real) INTType(string) INTLevel(string) ///
-		NULLSpace(string) NULLWeights(string) ALTSpace(string) ALTWeights(string) ///
-		[SGPVal(integer 0) pi0(real 0.5)]
+syntax, nulllo(string) nullhi(string) STDerr(real) INTType(string) INTLevel(string) ///
+		NULLSpace(string asis) NULLWeights(string) ALTSpace(string asis) ALTWeights(string) ///
+		[SGPVal(integer 0) Pi0(real 0.5)]
 *Syntax parsing
 local integrate nomataInt
 
 if !inlist(`sgpval',0,1){
-	stop "Only values 0 and 1 allowed for the option 'sgpval'"
-	
+	stop "Only values 0 and 1 allowed for the option 'sgpval'"	
 }
 
 if !inlist("`inttype'", "confidence","likelihood"){
-	stop "Parameter intervaltype must be one of the following: confidence or likelihood "
+	stop "Option intervaltype must be one of the following: confidence or likelihood "
 	
 }
 
 if !inlist("`nullweights'", "Point", "Uniform", "TruncNormal"){
-	stop "Parameter nullweights must be one of the following: Point, Uniform or TruncNormal"
+	stop "Option nullweights must be one of the following: Point, Uniform or TruncNormal."
 }
 
 if !inlist("`altweights'", "Point", "Uniform", "TruncNormal"){
-	stop "Parameter altweights must be one of the following: Point, Uniform or TruncNormal"
+	stop "Option altweights must be one of the following: Point, Uniform or TruncNormal."
 }
 
+if !(`pi0'>0 & `pi0'<1){
+	stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
+}
 
 *Code taken from sgpower.ado -> in R-code things are handled directly by the sgpower() function. This would be only possible in Mata in the same way.
 local intlevel = `intlevel' 

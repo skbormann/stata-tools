@@ -1,6 +1,6 @@
 /*
-plotsgpv dialog version 0.98, 15.03.2020, Sven-Kristjan Bormann
-for plotsgpv version 0.98
+plotsgpv dialog version 0.98a, 15.03.2020, Sven-Kristjan Bormann
+for plotsgpv version 0.98a
 
 To install in User Statistics menu via Stata commands:
   
@@ -49,24 +49,24 @@ BEGIN
 	sgpv
 END
 
-DIALOG main, label("Plotsgpv 0.98 - Plotting SGPVs") tabtitle("Main")
+DIALOG main, label("Plotsgpv 0.98a - Plotting SGPVs") tabtitle("Main")
 BEGIN
-	GROUPBOX gb_est	 	_lft  _top  220    110, label("Estimated Interval") 
+	GROUPBOX gb_est	 	_lft  _top  400    110, label("Estimated Interval") 
 	TEXT tx_estlo 		+10   _ss   80      ., label("Lower Bound") 
-	EXP ex_estlo	 	@     _ss   200     ., option(estlo) label("Expression") /// 
+	EXP ex_estlo	 	@     _ss   380     ., option(estlo) label("Expression") /// 
 										   	tooltip("Set lower bound of the estimated interval") error(Lower Bound estimated interval)
 										   
 	TEXT tx_esthi	 	20   +20    80      ., label("Upper Bound")
-	EXP ex_esthi	 	@ 	 _ss    200     ., option(esthi) label("Expression") ///
+	EXP ex_esthi	 	@ 	 _ss    380     ., option(esthi) label("Expression") ///
 										   	tooltip("Set upper bound of the estimated interval") error(Upper Bound estimated interval)
 										   
-	GROUPBOX gb_null   _lft  +40    220    110, label("Null-Hypothesis Interval")
+	GROUPBOX gb_null   _lft  +40    400    110, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 		+10  _ss    80       ., label("Lower Bound") 
-	EXP ex_nulllo		@    _ss    200      ., label("Expression")  option(nulllo) ///
+	EXP ex_nulllo		@    _ss    380      ., label("Expression")  option(nulllo) ///
 										   	tooltip("Set lower bound of the null-hypothesis interval") error(Lower Bound null-hypothesis interval)
 										   
 	TEXT tx_nullhi 		20   +20     80      ., label("Upper Bound")
-	EXP ex_nullhi	 	@	 _ss    200      ., label("Expression") option(nullhi) ///
+	EXP ex_nullhi	 	@	 _ss    380      ., label("Expression") option(nullhi) ///
 										   	tooltip("Set upper bound of the null-hypothesis interval") error(Upper Bound null-hypothesis interval)
 END
 
@@ -137,11 +137,11 @@ BEGIN
 	EDIT 	ed_xshow 	+100	@		100	.,option(xshow) numonly ///
 											tooltip("A number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.")	
 	TEXT	tx_nullpt	20		_ls		80	.,label("Null point:")
-	EDIT 	ed_nullpt 	+100	@		40	.,option(nullpt) numonly default(0) ///
-											tooltip("A number representing a point null hypothesis. Default is 0. If set, the command will draw a horizontal dashed red line at this location.")
+	EDIT 	ed_nullpt 	+100	@		40	.,option(nullpt) numonly ///
+											tooltip("A number representing a point null hypothesis. If set, the command will draw a horizontal dashed red line at this location.")
 	
 	TEXT 	tx_twoway 	20 		_ls		100		.,label("Additional plotting options:")
-	EDIT 	ed_twoway 	+100 	@		250		.,option(twoway_opt) tooltip("Any additional options for the plotting")
+	EDIT 	ed_twoway 	+100 	@		250		.,option(twoway_opt) tooltip("Any additional options for the plotting. Any option set here may override the default options")
 	BUTTON  bu_twoway   +255	@  		40 	.,label("Help") onpush("view help twoway")
 	
 		
@@ -232,7 +232,7 @@ BEGIN
 		option options.ck_noshow
 		
 		put " " /program setorder_output
-		optionarg options.ed_xshow
+		optionarg /oquoted options.ed_xshow
 		optionarg options.ed_nullpt
 		optionarg /asis options.ed_twoway
 		

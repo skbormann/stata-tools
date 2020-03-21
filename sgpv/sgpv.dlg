@@ -1,6 +1,7 @@
 /*
 Draft of a dialog box for SGPV
-To-Do: Add additional input checks for nullweights and altweighs to allow only certain inputs for nullspace and altspace
+To-Do/Further improvements: 	Add additional input checks for nullweights and altweighs to allow only certain inputs for nullspace and altspace
+								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 */
 /*
 sgpv dialog version 0.98, 19.03.2020, Sven-Kristjan Bormann
@@ -14,7 +15,7 @@ To install in User Statistics menu via Stata commands:
 
 To permanently install, place the commands in your -profile.do- file.
 
-*The color setting does not work yet
+
 */
 
 VERSION 12.0
@@ -45,6 +46,7 @@ END
 
 LIST nobonus_values
 BEGIN
+	none // a filler option introduced to have a default option for the dropdownlist
 	deltagap
 	fdrisk
 	all
@@ -52,6 +54,7 @@ END
 
 LIST nobonus_list
 BEGIN
+	None
 	Delta-Gap
 	False discovery/confirmation risk
 	Both
@@ -60,9 +63,12 @@ END
 
 LIST nobonus_action
 BEGIN
-	 script fdrisk_on 
-	 script fdrisk_off
-	 script fdrisk_off
+	script fdrisk_on
+	script fdrisk_on	 
+	script fdrisk_off
+	script fdrisk_off
+	  
+
 END
 
 LIST inttype_list
@@ -75,14 +81,16 @@ END
 DIALOG main, label("sgpv 0.98 - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
-	GROUPBOX gp_calcfor 		5 	5 		410 	110,label("Calculate SGPVs for:")
-	RADIO 	r1 				_lft	20		50 		.,first label("Replay") onclickon(script replay_on) ///
+	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
+	RADIO 	r1 				_lft	20		50 		., first label("Replay") onclickon(script replay_on) ///
 													tooltip("Replay the previous estimation command and calculate the SGPVs and bonus statistics for it")
-	RADIO 	r2 				+70		@ 	 	150 	., 	middle label("Stored Estimate") onclickon(script estimate_on)
+	RADIO 	r2 				+70		@ 	 	150 	., 	middle label("Stored Estimate") onclickon(script estimate_on) ///
+														tooltip("Calculate SGPVs for a previously stored estimate.")
 	COMBOBOX cb_estimate 	80	 	_ss	 	150		., dropdown content(estimates) option(estimate)
 
 	RADIO 	r3 				+180 	20	 	@ 		., middle label("Matrix") onclickon(script matrix_on)
-	COMBOBOX cb_matrix	 	@ 		_ss 	150	 	., dropdown content(matrix) option(matrix)
+	COMBOBOX cb_matrix	 	@ 		_ss 	150	 	., dropdown content(matrix) option(matrix) ///
+														tooltip("The selected needs to have the same layout as the matrix r(table) which is returned by Stata estimation commands. See the help file for more information.")
 	RADIO 	r4  			10 		_ls 	150		 ., last label("Estimation command") onclickon(script cmd_on) ///
 														tooltip("Enter the estimation command for which you want to calculate the SGPVs and bonus statistcs.")
 	EDIT ed_cmd 			@ 		_ss 	400 	., label(resource LBL_STATA_COMMAND_TO_RUN) 
@@ -93,7 +101,7 @@ BEGIN
 	TEXT tx_coefficient 	@ 		_ss		@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP)
 	TEXT tx_coefficient2 	@ 		_vss 	@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP2)
 	
-	GROUPBOX gb_null 		5 		_ls 	190 	80,label("Null-Hypothesis Interval")
+	GROUPBOX gb_null 		5 		_ls 	190 	80, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 
 	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) numonly
 	
@@ -113,7 +121,8 @@ BEGIN
 	BUTTON bu_matlist 		+320	@ 		60 		., label("Help") onpush("view help matlist") 
 			
 	TEXT tx_nobonus 		10 		_ss 	150 	., label("Deactivate Bonus Statistics:")
-	COMBOBOX cb_nobonus 	10 		_ss 	180 	., dropdown content(nobonus_list) values(nobonus_values) option(nobonus) tooltip("Deactivate") ///
+	COMBOBOX cb_nobonus 	10 		_ss 	180 	., dropdownlist content(nobonus_list) values(nobonus_values) option(nobonus) default(none)  ///
+														tooltip(Deactivate the display and calculation of the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then all bonus statistcs are calculated and displayed.) ///
 														onselchangelist(nobonus_action) 
 	
 END
@@ -121,27 +130,29 @@ END
 DIALOG fdrisk, tabtitle("Fdrisk options")
 BEGIN
 	//FRAME fr_nullspace		5 	5		410		110				
-	TEXT tx_nullspace      10    10    100    ., label("Nullspace:")
-	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression")
+	TEXT tx_nullspace      10    10    200    ., label("Null hypothesis parameter space:")
+	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
 	
-	TEXT tx_nullweights     10    _ls    @    ., label("Nullweights:")
-	COMBOBOX cb_nullweights @    _ss     100    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights)
+	TEXT tx_nullweights     10    _ls    150    ., label("Null hypothesis distribution:")
+	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
+													tooltip("The probability distribution for the null parameter space.")
 	
 	//FRAME fr_altspace		5  	+20		410		120
-	TEXT tx_altspace     	10   _ls      @    ., label("Altspace:")
-	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression")
+	TEXT tx_altspace     	10   _ls      200    ., label("Alternative hypothesis parameter space:")
+	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution")
 	
-	TEXT tx_altweights      @   _ls      100    ., label("Altweights:")
-	COMBOBOX cb_altweights  @   _ss      @    ., dropdown content(altweights_list) option(altweights) error(Altweights)
+	TEXT tx_altweights      @   _ls      200    ., label("Alternative hypothesis distribution:")
+	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
+												tooltip("Probability distribution for the alternative parameter space")
 	
 	TEXT tx_inttpye       	@  _xxls      @    ., label("Interval type:")
-	COMBOBOX cb_inttype     @  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) 
+	COMBOBOX cb_inttype     @  _ss      @    ., dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
 	
 	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
-	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level)
+	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level) default(0.05)
 	
 	TEXT tx_pi0           +150  -70     120   ., label("Prior probability of H0:")
-	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly
+	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
 	
 END
@@ -215,15 +226,15 @@ BEGIN
 		option display.ck_quiet
 		
 		optionarg display.ed_matlist
-		optionarg display.cb_nobonus
+		optionarg /hidedefault display.cb_nobonus
 		
 		optionarg fdrisk.ex_nullspace
-		optionarg fdrisk.cb_nullweights 
+		optionarg /hidedefault fdrisk.cb_nullweights 
 		optionarg fdrisk.ex_altspace
-		optionarg fdrisk.cb_altweights 
-		optionarg fdrisk.cb_inttype 
-		optionarg fdrisk.ed_intlevel
-		optionarg fdrisk.ed_pi0
+		optionarg /hidedefault fdrisk.cb_altweights 
+		optionarg /hidedefault fdrisk.cb_inttype 
+		optionarg /hidedefault fdrisk.ed_intlevel
+		optionarg /hidedefault fdrisk.ed_pi0
 	endoptions
 END
 
