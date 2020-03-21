@@ -34,17 +34,17 @@ local nullcoldefault 208 216 232
 ***Input parsing
 *Need additional checks and conversions of matrix names  to work with the example in the R-code
 if `:word count `nullhi'' != `: word count `nulllo''{
-	disp as error " `"nullhi"' and `"nulllo"' are of different length "
+	disp as error `" Options "nullhi" and "nulllo" are of different length. "'
 	exit 198
 }
 
 if `:word count `esthi'' != `: word count `estlo''{
-	disp as error " `"esthi"' and `"estlo"' are of different length. "
+	disp as error `" Options "esthi"' and "estlo" are of different length. "'
 	exit 198
 }
 
 if `:word count `nullhi'' !=  1 |`: word count `nulllo'' !=1{
-	disp as error " null.lo and null.hi must be scalars "
+	disp as error `" Options "nulllo" and "nullhi" must be only one number or expression. "'
 	exit 198
 }
 ***Further input parsing
@@ -64,7 +64,7 @@ if `:word count `esthi''==1{
 if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	capture confirm variable `setorder'
 	if _rc{
-		disp as error "No variables found in option 'setorder'. Only variable names or `"sgpv"' are allowed values. "
+		disp as error `"No variables found in option 'setorder'. Only variable names or "sgpv" are allowed values. "'
 		exit 198
 	}
 	else local setorder_var `setorder' // Indicate that variable for sorting got found -> currently needed due to somewhat confusing handling of the setorder option

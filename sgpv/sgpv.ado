@@ -28,10 +28,10 @@ capture  _on_colon_parse `0'
 *Check if anything to calculate is given
 if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !ustrregexm(`"`0'"',"menuInstall") { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem
 	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
-	disp as error "No subcommand found either"
+	disp as error "No subcommand found either."
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
-	disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'm(stored estimate name)' . "
-	disp as error "The only currently available subcommand is `"menuInstall"' "
+	disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'e(stored estimate name)' . "
+	disp as error "The only currently available subcommand is 'menuInstall'."
 	exit 198
 }
 

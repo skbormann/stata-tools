@@ -1,5 +1,6 @@
 *!False discovery rates
 *!Based on the R-code for fdisk.R
+*!Version 0.97a: Made error messages hopefully more understandable.
 *!Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
 *!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
 *!Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
@@ -25,20 +26,20 @@ if !inlist(`sgpval',0,1){
 }
 
 if !inlist("`inttype'", "confidence","likelihood"){
-	stop "Option intervaltype must be one of the following: confidence or likelihood "
+	stop "Option 'inttype' must be one of the following: confidence or likelihood "
 	
 }
 
 if !inlist("`nullweights'", "Point", "Uniform", "TruncNormal"){
-	stop "Option nullweights must be one of the following: Point, Uniform or TruncNormal."
+	stop "Option 'nullweights' must be one of the following: Point, Uniform or TruncNormal."
 }
 
 if !inlist("`altweights'", "Point", "Uniform", "TruncNormal"){
-	stop "Option altweights must be one of the following: Point, Uniform or TruncNormal."
+	stop "Option 'altweights' must be one of the following: Point, Uniform or TruncNormal."
 }
 
 if !(`pi0'>0 & `pi0'<1){
-	stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
+	stop "Values for option 'pi0' need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
 }
 
 *Code taken from sgpower.ado -> in R-code things are handled directly by the sgpower() function. This would be only possible in Mata in the same way.
@@ -90,7 +91,7 @@ if `: word count `altspace''==2{
 	}
     if(`nulllo' == `nullhi')  {
       if "`nulllo'" != "`nullspace'"{
-		disp as error "For a point indifference zone, specification of a different 'nullspace' is not permitted; 'nullspace' set to be " round(`nulllo', 0.01)
+		disp as error "For a point indifference zone, specification of a different 'nullspace' is not permitted; Option 'nullspace' set to be " round(`nulllo', 0.01)
 	  } 
 	  local powerxnull : subinstr local powerx "x" "`nulllo'", all // Need substitution to emulate the parameter passing of R-functions only possible in Mata but in Stata -> Could be reworked by switching over to Mata
       local PsgpvH0 = `powerxnull'
@@ -106,7 +107,7 @@ if `: word count `altspace''==2{
      * * P.sgpv.H0 @ point (=type I error at null.space)
       if("`nullweights'" == "Point")  {
         if(`:word count `nullspace''!=1){
-			stop " 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
+			stop "Option 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
 			
 		} 
 		local powerxnullint : subinstr local powerx "x" "`nullspace'", all
@@ -115,12 +116,12 @@ if `: word count `altspace''==2{
 	 * P.sgpv.H0 averaged: check `null.space` input
 	 if inlist("`nullweights'","Uniform","GBeta","TruncNormal"){
 		if `:word count `nullspace''<2{
-			stop "nullspace must not be a point to use averaging methods. Set nullweights(`"Point"') instead."
+			stop "Option 'nullspace' must not be a point to use averaging methods. Set nullweights(Point) instead."
 			
 		}
 		if `:word count `nullspace''==2{
 			if max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')>`nullhi' | min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')<`nulllo'{
-				disp as error "null space must be inside originally specified null hypothesis; at least one null space bound has been truncated."
+				disp as error "Option 'nullspace' must be inside originally specified null hypothesis specified by options 'nulllo' and 'nullhi'; at least one null space bound has been truncated."
 				
 				if max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')>`nullhi'{
 					local nullspace `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' `nullhi'
@@ -141,7 +142,7 @@ if `: word count `altspace''==2{
 
       *P.sgpv.H0 averaged using generalized beta as weighting distribution function
       if("`nullweights'" == "GBeta") {
-        disp as error "placeholder for future implementation of Generalized Beta null probability distribution"
+        disp as error "A placeholder for future implementation of Generalized Beta null probability distribution"
         local PsgpvH0 .
       }
 	       *P.sgpv.H0 averaged using truncated normal as weighting distribution function
@@ -163,12 +164,12 @@ if `: word count `altspace''==2{
     * P.sgpv.H1 @ point
     if("`altweights'" == "Point")  {
       if(`:word count `altspace''!=1){
-	    stop "alt space must be a vector of length 1 when using a point alternative probability distribution"
+	    stop "Option 'altspace' must be a one number or expression when using a point alternative probability distribution."
 		
 	  }
 	  
       if inrange(`altspace',`nulllo',`nullhi') {
-		stop "alternative space must be outside of the originally specified indifference zone"
+		stop "Option 'altspace' must be outside of the originally specified indifference zone by options 'nulllo' and 'nullhi'."
 	  
 	  } 
 	  local powerxaltpoint : subinstr local powerx "x" "`altspace'", all
@@ -177,10 +178,10 @@ if `: word count `altspace''==2{
 
     * P.sgpv.H1 averaged: check ``altspace'` input
     if inlist("`altweights'" ,"Uniform", "GBeta", "TruncNormal") {
-      if( `:word count `altspace''<2)  stop "alt space must not be a point to use averaging methods"
+      if( `:word count `altspace''<2)  stop "Option 'altspace' must not be a point to use averaging methods."
       if `:word count `altspace''==2  {
-        if(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')' > `nulllo') & (`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')'< `nullhi') stop "alternative space can not be contained inside indifference zone; 'nullspace' and `'altspace' might be flipped"
-        if ((`:word 1 of `altspace'' >`nulllo'| `:word 2 of `altspace''> `nulllo' ) & (`:word 1 of `altspace'' < `nullhi'| `:word 2 of `altspace'' < `nullhi'))  stop "alternative space can not intersect indifference zone" //Not sure if translated correctly
+        if(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')' > `nulllo') & (`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')'< `nullhi') stop "Option 'altspace' can not be contained inside indifference zone specified by options 'nulllo' and 'nullhi'; 'nullspace' and `'altspace' might be flipped."
+        if ((`:word 1 of `altspace'' >`nulllo'| `:word 2 of `altspace''> `nulllo' ) & (`:word 1 of `altspace'' < `nullhi'| `:word 2 of `altspace'' < `nullhi'))  stop "Option 'altspace' can not intersect with the indifference zone specified by options 'nulllo' and 'nullhi'." //Not sure if translated correctly
       }
     }
 
@@ -192,7 +193,7 @@ if `: word count `altspace''==2{
 
     * P.sgpv.H1 averaged using generalized beta as weighting distribution function
     if("`altweights'" == "GBeta") {
-      disp as error "placeholder for future implementation of Generalized Beta null probability distribution"
+      disp as error "A placeholder for future implementation of Generalized Beta null probability distribution"
       local PsgpvH1 .
     }
 
@@ -205,7 +206,7 @@ if `: word count `altspace''==2{
       local truncNormsd = `stderr'
 
      
-	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "'trunNorm.mu' and 'truncNorm.sd' must be numeric."
+	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "Both elements of the option 'altspace' must be numeric or be expressions which evaluate to a number."
 
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
         qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') 

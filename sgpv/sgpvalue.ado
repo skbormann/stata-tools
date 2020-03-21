@@ -47,12 +47,12 @@ syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings 
 
 *Potential Errors
 if `:word count `nullhi'' != `: word count `nulllo''{
-	disp as error " `"nullhi"' and `"nulllo"' are of different length."
+	disp as error `" Options "nullhi" and "nulllo" do not contain the same number of arguments."'
 	exit 198
 }
 
 if `:word count `esthi'' != `: word count `estlo''{
-	disp as error " `"esthi"' and `"estlo"' are of different length. "
+	disp as error `" Options "esthi" and "estlo" do not contain the same number of arguments. "'
 	exit 198
 }
 
@@ -145,7 +145,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 				}
 				*if isinfinite(abs(`est_len')+abs(`null_len')){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
 				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
-					disp as error "The `i' th interval has infinite length."
+					disp as error "The `i'th interval has infinite length."
 				}
 				
 				
