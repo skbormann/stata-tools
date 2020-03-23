@@ -46,7 +46,7 @@
 {p_end}
 {synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
 {p_end}
-{synopt:{opt for:mat({help format:%fmt})}} display format; default is format(%5.4f)
+{synopt:{opth for:mat(%fmt)}} display format; default is format(%5.4f)
 {p_end}
 
 {syntab:Fdrisk}
@@ -155,7 +155,7 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 {opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
 
 {phang}
-{opt for:mat({help %fmt:format})} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
+{opth for:mat(%fmt)} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
 {dlgtab:Fdrisk}
 {pstd}These options are only needed for the calculations of the False Confirmation/Discovery Risk. The default values should give sensible results in most situations.{p_end}
