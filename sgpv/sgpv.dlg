@@ -4,8 +4,8 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 */
 /*
-sgpv dialog version 0.98, 19.03.2020, Sven-Kristjan Bormann
-for sgpv version 0.98
+sgpv dialog version 0.98a, 23.03.2020, Sven-Kristjan Bormann
+for sgpv version 0.98a
 
 To install in User Statistics menu via Stata commands:
   
@@ -78,7 +78,7 @@ BEGIN
 END
 
 
-DIALOG main, label("sgpv 0.98 - Second Generation P-Values") tabtitle("Main")
+DIALOG main, label("sgpv 0.98a - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
@@ -120,13 +120,17 @@ BEGIN
 	
 	TEXT tx_matlist 		10 		_ls 	200 	., label("Further results display options")
 	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt)
-	BUTTON bu_matlist 		+320	@ 		60 		., label("Help") onpush("view help matlist") 
+	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
 	TEXT tx_nobonus 		10 		_ss 	150 	., label("Deactivate Bonus Statistics:")
 	COMBOBOX cb_nobonus 	10 		_ss 	180 	., dropdownlist content(nobonus_list) values(nobonus_values) option(nobonus) default(none)  ///
 														tooltip(Deactivate the display and calculation of the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then all bonus statistcs are calculated and displayed.) ///
 														onselchangelist(nobonus_action) 
-	
+	TEXT     tx_format    	_lft    +35     _iwd    .,   label(resource LBL_FORMAT) 
+	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
+													 tooltip("specifies the format for displaying the individual elements of the result matrix.   This option is NOT identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via matlistopt() overrides the setting here and also changes the format of the column names.")
+	BUTTON   bu_format    340  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
+
 END
 
 DIALOG fdrisk, tabtitle("Fdrisk options")
@@ -157,6 +161,14 @@ BEGIN
 	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
 	
+END
+
+//Copied from format.dlg
+SCRIPT showFormatDialog 
+BEGIN
+        create CHILD format_chooser
+        format_chooser.setExitString formatString
+        format_chooser.setExitAction "main.ed_format.setvalue class formatString.value"
 END
 
 
@@ -229,6 +241,7 @@ BEGIN
 		
 		optionarg display.ed_matlist
 		optionarg /hidedefault display.cb_nobonus
+		optionarg /hidedefault display.ed_format
 		
 		optionarg fdrisk.ex_nullspace
 		optionarg /hidedefault fdrisk.cb_nullweights 

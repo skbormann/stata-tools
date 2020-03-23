@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.98  19 Mar 2020}{...}
+{* *! version 0.98a  23 Mar 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -45,6 +45,8 @@
 {synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. 
 {p_end}
 {synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
+{p_end}
+{synopt:{opt for:mat({help format:%fmt})}} display format; default is format(%5.4f)
 {p_end}
 
 {syntab:Fdrisk}
@@ -132,7 +134,7 @@ Meaning that the parameter estimate has to be in the 1st row, the standard error
 As additional check, the row names of the supplied matrix need to match the rownames of the r(table) matrix.
 The rownames are: b se t pvalue ll ul{break}
 To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {break}
-Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}.
+Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}, if installed.
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
 
@@ -151,6 +153,9 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 
 {phang}
 {opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
+
+{phang}
+{opt for:mat({help %fmt:format})} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
 {dlgtab:Fdrisk}
 {pstd}These options are only needed for the calculations of the False Confirmation/Discovery Risk. The default values should give sensible results in most situations.{p_end}
@@ -194,10 +199,10 @@ The default value assumes that both hypotheses are equally likely.
 {title:Examples}
 {* pstd}
 
-  {stata sysuse auto, clear}
+  {stata . sysuse auto, clear}
 {marker prefix}{...}
   Usage of {cmd:sgpv} as a prefix-command:
-  {stata "sgpv: regress price mpg weight foreign"} 
+  {stata ". sgpv: regress price mpg weight foreign"} 
   
   Example Output:
   		
@@ -245,32 +250,30 @@ The default value assumes that both hypotheses are equally likely.
   
   
   Save estimation for later usage 
-	  {stata estimate store pricereg} 
+	{stata . estimate store pricereg} 
 
   The same result but this time after the last estimation.
-		{stata sgpv} 
-		{stata qreg price mpg weight foreign} 
-		{stata estimates store priceqreg}
+	{stata . sgpv} 
+	{stata . qreg price mpg weight foreign} 
+	{stata . estimates store priceqreg}
 
 {* pstd}
   Calculate sgpvs for the stored estimation and only the foreign coefficient
-	{stata sgpv, estimate(pricereg) coefficient("foreign")} 
-	{stata sgpv, estimate(priceqreg) coefficient("foreign")}
+	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
+	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
 
 {marker leukemia-example}{...}
-  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here}):
-	{stata do sgpv-leukemia-example.do}
+  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed. 
+  If not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here}):
+	{stata . do sgpv-leukemia-example.do}
 	
-    This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
-    Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
-    You can run {stata display c(matsize)} to see your current setting.
-
-
-    
+  This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
+  Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
+  You can run {stata display c(matsize)} to see your current setting.
+ 
 {marker menuInstall}{...}
-{* phang}
-  Install the dialog boxes permanently in the User menubar: User -> Statistics {* p_end}
-	{stata sgpv menuInstall, perm} //	install permanently the dialog boxes into the User menubar. 
+  Install the dialog boxes permanently in the User menubar: User -> Statistics 
+	{stata . sgpv menuInstall, perm}  
 
 {title:Stored results}
 Besides its own calculations, {cmd:sgpv} also preserves the returned results from the estimation command including everything returned in r().

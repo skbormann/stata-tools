@@ -8,7 +8,8 @@
 *!Version 0.90 : Initial Github release
 *!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
 *!		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
-*!		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box
+*!		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box -> make options nullspace_lower and nullspace_upper and the same for altspace available.
+*! 		Make error messages more descriptive and give hints how resolve the problems.
 
 
 capture program drop fdrisk

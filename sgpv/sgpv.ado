@@ -1,4 +1,5 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
 *!Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 *!Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 *!Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
@@ -7,6 +8,10 @@
 
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
+	- Make error messages more descriptive and give hints how resolve the problems.
+	- display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios)
+	- make the output look like it got returned by "ereturn display", especially the p-values are too detailed at the moment, using matlist options does not work as matlist changes the format of all colums and not just the numbers in the colums. 
+	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
 	- support for more commands which do not report their results in a matrix named "r(table)".
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
@@ -15,7 +20,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- Calculate automatically a null interval based on the statistical properties of the dependent variable of an estimation to encourage the usage of interval null-hypotheses.
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	- improve the speed of fdrisk.ado -> probably the integration part takes too long.
-	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent 
+	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
 */
 
 capture program drop sgpv
@@ -42,7 +47,7 @@ if !_rc{
 } 
 
 **Define here options
-syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5) perm debug  /*Display additional messages: undocumented*/] 
+syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5) perm debug  /*Display additional messages: undocumented*/ FORmat(str) /*Undocumented setting to change the numerical accuracy of the displayed results*/] 
 
 ***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
 /* Potential subcommands: value, power, fdrisk, plot
@@ -223,7 +228,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 *The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
 *Removing not estimated coefficients from the input matrix
  forvalues i=1/`coln'{
-	 if `:disp `input'[2,`i']'!=.{ // Check here if the standard error is missing and treat is as indication for a variable to omit.
+	 if !mi(`:disp `input'[2,`i']') /*<. */& !mi(`:disp `input'[4,`i']')/*<.*/ { // Check here if the standard error or the p-value is missing and treat is as indication for a variable to omit.
 		local esthi `esthi' `:disp `input'[6,`i']'
 		local estlo `estlo' `:disp `input'[5,`i']'
 		mat `pval' =(nullmat(`pval')\\`input'[4,`i'])
@@ -231,7 +236,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 
 	 }
  }
-  local rownames : colnames `input_new' //Save the variable names for later display
+  local rownames : colfullnames `input_new' //Save the variable names for later display
 
  
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
@@ -272,10 +277,44 @@ else{
 }
  mat rownames `comp' = `rownames'
 
-matlist `comp' , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
+*Change the format of the displayed matrix
+Format_Display `comp', format(`format')
+ matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
+
+*matlist `comp' , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
 return add
 *Return results
 return matrix comparison =  `comp'
+
+end
+
+*Re-format the input matrix and return a new matrix to circumvent the limitations set by matlist -> using the cspec and rspec options of matlist requires more code to get these options automatically correct -> for now probably not worth the effort.
+program define Format_Display, rclass
+syntax name(name=matrix) [, format(string)]
+	if `"`format'"'==""{
+		local format %5.4f
+		} 
+	else {
+			capture local junk : display `format' 1
+			if _rc {
+					dis as err "invalid %format `format'"
+					exit 120
+			}
+		}
+tempname display_mat
+local display_mat_coln : colfullnames `matrix'
+local display_mat_rown : rowfullnames `matrix'
+mat `display_mat'=J(`=rowsof(`matrix')',`=colsof(`matrix')',.)
+forvalues i=1/`=rowsof(`matrix')'{
+	forvalues j=1/`=colsof(`matrix')'{
+		mat `display_mat'[`i',`j']= `: display `format' `matrix'[`i',`j']'
+	}
+
+}
+mat colnames `display_mat' = `display_mat_coln'
+mat rownames `display_mat' = `display_mat_rown'
+
+return matrix display_mat = `display_mat' 
 
 end
 

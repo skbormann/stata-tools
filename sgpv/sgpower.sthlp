@@ -107,11 +107,11 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 {title:Examples}
 {pstd}
 
-{stata sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
-{stata sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+{stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
 
 Plot the power curve examples (view the {view sgpower-plot-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
-{stata do sgpower-plot-example.do}
+{stata . do sgpower-plot-example.do}
 
 
 {title:Stored results}
