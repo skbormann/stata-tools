@@ -19,6 +19,7 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 0.97a: Made error messages hopefully more understandable.
 * Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details
 * Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
@@ -47,6 +48,11 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
+* Version 0.98a: 
+  *	Displays now the full name of a variable in case of multi equation commands. 
+  * Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); 
+  * Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation.
 * Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 * Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 * Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
@@ -83,6 +89,8 @@ A collection of things that I want to do at some point + some limitations of the
 * The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
 
 ### sgpv
+* Make error messages more descriptive and give hints how resolve the problems.
+* display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios) 
 * support for more commands which do not report their results in a matrix named "r(table)".
 * Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 * Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate

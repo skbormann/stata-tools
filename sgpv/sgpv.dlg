@@ -4,8 +4,8 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 */
 /*
-sgpv dialog version 0.98a, 23.03.2020, Sven-Kristjan Bormann
-for sgpv version 0.98a
+sgpv dialog version 0.99, 23.03.2020, Sven-Kristjan Bormann
+for sgpv version 0.99
 
 To install in User Statistics menu via Stata commands:
   
@@ -56,7 +56,7 @@ LIST nobonus_list
 BEGIN
 	None
 	Delta-Gap
-	False discovery/confirmation risk
+	False discovery risk
 	Both
 END
 

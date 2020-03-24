@@ -181,8 +181,14 @@ if `: word count `altspace''==2{
     if inlist("`altweights'" ,"Uniform", "GBeta", "TruncNormal") {
       if( `:word count `altspace''<2)  stop "Option 'altspace' must not be a point to use averaging methods."
       if `:word count `altspace''==2  {
-        if(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')' > `nulllo') & (`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')'< `nullhi') stop "Option 'altspace' can not be contained inside indifference zone specified by options 'nulllo' and 'nullhi'; 'nullspace' and `'altspace' might be flipped."
-        if ((`:word 1 of `altspace'' >`nulllo'| `:word 2 of `altspace''> `nulllo' ) & (`:word 1 of `altspace'' < `nullhi'| `:word 2 of `altspace'' < `nullhi'))  stop "Option 'altspace' can not intersect with the indifference zone specified by options 'nulllo' and 'nullhi'." //Not sure if translated correctly
+        if (`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')' > `nulllo') & (`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')'< `nullhi') {
+			disp as error "Option 'altspace' can not be contained inside indifference zone specified by options 'nulllo' and 'nullhi'" _n "'nullspace' and `'altspace' might be flipped."
+			disp as error "If you see this message after running the {cmd:sgpv} command, then you need to the set options 'nulllo' and 'nullhi' to " _n " values which are smaller than the lower and upper bound of the smallest confidence interval. "
+			exit 198
+		} 
+        if ((`:word 1 of `altspace'' >`nulllo'| `:word 2 of `altspace''> `nulllo' ) & (`:word 1 of `altspace'' < `nullhi'| `:word 2 of `altspace'' < `nullhi')){
+			stop "Option 'altspace' can not intersect with the indifference zone specified by options 'nulllo' and 'nullhi'." //Not sure if translated correctly
+		}  
       }
     }
 

@@ -16,7 +16,7 @@ d
 d Requires: Stata 12.0
 d Author: Sven-Kristjan Bormann
 d Support: email sven-kristjan@gmx.de
-d Distribution-Date: 20200323
+d Distribution-Date: 20200324
 d
 d 
 d License: MIT
@@ -36,7 +36,7 @@ f sgpv/fdrisk.dlg
 f sgpv/plotsgpv.dlg
 f sgpv/sgpower.dlg
 f sgpv/sgpv.dlg
-F sgpv/leukstats.dta
+f sgpv/leukstats.dta
 f sgpv/fdrisk-examples.do
 f sgpv/sgpv-leukemia-example.do
 f sgpv/sgpower-plot-example.do

@@ -1,4 +1,5 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
 *!Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 *!Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
@@ -10,7 +11,6 @@
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
 	- Make error messages more descriptive and give hints how resolve the problems.
 	- display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios)
-	- make the output look like it got returned by "ereturn display", especially the p-values are too detailed at the moment, using matlist options does not work as matlist changes the format of all colums and not just the numbers in the colums. 
 	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
 	- support for more commands which do not report their results in a matrix named "r(table)".
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
@@ -208,7 +208,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  mat `input' = `inputmatrix'
  return add // save existing returned results 
  
- *Add here code for coefficient selection
+ *Coefficient selection
  if "`coefficient'"!=""{
 	local coefnumb : word count `coefficient'
 	forvalues i=1/`coefnumb'{
@@ -245,21 +245,30 @@ if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr/F
 
 mat `comp'=r(results)
 return add
-*mat colnames `pval' = "Old_P-Values"
  mat colnames `pval' = "P-Value"
 
 
 if "`nofdrisk'"==""{
-*False discovery risks / False confirmation risks -> Need further checks to ensure that the necessary options exist when calling without further arguments
+*False discovery risks 
 	mat `fdrisk' = J(`:word count `rownames'',1,.)
-	*mat colnames  `fdrisk' = Fdr/Fcr
-	*Test alternative layout and presentation of results
-	*if "`altlabel'"=="altlabel"{
-		mat `fdrisk' = J(`:word count `rownames'',2,.)
-		mat colnames  `fdrisk' = Fdr  Fcr
-	*}
+		*mat `fdrisk' = J(`:word count `rownames'',2,.)
+		mat `fdrisk' = J(`:word count `rownames'',1,.)
+		*mat colnames  `fdrisk' = Fdr  Fcr
+		mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
-	if inlist(`=`comp'[`i',1]',0,1){
+	*if inlist(`=`comp'[`i',1]',0,1){
+	if `=`comp'[`i',1]'==0{
+	/*Add here additional checks for non-sensical inputs (according to the fdrisk R-code) like a Null-Hypothesis which is included in the confidence interval -> in theory it makes sense to calculate the Fcr in such case, but Blume et al. do not consider this case 
+	-> shows the limitations of using confidence intervals as support for the alternative hypothesis 
+	-> shows the limitations of calculating Fcr/Fdr automatically after estimation commands
+	-> should consider only reporting Fdr and not Fcr's
+	*/
+	/*if ((`=min(`=`input_new'[5,`i']', `=`input_new'[6,`i']')' > `nulllo') & (`=max(`=`input_new'[5,`i']', `=`input_new'[6,`i']')'< `nullhi')){
+	 local skipped_coef `skipped_coef' `:word `i' of `rownames''
+	 
+	 continue
+	}*/
+	
 		qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
 		if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
 		if "`r(fcr)'"!= "" mat `fdrisk'[`i',2] = `r(fcr)'
@@ -280,6 +289,14 @@ else{
 *Change the format of the displayed matrix
 Format_Display `comp', format(`format')
  matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
+
+/*
+if "`skipped_coef'"!=""{
+	disp _n "Skipped calculations of Fcr/Fdr for the coefficients: `skipped_coef'"
+	disp "These coefficients have confidence intervals which overlap or are contained with the Null-Hypothesis defined" _n "by the options 'nulllo' and 'nullhi'."
+	disp "If you want calculate False Confirmation/Discovery risks for these coefficients" _n "then you have to set the options 'nulllo' and 'nullhi' to values" _n "which are smaller than the lower and upper bound of the smallest confidence interval. "
+}
+*/
 
 *matlist `comp' , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
 return add

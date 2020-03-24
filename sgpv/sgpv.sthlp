@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.98a  23 Mar 2020}{...}
+{* *! version 0.99  24 Mar 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -85,7 +85,7 @@ If you want to calculate SGPVs for an estimation command or any other command wh
 {title:Description}
 {pstd}
 {cmd:sgpv} allows the calculation of the Second-Generation P-Values (SGPV) developed by Blume et.al.(2018,2019) for and after commonly used estimation commands. 
-The false discovery/confirmation risks (fdr/fcr) can be also reported. 
+The false discovery risk (fdr) can be also reported. 
 The SGPVs are reported alongside the usually reported p-values. {break}
 An ordinary user should use this command and not other commands on which {cmd:sgpv} is based upon. 
 {cmd:sgpv} uses sensible default values for calculating the SGPVs and the accompaning fdr/fcr, which can be changed.  
