@@ -1,6 +1,6 @@
 /*
-plotsgpv dialog version 0.98a, 15.03.2020, Sven-Kristjan Bormann
-for plotsgpv version 0.98a
+plotsgpv dialog version 1.00, 15.03.2020, Sven-Kristjan Bormann
+for plotsgpv version 1.00
 
 To install in User Statistics menu via Stata commands:
   
@@ -49,7 +49,7 @@ BEGIN
 	sgpv
 END
 
-DIALOG main, label("Plotsgpv 0.98a - Plotting SGPVs") tabtitle("Main")
+DIALOG main, label("Plotsgpv 1.00 - Plotting SGPVs") tabtitle("Main")
 BEGIN
 	GROUPBOX gb_est	 	_lft  _top  400    110, label("Estimated Interval") 
 	TEXT tx_estlo 		+10   _ss   80      ., label("Lower Bound") 

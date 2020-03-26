@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.92  19 Mar 2020}{...}
+{* *! version 1.00  19 Mar 2020}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -35,6 +35,7 @@
 {p_end}
 {synopt:{opt intl:evel(#)}}  level of interval estimate. 
 {p_end}
+
 {syntab:Further options}
 {synopt:{opt std:err(#)}}  standard error for the distribution of the estimator for the parameter of interest. 
 {p_end}

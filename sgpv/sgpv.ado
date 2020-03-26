@@ -1,4 +1,5 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
 *!Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
@@ -228,7 +229,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 *The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
 *Removing not estimated coefficients from the input matrix
  forvalues i=1/`coln'{
-	 if !mi(`:disp `input'[2,`i']') /*<. */& !mi(`:disp `input'[4,`i']')/*<.*/ { // Check here if the standard error or the p-value is missing and treat is as indication for a variable to omit.
+	 if !mi(`:disp `input'[2,`i']') & !mi(`:disp `input'[4,`i']') { // Check here if the standard error or the p-value is missing and treat it is as indication for a variable to omit.
 		local esthi `esthi' `:disp `input'[6,`i']'
 		local estlo `estlo' `:disp `input'[5,`i']'
 		mat `pval' =(nullmat(`pval')\\`input'[4,`i'])
@@ -240,7 +241,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 
  
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
-if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr/Fcr calculations."
+if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
 
 
 mat `comp'=r(results)

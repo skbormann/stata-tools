@@ -1,6 +1,6 @@
 /*
-sgpower dialog version 0.92, 21.03.2020, Sven-Kristjan Bormann
-for sgpower version 0.92
+sgpower dialog version 1.00, 21.03.2020, Sven-Kristjan Bormann
+for sgpower version 1.00
 
 To install in User Statistics menu via Stata commands:
   
@@ -24,7 +24,7 @@ BEGIN
 	likelihood
 END
 
-DIALOG main, label("Sgpower 0.92 - SGPV Power Calculations") tabtitle("Main")
+DIALOG main, label("Sgpower 1.00 - SGPV Power Calculations") tabtitle("Main")
 BEGIN
 	TEXT tx_true 		20    _top   120    ., label("True value")
 	EDIT ed_true 		 @    _ss    120    ., numonly option(true) error("A true value is required.") tooltip("The true value of a parameter for which the power function should be calculated.")

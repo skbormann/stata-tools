@@ -1,5 +1,6 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
-*!Based on the R-code for plotsgpv.R
+*!Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
 *!				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
 *!				 Now a line is only drawn if set, before it was to 0 as a default and always drawn.	

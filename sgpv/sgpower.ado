@@ -1,4 +1,6 @@
-*!Based on the R-code for sgpower.R
+*!Power function calculations for Second Generation P-Values
+*!Based on the R-code for sgpower.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.00  : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 *!Version 0.91 	: Removed dependency on user-provided integrate-command. 
 *!Version 0.90 	: Initial Github Release

@@ -1,5 +1,6 @@
-*!False discovery rates
-*!Based on the R-code for fdisk.R
+*!False confirmatory/discovery risk calculations for Second Generation P-Values
+*!Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.97a: Made error messages hopefully more understandable.
 *!Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
 *!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
@@ -76,7 +77,7 @@ if `: word count `altspace''==2{
 } 
 
 
-*Power functions
+*Power functions -> taken from sgpower.ado 
 	if `sgpval'==0{
 		local powerx normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z')
 		
@@ -136,7 +137,7 @@ if `: word count `altspace''==2{
 		}
 	 }
  * P.sgpv.H0 averaged uniformly
-      if("`nullweights'" == "Uniform") {
+      if("`nullweights'" == "Uniform") { // two stops instead of one are needed because results from one command cannot be used directly as the input of another command -> works in Stata only for functions
 		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }

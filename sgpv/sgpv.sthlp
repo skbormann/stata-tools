@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.99  24 Mar 2020}{...}
+{* *! version 1.00  24 Mar 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -44,9 +44,9 @@
 {p_end}
 {synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. 
 {p_end}
-{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. 
+{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr. 
 {p_end}
-{synopt:{opth for:mat(%fmt)}} display format; default is format(%5.4f)
+{synopt:{opth for:mat(%fmt)}} display format of the results.
 {p_end}
 
 {syntab:Fdrisk}
@@ -78,20 +78,20 @@ If you want to calculate SGPVs for an estimation command or any other command wh
  See the description {help sgpv##matrix_opt:here} for more information.{p_end}
  {p 4 6 2}
  * ONLY one thing can be used to calculate the SGPVs: an estimation command, a stored estimation result or a matrix with the necessary information.
- 
- 
 
 {marker description}{...}
 {title:Description}
 {pstd}
 {cmd:sgpv} allows the calculation of the Second-Generation P-Values (SGPV) developed by Blume et.al.(2018,2019) for and after commonly used estimation commands. 
 The false discovery risk (fdr) can be also reported. 
-The SGPVs are reported alongside the usually reported p-values. {break}
-An ordinary user should use this command and not other commands on which {cmd:sgpv} is based upon. 
-{cmd:sgpv} uses sensible default values for calculating the SGPVs and the accompaning fdr/fcr, which can be changed.  
-This wrapper command runs commands which are based on the original R-code from for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}. 
+The SGPVs are reported alongside the usually reported p-values. {p_end}
+
+{pstd}
+An ordinary user should use this command and not other commands of this package on which {cmd:sgpv} is based upon. 
+{cmd:sgpv} uses sensible default values for calculating the SGPVs, the delta-gaps and the accompaning false discovery risks (fdr), which can be changed.  
+This wrapper command runs commands which are based on the original R-code from the {browse "https://github.com/weltybiostat/sgpv":sgpv-package}. 
 This package comes also with the example leukemia dataset from {browse "https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)"}.{break}
-Dialog boxes for each command are also provided to make the usage of the commands easier.
+Dialog boxes for each command (including {dialog sgpv:this one}) are also provided to make the usage of the commands easier.
 The dialog boxes can be installed into the User menubar. 
 See {help sgpv##menuInstall:this example} for how to do it.{p_end}
 
@@ -106,13 +106,23 @@ An example of how to interpret the result from {cmd:sgpv} can be found in the {h
 {pstd}
 The formulas for the Second-Generation P-Values can be found {help sgpv##formulas:here}.{p_end}
 
+
+    The sgpv-package consists of: sgpv       - a wrapper around the other commands, {help sgpvalue} and {help fdrisk}, to be used after estimations commands
+    				  {help sgpvalue}   - calculate the SGPVs
+    				  {help sgpower}    - power functions for the SGPVs
+    				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs
+    				  {help plotsgpv}   - plot the SGPVs
+
+
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}
 {phang}
 {opt replay} the default behaviour if no estimation command, matrix or stored estimate is set. 
-There is {bf:no} explicit replay option but instead {cmd:sgpv} behave like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
-At the moment, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
+The replay-option is only available in the {dialog sgpv:dialog box}.
+{cmd:sgpv} behaves like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
+At the moment, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. 
+Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
 To see the results from a previous run of {cmd:sgpv} without recalculation, you can run something like {stata matlist r(comparison)}.
 This works only if no other commands did run after {cmd:sgpv}.
 
@@ -123,7 +133,8 @@ This works only if no other commands did run after {cmd:sgpv}.
 
 {phang}
 {opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
-The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
+The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
+Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
 
 {phang}
@@ -137,12 +148,11 @@ To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {brea
 Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}, if installed.
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
+{phang}
+{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed.
 
 {phang}
-{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
-
-{phang}
-{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0. Missing values are not allowed.
+{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed.
 
 {dlgtab:Display}
 {phang}
@@ -152,7 +162,7 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 {opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
-{opt nob:onus(string)}     deactivate the display and calculation of bonus statistics like delta gaps and fdr/fcr. Possible values are "deltagap", "fdrisk", "all".
+{opt nob:onus(string)}   deactivate the display and calculation of bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to deactivate only the display and calculations of the delta-gaps or the fdrs or both.
 
 {phang}
 {opth for:mat(%fmt)} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). 
@@ -160,14 +170,15 @@ This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but
 Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
 {dlgtab:Fdrisk}
-{pstd}These options are only needed for the calculations of the False Confirmation/Discovery Risk. The default values should give sensible results in most situations.{p_end}
+{pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end}
 
 {phang}
 {opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal". The default is "Uniform".
 
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution.  
-If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space. These numbers can be also formulas which must be enclosed in " ".
+If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space. 
+These numbers can be also formulas which must be enclosed in " ".
 
 {phang}
 {opt nulls:pace(string)}  support of the null probability distribution. 
@@ -195,7 +206,11 @@ The default value assumes that both hypotheses are equally likely.
 
 {dlgtab: menuInstall}
 {phang}
-{opt perm} install permanently the dialog boxes into the User menubar. The necessary commands are added to the user's profile.do. If no profile.do exists or can be found then a new profile.do is created in the current directory. Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. The dialog boxes can be accessed as usual by for example {stata db sgpv}.
+{opt perm} install permanently the dialog boxes into the User menubar. 
+The necessary commands are added to the user's profile.do. 
+If no profile.do exists or can be found then a new profile.do is created in the current directory. 
+Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. 
+The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
 {marker examples}{...}
 {title:Examples}
@@ -256,10 +271,11 @@ The default value assumes that both hypotheses are equally likely.
 
   The same result but this time after the last estimation.
 	{stata . sgpv} 
+	
+  Now run a quantile regression instead	
 	{stata . qreg price mpg weight foreign} 
 	{stata . estimates store priceqreg}
 
-{* pstd}
   Calculate sgpvs for the stored estimation and only the foreign coefficient
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
@@ -287,7 +303,7 @@ Besides its own calculations, {cmd:sgpv} also preserves the returned results fro
 {title:Formulas & Interpretation}
 {pstd}
 The formulas below are taking from the help-files of {helpb sgpvalue} and {helpb fdrisk}.
-An example about how to interpret the results is given in the {help sgpv##interpretation_example:example section} .
+An example about how to interpret the results is given in the {help sgpv##interpretation_example:example section}.
 {p_end}
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
@@ -345,7 +361,6 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 {title:Author}
 {p}
-
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}

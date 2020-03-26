@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.97  21 Mar 2020}{...}
+{* *! version 1.00  21 Mar 2020}{...}
 {viewerdialog fdrisk "dialog fdrisk"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -44,7 +44,7 @@
 {marker description}{...}
 {title:Description}
 {pstd}
-This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk for a second-generation {it:p}-value of 1. 
+This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk (FCR) for a second-generation {it:p}-value of 1. 
 This command should be used mostly for single calculations. 
 For calculations after estimation commands use the {help sgpv} command.
 A {dialog fdrisk:dialog box} for easier usage of this command is available. 
@@ -90,7 +90,7 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 
 {phang}
 {opt nulls:pace(string asis)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is one number. 
-If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space. These numbers can be also formulas which must enclosed in " "
+If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space. These numbers can be also formulas which must enclosed in " ".
 
 {phang}
 {opt nullw:eights(string)}     probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
@@ -98,40 +98,38 @@ If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a s
 {phang}
 {opt alts:pace(string asis)}  support for the alternative probability distribution. 
 If "altweights" is "Point", then "altspace" is one number. If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space.
-These numbers can be also formulas which must enclosed in " "
+These numbers can be also formulas which must enclosed in " ".
 
 {phang}
 {opt altw:eights(string)}     probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
 
 {phang}
-{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive).
+{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
+A prior probability outside of this interval is not sensible. 
+The default value assumes that both hypotheses are equally likely.
 
 {marker examples}{...}
 {title:Examples}
  To run the examples copy the lines into a Stata or use the file {view fdrisk-examples.do} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
 {pstd}{bf:False discovery risk with 95% confidence level:} (Click to {stata do fdrisk-examples.do example1:run} the example.){p_end}
 	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) /// 
-		altweights("Uniform") altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") inttype("confidence")  intlevel(0.05)
-
-		
+		  altweights("Uniform") altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") inttype("confidence")  intlevel(0.05)		
 	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata do fdrisk-examples.do example2a:run} the example.){p_end}
 	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0) /// 
-		altweights("Uniform") altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
-	 
-	
+	          altweights("Uniform") altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
+	 	
 	{bf:with truncated normal weighting distribution:}(Click to {stata do fdrisk-examples.do example2b:run} the example.)
 	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("TruncNormal") ///
-		altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
-
+	          altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
 
 {pstd}{bf:False discovery risk with LSI and wider null hypothesis:}(Click to {stata do fdrisk-examples.do example3:run} the example.){p_end}
-	. fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("Uniform") ///
-		altspace("2.5-1*invnorm(1-0.041/2)*0.8" "2.5+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
+	. fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  ///
+		  altweights("Uniform") altspace("2.5-1*invnorm(1-0.041/2)*0.8" "2.5+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
  
-
 {pstd}	{bf:False confirmation risk example:}(Click to {stata do fdrisk-examples.do example4:run} the example.) {p_end}
-	. fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform") nullspace("0.01 - 1*invnorm(1-0.041/2)*0.15" "0.01 + 1*invnorm(1-0.041/2)*0.15") ///
-		altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5))  inttype("likelihood")  intlevel(1/8)
+	. fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform")  ///
+	          nullspace("0.01 - 1*invnorm(1-0.041/2)*0.15" "0.01 + 1*invnorm(1-0.041/2)*0.15") altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5)) ///
+	          inttype("likelihood")  intlevel(1/8)
  
 
 
@@ -154,7 +152,6 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 {title:Author}
 {p}
-
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}

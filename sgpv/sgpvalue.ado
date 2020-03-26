@@ -1,4 +1,6 @@
-*!Based on the R-code for the sgpvalue function from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Second Generation P-Values Calculations
+*!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 *!				Fixed a bug with the nodeltagap-option.
 *!				Added more examples from the R-code (as a do-file).

@@ -7,6 +7,10 @@ The changelog is taken from the ado-files.
 
 ### General
 General remarks if updates come in larger "packages".
+* 26.03.2020:
+  * Submission of the commands to SSC
+  * Minor corrections in all help files -> Correction of spelling mistakes, incorrect format, etc.
+
 * 21.03.2020: 
   * Added a dialog box for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the sgpv.dlg file. 
   * The dialog boxes can be also added now by running __sgpv menuInstall__ or permanently added by running __sgpv menuInstall, perm__
@@ -76,7 +80,6 @@ A collection of things that I want to do at some point + some limitations of the
 
 ### fdrisk
 *   Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
-* 	Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 * 	Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box
 
 ### plotsgpv
@@ -89,7 +92,7 @@ A collection of things that I want to do at some point + some limitations of the
 * The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
 
 ### sgpv
-* Make error messages more descriptive and give hints how resolve the problems.
+* Make error messages more descriptive and give hints how to resolve the problems.
 * display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios) 
 * support for more commands which do not report their results in a matrix named "r(table)".
 * Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 

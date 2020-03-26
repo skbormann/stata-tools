@@ -1,6 +1,6 @@
 /*
-fdrisk dialog version 0.97 , 19.03.2020, Sven-Kristjan Bormann
-for fdrisk version 0.97 
+fdrisk dialog version 1.00 , 19.03.2020, Sven-Kristjan Bormann
+for fdrisk version 1.00 
 
 To install in User Statistics menu via Stata commands:
   
@@ -48,7 +48,7 @@ BEGIN
 	1
 END
 
-DIALOG main, label("Fdrisk 0.97 - False discovery/confirmation risk") tabtitle("Main")
+DIALOG main, label("Fdrisk 1.00 - False discovery/confirmation risk") tabtitle("Main")
 BEGIN
 
 

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.98a  21 Mar 2020}{...}
+{* *! version 1.00  21 Mar 2020}{...}
 {viewerdialog sgpvalue "dialog sgpvalue"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -9,7 +9,7 @@
 {viewerjumpto "Syntax" "sgpvalue##syntax"}{...}
 {viewerjumpto "Description" "sgpvalue##description"}{...}
 {viewerjumpto "Options" "sgpvalue##options"}{...}
-{* viewerjumpto "Remarks" "sgpvalue##remarks"}{...}
+{viewerjumpto "Formulas/Remarks" "sgpvalue##formulas"}{...}
 {viewerjumpto "Examples" "sgpvalue##examples"}{...}
 {title:Title}
 {phang}
@@ -25,7 +25,7 @@
 {synoptset 20 tabbed}{...}
 {synopthdr}
 {synoptline}
-{syntab:Main:}
+{syntab:Main}
 {synopt:{opt estlo(string)}}  lower bound of interval estimate. 
 {p_end}
 {synopt:{opt esthi(string)}}   upper bound of interval estimate. 
@@ -34,19 +34,22 @@
 {p_end}
 {synopt:{opt nullhi(string)}}  upper bound of null interval.
 {p_end}
-{syntab:Display:}
+
+{syntab:Display}
 {synopt:{opt nowarnings}}  disable showing the warnings about potentially problematic intervals.
 {p_end}
 {synopt:{opt nodeltagap}}  disable the display and calculations of the delta-gap. 
 {p_end}
 {synopt:{opt noshow}}  do not show the outcome of the calculations.
 {p_end}
-{syntab:Larger input:}
+
+{syntab:Larger input}
 {synopt:{opt nomata}}  do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.
 {p_end}
 {synopt:{opt replace}}  replace existing variables in case the nomata-option was used.
 {p_end}
-{syntab:Further options:}
+
+{syntab:Further options}
 {synopt:{opt infcorrection(#)}}  a small scalar to denote a positive but infinitesimally small SGPV. 
 {p_end}
 {synoptline}
@@ -57,6 +60,7 @@
 {title:Description}
 {pstd}
 Compute the second-generation {it:p}-value (SGPV) and its associated delta-gaps, as introduced in Blume et al. (2018). 
+See the {help sgpvalue##formulas:formulas} at the end for a more detailed description.
 This command and its companions commands ({cmd:sgpower}, {cmd:fdrisk}, {cmd:plotsgpv}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
 A wrapper command {help sgpv} also exists  which makes the computation after common estimation commands easier.
 The {cmd:sgpvalue} command should be used mostly for individual SGPV calculations.
@@ -70,23 +74,29 @@ A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
 {opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
 To specify that the upper limit is +infinity, just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
 Typically the upper bound of a confidence interval is used. 
-A variable contained the upper bound can be also used.
+A variable containing the upper bound can be also used.
 
 {phang}
 {opt estlo(string)}  lower bound of interval estimate. Values may be finite or infinite.
- To specify that the lower limit is -infinity, just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. {help exp:Expressions}/formulas are also allowed as input.
-Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.
+ To specify that the lower limit is -infinity, just specify the missing value . in this option. 
+ Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
+ {help exp:Expressions}/formulas are also allowed as input.
+Typically the lower bound of a confidence interval can be used. 
+A variable containing the lower bound can be also used.
 
 {phang}
 {opt nullhi(string)}     upper bound of null interval. Values may be finite or infinite.
 To specify that the upper limit is +infinity, just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
 Typically the upper bound of a confidence interval is used. 
-A variable contained the upper bound can be also used.
+A variable containing the upper bound can be also used.
 
 {phang}
 {opt nulllo(string)}     lower bound of null interval. Values may be finite or infinite.
- To specify that the lower limit is -infinity, just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. {help exp:Expressions}/formulas are also allowed as input.
-Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.
+ To specify that the lower limit is -infinity, just specify the missing value . in this option. 
+ Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
+ {help exp:Expressions}/formulas are also allowed as input.
+Typically the lower bound of a confidence interval can be used. 
+A variable containing the lower bound can be also used.
 
 {dlgtab:Display}
 {phang}
@@ -254,7 +264,6 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 {title:Author}
 {p}
-
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}

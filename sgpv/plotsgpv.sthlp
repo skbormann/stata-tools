@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.98a  20 Mar 2020}{...}
+{* *! version 1.00  20 Mar 2020}{...}
 {viewerdialog plotsgpv "dialog plotsgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -92,13 +92,13 @@ A {dialog plotsgpv:dialog box} for easier usage is available.
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt estlo(string)}  lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used. A variable contained the lower bound can be also used.
+{opt estlo(string)}  lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used. A variable containing the lower bound can be also used.
 
 {phang}
 {opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
 To specify that the upper limit is +infinity just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. 
 Multiple upper bounds can be entered. They must be separated by spaces.
- Typically the upper bound of a confidence interval can be used. A variable contained the upper bound can be also used.
+ Typically the upper bound of a confidence interval can be used. A variable containing the upper bound can be also used.
 
 {phang}
 {opt nulllo(string)}     lower bound of null interval.
@@ -116,7 +116,7 @@ You can set the color to any other available color in Stata. See {helpb colorsty
 
 {phang}
 {title:Interval colors}{break}
-The coloring of the intervals according to SGPV ranking. Default are the R-colors ("cornflowerblue","firebrick3","darkslateblue") for SGPVs of {it:0}, in {it:(0,1)} , and {it:1} respectively. 
+The coloring of the intervals according to SGPV ranking. Default are the R-colors ("cornflowerblue","firebrick3","darkslateblue") for SGPVs of {it:0}, in {it:(0,1)}, and {it:1} respectively. 
 You can see the default color(s) before plotting via:
  
 		{stata palette color 205 38 38 } 	firebrick3 	for SGPV = 0
@@ -140,7 +140,7 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 {opt t:itle(string)}     title of the plot.
 
 {phang}
-{opt xt:itle(string)}     label of the x-axis. Default is "Ranking according to <order>" where <order> can refer to the option {it:setorder()} or the original  sorting of the input 
+{opt xt:itle(string)}     label of the x-axis. Default is "Ranking according to <order>" where <order> can refer to the option {it:setorder()} or the original  sorting of the input. 
 
 {phang}
 {opt yt:itle(string)}     label of the y-axis.
@@ -208,7 +208,6 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 {title:Author}
 {p}
-
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}

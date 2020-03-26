@@ -4,8 +4,8 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 */
 /*
-sgpv dialog version 0.99, 23.03.2020, Sven-Kristjan Bormann
-for sgpv version 0.99
+sgpv dialog version 1.00, 23.03.2020, Sven-Kristjan Bormann
+for sgpv version 1.00
 
 To install in User Statistics menu via Stata commands:
   
@@ -78,7 +78,7 @@ BEGIN
 END
 
 
-DIALOG main, label("sgpv 0.98a - Second Generation P-Values") tabtitle("Main")
+DIALOG main, label("sgpv 1.00 - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
@@ -135,7 +135,6 @@ END
 
 DIALOG fdrisk, tabtitle("Fdrisk options")
 BEGIN
-	//FRAME fr_nullspace		5 	5		410		110				
 	TEXT tx_nullspace      10    10    200    ., label("Null hypothesis parameter space:")
 	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
 	
@@ -143,7 +142,6 @@ BEGIN
 	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
 													tooltip("The probability distribution for the null parameter space.")
 	
-	//FRAME fr_altspace		5  	+20		410		120
 	TEXT tx_altspace     	10   _ls      200    ., label("Alternative hypothesis parameter space:")
 	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution")
 	
