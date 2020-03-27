@@ -68,7 +68,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
-* Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
+* Version 1.01 28.03.2020 : Fixed the nodeltagap-option -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the SGPV algorithm.	
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
 	* Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
