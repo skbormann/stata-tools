@@ -1,5 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 *!				Fixed a bug with the nodeltagap-option.
@@ -11,7 +12,8 @@
 *!Version 0.90  : Initial release to Github 
 *!Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
 *!Still missing: Some Input error checks
-*!To-do: At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used. 
+*!To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
+*!		 	Make behaviour of nodeltagap-option consistent across algorithms -> delta-gaps always calculated for mata and variable version, always returned for variable version 
 
 
 capture program drop sgpvalue
@@ -73,36 +75,38 @@ if `:word count `esthi'' != `: word count `estlo''{
 *Check if estint is larger than the current matsize
 if `estint'>c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize).
 	*An alternative based on variables if inputs are variables.
+	local nodeltagap `deltagap'
 	if "`mata'"=="nomata" & `varsfound'==1{
 		local nulllo = real(trim("`nulllo'"))
 		local nullhi = real(trim("`nullhi'"))
-		sgpv_var ,esthi(`esthi') estlo(`estlo') nulllo(`nulllo') nullhi(`nullhi') `replace'
+		
+		sgpv_var ,esthi(`esthi') estlo(`estlo') nulllo(`nulllo') nullhi(`nullhi') `replace' `nodeltagap' infcorrection(`infcorrection')
 	}
 	else if "`mata'"==""{
 		
-		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection') // Only one null interval allowed.
+		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection' , "`nodeltagap'") // Only one null interval allowed.
 		*The same return as before but this time for the Mata function -> not the best solution yet.
 
-		mat colnames results = "SGPV" "Delta-Gap"
-		if "`deltagap'"=="nodeltagap"{
+		if `=colsof(results)'==2 mat colnames results = "SGPV" "Delta-Gap"
+		if `=colsof(results)'==1 mat colnames results = "SGPV"
+		
+		/*if "`deltagap'"=="nodeltagap"{
 		mat results=results[1...,1]
-		} 
+		} */
+		
+		
 
 		if "`show'"!="noshow" matlist results ,names(columns) title(Second Generation P-Values)
 		return matrix results = results
-
+		exit
 	}
 }
 else{	// Run if rows less than matsize -> the "original" approach
 	tempname results 
-	mat `results' = J(`estint',2,0)
-	*mat colnames `results' = "New_P-Values" "Delta_Gap"
-	*if "`altlabel'"=="altlabel" 	
+	mat `results' = J(`estint',2,0)	
 	mat colnames `results' = "SGPV" "Delta-Gap"
 	***Iterate over all intervalls to implement a parallel max and min function as in the R-code
 	forvalues i=1/`estint'{
-		*Reset some macros
-		local est_len
 		*Parse interval -> Not the best names yet
 		local null_lo = `: word `i' of `nulllo''
 			isValid `null_lo'
@@ -150,11 +154,9 @@ else{	// Run if rows less than matsize -> the "original" approach
 					disp as error "The `i'th interval has infinite length."
 				}
 				
-				
 				if (`est_len'==0 | `null_len'==0 ) {
 					disp as error "The `i'th interval has a zero length."
 				}
-		
 		}
 		
 		*SGPV computation--------------------------------------------------
@@ -327,7 +329,7 @@ end
 ***Mata function(s)
 mata:
 
-void function sgpv(string varlist, string sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection){ 
+void function sgpv(string varlist, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection ,| string scalar nodeltagap){ 
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta-Gaps if the desired matrix size is too large for Stata
 Might have to change the way missing values are handled -> For now they are treated as meaning infinite.
@@ -380,19 +382,23 @@ Might have to change the way missing values are handled -> For now they are trea
 			pdelta = .			
 		}
 		/*Delta-Gap*/
-		 gap = max_s(est_lo,nulllo) - min_s(nullhi,est_hi) 
-		 delta = null_len/2
-		if (null_len ==0){
-			 delta = 1
+		if (nodeltagap!="nodeltagap"){
+			 gap = max_s(est_lo,nulllo) - min_s(nullhi,est_hi) 
+			 delta = null_len/2
+			if (null_len ==0){
+				 delta = 1
+			}
+			if (pdelta==0 & pdelta!=.){
+				 dg = gap/delta 
+			}
+			else{
+				 dg = .
+			}
+			Sgpv[i,2] = dg
 		}
-		if (pdelta==0 & pdelta!=.){
-			 dg = gap/delta 
-		}
-		else{
-			 dg = .
-		}
+		
 		 Sgpv[i,1] = pdelta
-		 Sgpv[i,2] = dg
+		 
 	}	
 	st_matrix(sgpvmat,Sgpv)
 }

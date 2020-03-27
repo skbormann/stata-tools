@@ -23,6 +23,7 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.97a: Made error messages hopefully more understandable.
 * Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details
@@ -31,6 +32,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
+* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
   * The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
   *	Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
@@ -46,12 +48,14 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpower
+* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 * Version 0.91a	: Fixed some issues in the documentation.
 * Version 0.91 	: Removed dependency on user-provided integrate-command. 
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 * Version 0.98a: 
   *	Displays now the full name of a variable in case of multi equation commands. 
@@ -64,6 +68,8 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
+* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
 	* Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
 	* Fixed a bug with the nodeltagap-option.
