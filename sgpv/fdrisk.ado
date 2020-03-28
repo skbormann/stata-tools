@@ -1,5 +1,6 @@
 *!False confirmatory/discovery risk calculations for Second Generation P-Values
 *!Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.97a: Made error messages hopefully more understandable.
 *!Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
@@ -142,11 +143,7 @@ if `: word count `altspace''==2{
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
 
-      *P.sgpv.H0 averaged using generalized beta as weighting distribution function
-      if("`nullweights'" == "GBeta") {
-        disp as error "A placeholder for future implementation of Generalized Beta null probability distribution"
-        local PsgpvH0 .
-      }
+
 	       *P.sgpv.H0 averaged using truncated normal as weighting distribution function
       if("`nullweights'" == "TruncNormal") {
 
@@ -179,7 +176,7 @@ if `: word count `altspace''==2{
     }
 
     * P.sgpv.H1 averaged: check ``altspace'` input
-    if inlist("`altweights'" ,"Uniform", "GBeta", "TruncNormal") {
+    if inlist("`altweights'" ,"Uniform", "TruncNormal") {
       if( `:word count `altspace''<2)  stop "Option 'altspace' must not be a point to use averaging methods."
       if `:word count `altspace''==2  {
         if (`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')' > `nulllo') & (`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')'< `nullhi') {
@@ -199,11 +196,6 @@ if `: word count `altspace''==2{
       local PsgpvH1 = 1/(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') * `r(integral)'
     }
 
-    * P.sgpv.H1 averaged using generalized beta as weighting distribution function
-    if("`altweights'" == "GBeta") {
-      disp as error "A placeholder for future implementation of Generalized Beta null probability distribution"
-      local PsgpvH1 .
-    }
 
     * P.sgpv.H1 averaged using truncated normal as weighting distribution function
     if("`altweights'" == "TruncNormal") {
@@ -261,3 +253,37 @@ return local integral `r(integral)'
 restore
  
 end
+
+/*
+mata:
+void function fdrisk(real scalar sgpval,real scalar nulllo, real scalar nullhi, real scalar stderr, real scalar z, 
+					string scalar nullweights, real scalar nullspace_lower, real scalar nullspace_upper,
+					string scalar altweights, real scalar altspace_lower, real scalar altspace_upper, real scalar pi0){
+	if (sgpval==0){
+		power0 =  normal(nulllo :/ stderr :- x :/stderr :- z) :+ normal(-nullhi :/ stderr :+ x :/stderr :- z)
+	
+	}
+	
+	if (sgpval==1){
+		if ((nullhi-nulllo)>= 2*z*stderr) {
+			power1 normal(nullhi :/ stderr - x :/ stderr :- z) :- normal( nulllo :/ stderr - x:/ stderr :+ z)
+		
+		}
+		if ((nullhi-nulllo) < 2*z*stderr){
+			 power1 = 0 
+		}
+		
+	}
+}
+
+real rowvector function power0(real rowvector x){
+	return(normal(nulllo :/ stderr :- x :/stderr :- z) :+ normal(-nullhi :/ stderr :+ x :/stderr :- z))
+}
+
+real rowvector function power1(real rowvector x){
+	return(normal(nullhi :/ stderr - x :/ stderr :- z) :- normal( nulllo :/ stderr - x:/ stderr :+ z))
+}
+
+end 
+
+*/
