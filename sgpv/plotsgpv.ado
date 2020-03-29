@@ -1,5 +1,6 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> requires for now the moremata package by Ben Jann due to using the mm_cond() function -> not tested the code yet 
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
 *!				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
@@ -111,19 +112,28 @@ if `"`nullcol'"'==""{
 		if ("`setorder'"=="sgpv") gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
 	}
 	else if `varsfound'==0{ // Not correct yet
-			sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace'
+			sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) -> how test these cases?
 			mat `sgpvs' = r(results)
 			if ("`sortorder'"=="sgpv"){
-				mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) // Not possible if matrix is too large -> requires different solution
-				mat colnames `sgpvcombo' = "sgpvcombo"
-				forvalues i=1/`=rowsof(`sgpvs')'{ // Only needed if sorting is set to sgpv
-					if `sgpvs'[`i',1]==0{
-						mat `sgpvcombo'[`i',1]=-`=`sgpvs'[`i',2]'
+				if `=rowsof(`sgpvs')'<=c(matsize){				
+					mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) // Not possible if matrix is too large -> requires different solution
+					mat colnames `sgpvcombo' = "sgpvcombo"
+					forvalues i=1/`=rowsof(`sgpvs')'{ // Only needed if sorting is set to sgpv
+						if `sgpvs'[`i',1]==0{
+							mat `sgpvcombo'[`i',1]=-`=`sgpvs'[`i',2]'
+						}
+						else{
+							mat `sgpvcombo'[`i',1]=`=`sgpvs'[`i',1]'
+						}
+					
 					}
-					else{
-						mat `sgpvcombo'[`i',1]=`=`sgpvs'[`i',1]'
-					}
-				
+				}
+				else if `=rowsof(`sgpvs')'>c(matsize){ //Not tested yet -> need test case
+					mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
+					mata: sgpvcombo = J(rows(sgpv),1.)
+					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond
+					mata: st_matrix("`sgpvcombo'",sgpvcombo)
+					mat colnames `sgpvcombo' = "sgpvcombo"
 				}
 			}
 	}
