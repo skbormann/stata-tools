@@ -23,6 +23,7 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 1.01 : Removed unused code for Generalized Beta distribution 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.97a: Made error messages hopefully more understandable.
 * Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
@@ -32,6 +33,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
+* Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> requires for now the moremata package by Ben Jann due to using the mm_cond() function -> not tested the code yet 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
   * The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
@@ -68,6 +70,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi
 * Version 1.01 28.03.2020 : Fixed the nodeltagap-option -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the SGPV algorithm.	
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
