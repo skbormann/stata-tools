@@ -112,7 +112,7 @@ if `"`nullcol'"'==""{
 		if ("`setorder'"=="sgpv") gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
 	}
 	else if `varsfound'==0{ // Not correct yet
-			sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) -> how test these cases?
+			sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) < rows of esthi or estlo -> how test these cases?
 			mat `sgpvs' = r(results)
 			if ("`sortorder'"=="sgpv"){
 				if `=rowsof(`sgpvs')'<=c(matsize){				
@@ -129,6 +129,8 @@ if `"`nullcol'"'==""{
 					}
 				}
 				else if `=rowsof(`sgpvs')'>c(matsize){ //Not tested yet -> need test case
+					capture findfile lmoremata.mlib
+					if _rc qui ssc install moremata, replace
 					mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
 					mata: sgpvcombo = J(rows(sgpv),1.)
 					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond

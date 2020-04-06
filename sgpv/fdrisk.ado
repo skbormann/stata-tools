@@ -117,9 +117,9 @@ if `: word count `altspace''==2{
 		local PsgpvH0 = `powerxnullint' 
       }
 	 * P.sgpv.H0 averaged: check `null.space` input
-	 if inlist("`nullweights'","Uniform","GBeta","TruncNormal"){
+	 if inlist("`nullweights'","Uniform","TruncNormal"){
 		if `:word count `nullspace''<2{
-			stop "Option 'nullspace' must not be a point to use averaging methods. Set nullweights(Point) instead."
+			stop "Option 'nullspace' must not be a single number to use averaging methods. Set nullweights(Point) instead."
 			
 		}
 		if `:word count `nullspace''==2{
@@ -138,7 +138,7 @@ if `: word count `altspace''==2{
 		}
 	 }
  * P.sgpv.H0 averaged uniformly
-      if("`nullweights'" == "Uniform") { // two stops instead of one are needed because results from one command cannot be used directly as the input of another command -> works in Stata only for functions
+      if("`nullweights'" == "Uniform") { // two steps instead of one are needed because results from one command cannot be used directly as the input of another command -> works in Stata only for functions
 		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
@@ -165,8 +165,7 @@ if `: word count `altspace''==2{
       if(`:word count `altspace''!=1){
 	    stop "Option 'altspace' must be a one number or expression when using a point alternative probability distribution."
 		
-	  }
-	  
+	  }	  
       if inrange(`altspace',`nulllo',`nullhi') {
 		stop "Option 'altspace' must be outside of the originally specified indifference zone by options 'nulllo' and 'nullhi'."
 	  
@@ -254,36 +253,5 @@ restore
  
 end
 
-/*
-mata:
-void function fdrisk(real scalar sgpval,real scalar nulllo, real scalar nullhi, real scalar stderr, real scalar z, 
-					string scalar nullweights, real scalar nullspace_lower, real scalar nullspace_upper,
-					string scalar altweights, real scalar altspace_lower, real scalar altspace_upper, real scalar pi0){
-	if (sgpval==0){
-		power0 =  normal(nulllo :/ stderr :- x :/stderr :- z) :+ normal(-nullhi :/ stderr :+ x :/stderr :- z)
-	
-	}
-	
-	if (sgpval==1){
-		if ((nullhi-nulllo)>= 2*z*stderr) {
-			power1 normal(nullhi :/ stderr - x :/ stderr :- z) :- normal( nulllo :/ stderr - x:/ stderr :+ z)
-		
-		}
-		if ((nullhi-nulllo) < 2*z*stderr){
-			 power1 = 0 
-		}
-		
-	}
-}
 
-real rowvector function power0(real rowvector x){
-	return(normal(nulllo :/ stderr :- x :/stderr :- z) :+ normal(-nullhi :/ stderr :+ x :/stderr :- z))
-}
 
-real rowvector function power1(real rowvector x){
-	return(normal(nullhi :/ stderr - x :/ stderr :- z) :- normal( nulllo :/ stderr - x:/ stderr :+ z))
-}
-
-end 
-
-*/

@@ -6,8 +6,10 @@ preserve
 sysuse leukemia, clear
 sort p_value // To show the results the same way they are shown in the example for plotsgpv
 mata: final =J(1,5,.)
+* Partition the observations into chunks of the size of c(matsize), the maximum allowed matrix size
 forvalues i=1/`=ceil(_N/c(matsize))'{
 	tempname part`i' res`i' final
+	* Get the start and end observations of the variables
 	local start = (`i'-1)*c(matsize)+1
 	local end = `i'*c(matsize)
 	if `end'>`=_N' local end l

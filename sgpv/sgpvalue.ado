@@ -1,5 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi
 *!Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
@@ -79,26 +80,25 @@ if `estint'>c(matsize){ //Assuming here that this condition is only true if vari
 	if "`mata'"=="nomata" & `varsfound'==1{
 		local nulllo = real(trim("`nulllo'"))
 		local nullhi = real(trim("`nullhi'"))
+		if wordcount("`nulllo'") >1 | wordcount("`nullhi'") > 1{
+			stop "Only one null interval can be used when using variables as input. Provide only one value in options nulllo() and nullhi()."
+		}
 		
 		sgpv_var ,esthi(`esthi') estlo(`estlo') nulllo(`nulllo') nullhi(`nullhi') `replace' `nodeltagap' infcorrection(`infcorrection')
 	}
 	else if "`mata'"==""{
-		
+		if wordcount("`nulllo'") >1 | wordcount("`nullhi'") > 1{
+			stop "Only one null interval can be used when using variables or matrices larger than c(matsize) as input. Provide only one value in options nulllo() and nullhi()."
+		}
 		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection' , "`nodeltagap'") // Only one null interval allowed.
 		*The same return as before but this time for the Mata function -> not the best solution yet.
 
 		if `=colsof(results)'==2 mat colnames results = "SGPV" "Delta-Gap"
 		if `=colsof(results)'==1 mat colnames results = "SGPV"
 		
-		/*if "`deltagap'"=="nodeltagap"{
-		mat results=results[1...,1]
-		} */
-		
-		
-
 		if "`show'"!="noshow" matlist results ,names(columns) title(Second Generation P-Values)
 		return matrix results = results
-		exit
+		*exit
 	}
 }
 else{	// Run if rows less than matsize -> the "original" approach
@@ -268,6 +268,13 @@ args infinite
 	}
 end
 
+*Simulate the behaviour of the R-function with the same name 
+program define stop
+ args text 
+ disp as error `"`text'"'
+ exit 198
+end
+
 *Use new variables to store and calculate the SGPVs
 program define sgpv_var, rclass
  syntax ,esthi(varname) estlo(varname) nullhi(string) nulllo(string) [replace nodeltagap infcorrection(real 1e-5)]
@@ -330,6 +337,8 @@ end
 mata:
 
 void function sgpv(string varlist, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection ,| string scalar nodeltagap){ 
+// void function sgpv(string varlist, string scalar sgpvmat, real rowvector nulllo, real scalar rowvector, real scalar infcorrection ,| string scalar nodeltagap){ 
+
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta-Gaps if the desired matrix size is too large for Stata
 Might have to change the way missing values are handled -> For now they are treated as meaning infinite.
