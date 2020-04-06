@@ -343,11 +343,11 @@ program define stop
  exit 198
 end
 
-*Make the dialog boxes accessible from the User-menu -> not called yet
+*Make the dialog boxes accessible from the User-menu
 program define menuInstall
  syntax [, perm *] 
  if "`perm'"=="perm"{
-		capture findfile profile.do
+		capture findfile profile.do, path(STATA;.)
 		if _rc{
 			local replace replace
 			disp "profile.do not found."

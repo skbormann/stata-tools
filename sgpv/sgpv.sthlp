@@ -209,6 +209,9 @@ The default value assumes that both hypotheses are equally likely.
 {opt perm} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
 If no profile.do exists or can be found then a new profile.do is created in the current directory. 
+At the moment, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
+Other possible places like the user's home folder are not accessed yet. 
+See {help profile} to get more information about how to setup the {cmd:profile.do}.
 Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. 
 The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
