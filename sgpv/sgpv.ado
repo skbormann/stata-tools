@@ -10,6 +10,7 @@
 
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
+	- Write a certification script which checks all possible errors (help cscript)
 	- Make error messages more descriptive and give hints how resolve the problems.
 	- display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios)
 	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
