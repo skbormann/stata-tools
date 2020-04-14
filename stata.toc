@@ -3,7 +3,7 @@ d Sven-Kristjan Bormann, University of Tartu
 
 p checkdim 		Check if a variable has observations for all categories of another variable. 
 p emptyvar		Finds variables containing only missing values and drops them.
-p expandIhlp	Integrates .ihlp files into normal help files. 
+p expand_ihlp	Integrates .ihlp files into normal help files. 
 p getperc		Returns the relative frequency of a category of a categorical variable for further processing.
 p multif		Constructs multiple if-restrictions.
 p num2base26 	An interface to the numbase26() function of Mata. Converts a number to a letter. 

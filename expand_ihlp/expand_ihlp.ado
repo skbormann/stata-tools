@@ -1,8 +1,8 @@
 *!expandihlp Version 1.0 Date: 20.12.2018
 *!Inserts .ihlp-files into .sthlp-files
 
-capture program drop expandihlp
-program define expandihlp, rclass
+capture program drop expand_ihlp
+program define expand_ihlp, rclass
 	syntax , File(string) [ REName NOTest SUFfix(string) ]
 	*Issue warning if unsupported version Stata is used
 	local version = _caller()

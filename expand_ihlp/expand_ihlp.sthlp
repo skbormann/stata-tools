@@ -2,19 +2,19 @@
 {* *! version 1.0 20.12.2018}{...}
 {title:Title}
 {phang}
-{cmd:expandihlp} {hline 2} inserts the content of .ihlp-files into .sthlp-files 
+{cmd:expand_ihlp} {hline 2} inserts the content of .ihlp-files into .sthlp-files 
 
 {title:Description}
-{cmd:expandihlp} is a tool meant for programmers who want to include the same text in the help-files for their programs. 
+{cmd:expand_ihlp} is a tool meant for programmers who want to include the same text in the help-files for their programs. 
 The standard way to do so is via the "INCLUDE help something" SMCL-directive which integrates the content of something.ihlp into the .sthlp file.
 However, you have to distribute the .ihlp-files if you want to use this approach for a program being installed by someone else.
-{cmd:expandihlp} reads the .sthlp-file, searches for "INCLUDE help something" SMCL-directives and integrates the content of something.ihlp into the .sthlp file like the Stata viewer would do.
-By default {cmd:expandihlp} tests for the existince of the directives, reports the numbers (and names) and creates a new file named "program_expanded.sthlp" which contains the integrated content and leaves the original file unchanged. 
+{cmd:expand_ihlp} reads the .sthlp-file, searches for "INCLUDE help something" SMCL-directives and integrates the content of something.ihlp into the .sthlp file like the Stata viewer would do.
+By default {cmd:expand_ihlp} tests for the existince of the directives, reports the numbers (and names) and creates a new file named "program_expanded.sthlp" which contains the integrated content and leaves the original file unchanged. 
 
 The full path to the help file can be provided, but the command will look for the help file in the standard search paths.
 {title:Syntax}
 {phang}
-{cmd:expandihlp}  , {cmdab:f:ile(string)}[ {cmdab:ren:ame} {cmdab:not:est} {cmdab:suf:fix(string)} ] 
+{cmd:expand_ihlp}  , {cmdab:f:ile(string)}[ {cmdab:ren:ame} {cmdab:not:est} {cmdab:suf:fix(string)} ] 
 
 {synoptline}
 {synoptset 15 tabbed}{...}
@@ -28,11 +28,11 @@ If no "INCLUDE"-directives are found, then the command is aborted. {p_end}
 
 {title:Examples}
 Expands the help file for this program.
-{tab}{cmd: expandihlp , file(expandihlp) ren}
+{tab}{cmd: expand_ihlp , file(expand_ihlp) ren}
 
 {title:Saved results}
 {synoptset 15 tabbed}{...}
-{cmd:expandihlp} saves the following in {cmd:r()}:
+{cmd:expand_ihlp} saves the following in {cmd:r()}:
 {p2col 5 20 24 2: Macro}{p_end}
 {synopt: {cmd:r(inccnt)}}the number of files included.{p_end}
 {synopt: {cmd:r(incfiles)}}the expanded and included ihlp-files. {p_end}

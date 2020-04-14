@@ -1,15 +1,15 @@
 /*
-expandihlp
+expand_ihlp
 Version 1.0
 */
 VERSION 14.2
 INCLUDE _std_medium
 INCLUDE header
 
-HELP hlp1, view("help expandihlp")
+HELP hlp1, view("help expand_ihlp")
 RESET res1
 
-DIALOG main, label("expandihlp - Expands .ihlp-files into .sthlp files") tabtitle("Main")
+DIALOG main, label("expand_ihlp - Expands .ihlp-files into .sthlp files") tabtitle("Main")
 BEGIN
 	TEXT	tx_exp 	_lft _top _iwd . ,label("Help file to parse:")
 	FILE	fhelp	@ +20 @ ., label("Browse...") option(file) filter("Stata Help Files|*.sthlp|All Files|*.*") dialogtitle("Open help file") error("Help file to open")
@@ -21,7 +21,7 @@ END
 
 PROGRAM command
 BEGIN
-	put "expandihlp "
+	put "expand_ihlp "
 	*require main.fhelp
 	*varlist main.fhelp
 		beginoptions
