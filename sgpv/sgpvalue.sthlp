@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.00  21 Mar 2020}{...}
+{* *! version 1.02  06 Apr 2020}{...}
 {viewerdialog sgpvalue "dialog sgpvalue"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -50,7 +50,7 @@
 {p_end}
 
 {syntab:Further options}
-{synopt:{opt infcorrection(#)}}  a small scalar to denote a positive but infinitesimally small SGPV. 
+{synopt:{opt inf:correction(#)}}  a small number to denote a positive but infinitesimally small SGPV. 
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -119,7 +119,7 @@ If you don't want to create new variables and time is not an issue then don't se
 
 {dlgtab:Further options}
 {phang}
-{opt infcorrection(#)}  a small scalar to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. 
+{opt inf:correction(#)}  a small number to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. 
 This option can only be invoked when one of the intervals has infinite length.{p_end}
 
 {marker examples}{...}

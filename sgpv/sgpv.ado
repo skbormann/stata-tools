@@ -1,4 +1,5 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 1.01 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented), removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; shortened subcommand menuInstall to menu 
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
@@ -11,17 +12,15 @@
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
 	- Write a certification script which checks all possible errors (help cscript)
-	- Make error messages more descriptive and give hints how resolve the problems.
-	- display the equation for multi equation commands e.g. sqreg, ivreg, heckman, etc. (done in general, but not tested for all scenarios)
+	- Make error messages more descriptive and give hints how to resolve the problems.
 	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
-	- support for more commands which do not report their results in a matrix named "r(table)".
+	- support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
-	- Return more infos
-	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations
-	- Calculate automatically a null interval based on the statistical properties of the dependent variable of an estimation to encourage the usage of interval null-hypotheses.
+	- Return more infos (Which infos are needed for further processing?)
+	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command matrixplot instead?
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
-	- improve the speed of fdrisk.ado -> probably the integration part takes too long.
+	- improve the speed of fdrisk.ado -> the integration part takes too long. -> switch over to Mata integration functions provided by moremata-package
 	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
 */
 
@@ -33,12 +32,12 @@ capture  _on_colon_parse `0'
 
 
 *Check if anything to calculate is given
-if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !ustrregexm(`"`0'"',"menuInstall") { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !ustrregexm(`"`0'"',"menu") { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
 	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
 	disp as error "No subcommand found either."
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
 	disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'e(stored estimate name)' . "
-	disp as error "The only currently available subcommand is 'menuInstall'."
+	disp as error "The only currently available subcommand is 'menu'."
 	exit 198
 }
 
@@ -49,32 +48,30 @@ if !_rc{
 } 
 
 **Define here options
-syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) pi0(real 0.5) perm debug  /*Display additional messages: undocumented*/ FORmat(str) /*Undocumented setting to change the numerical accuracy of the displayed results*/] 
+syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) FORmat(str) PERMament  debug  /*Display additional messages: undocumented*/ ] 
 
 ***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
-/* Potential subcommands: value, power, fdrisk, plot
+/* Potential subcommands: value, power, fdrisk, plot, menuInstall
 if "`subcmd'"!=""{
-	if !inlist("`anything'","value","power","fdrisk","plot" ) stop "Unknown subcommand `anything'. Allowed subcommands are value, power, fdrisk and plot."
+	if !inlist("`subcmd'","value","power","fdrisk","plot" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk and plot."
 	local 0_new `0'
 	gettoken 
 	ParseSubcmd `subcmd', 
 	
 }
 */
-if "`subcmd'"=="menuInstall"{
-	menuInstall , `perm'
+if "`subcmd'"=="menu"{
+	menuInstall , `permament'
 	exit
 }
 
 
-
-
 ***Option parsing
-if ("`cmd'"!="" & "`e(cmd)'"!="" ) & ("`estimate'"!="" & "`matrix'"!=""){
-	stop "Options 'matrix' and 'estimate' cannot be used in combination with replaying an existing estimation or a new estimation."
+if "`cmd'"!="" & ("`estimate'"!="" | "`matrix'"!=""){
+	disp as error "Options 'matrix' and 'estimate' cannot be used in combination with a new estimation command."
+	exit 198
 } 
-
-if "`estimate'"!="" & "`matrix'"!=""{
+else if "`estimate'"!="" & "`matrix'"!=""{
 	stop "Setting both options 'estimate' and 'matrix' is not allowed."
 } 
 
@@ -123,7 +120,7 @@ if "`estimate'"!="" & "`matrix'"!=""{
 	}
 	*Intlevel
 	if "`intlevel'"!=""{
-		local intlevel `intlevel'
+		local intlevel = `intlevel'
 	}
 	else{
 		local intlevel 0.05
@@ -251,29 +248,15 @@ return add
 
 
 if "`nofdrisk'"==""{
-*False discovery risks 
-	mat `fdrisk' = J(`:word count `rownames'',1,.)
-		*mat `fdrisk' = J(`:word count `rownames'',2,.)
+*False discovery risks 	
 		mat `fdrisk' = J(`:word count `rownames'',1,.)
-		*mat colnames  `fdrisk' = Fdr  Fcr
 		mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
-	*if inlist(`=`comp'[`i',1]',0,1){
 	if `=`comp'[`i',1]'==0{
-	/*Add here additional checks for non-sensical inputs (according to the fdrisk R-code) like a Null-Hypothesis which is included in the confidence interval -> in theory it makes sense to calculate the Fcr in such case, but Blume et al. do not consider this case 
-	-> shows the limitations of using confidence intervals as support for the alternative hypothesis 
-	-> shows the limitations of calculating Fcr/Fdr automatically after estimation commands
-	-> should consider only reporting Fdr and not Fcr's
-	*/
-	/*if ((`=min(`=`input_new'[5,`i']', `=`input_new'[6,`i']')' > `nulllo') & (`=max(`=`input_new'[5,`i']', `=`input_new'[6,`i']')'< `nullhi')){
-	 local skipped_coef `skipped_coef' `:word `i' of `rownames''
-	 
-	 continue
-	}*/
+
 	
 		qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
 		if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
-		if "`r(fcr)'"!= "" mat `fdrisk'[`i',2] = `r(fcr)'
 				
 		}
 	}
@@ -291,14 +274,6 @@ else{
 *Change the format of the displayed matrix
 Format_Display `comp', format(`format')
  matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
-
-/*
-if "`skipped_coef'"!=""{
-	disp _n "Skipped calculations of Fcr/Fdr for the coefficients: `skipped_coef'"
-	disp "These coefficients have confidence intervals which overlap or are contained with the Null-Hypothesis defined" _n "by the options 'nulllo' and 'nullhi'."
-	disp "If you want calculate False Confirmation/Discovery risks for these coefficients" _n "then you have to set the options 'nulllo' and 'nullhi' to values" _n "which are smaller than the lower and upper bound of the smallest confidence interval. "
-}
-*/
 
 *matlist `comp' , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
 return add
@@ -334,6 +309,9 @@ mat colnames `display_mat' = `display_mat_coln'
 mat rownames `display_mat' = `display_mat_rown'
 
 return matrix display_mat = `display_mat' 
+*return local ecmd "`e(cmd)'" 
+*return local ecmdline "`e(cmdline)'"
+*return local sgpv_options "`'"
 
 end
 
@@ -346,8 +324,8 @@ end
 
 *Make the dialog boxes accessible from the User-menu
 program define menuInstall
- syntax [, perm *] 
- if "`perm'"=="perm"{
+ syntax [, permament *] 
+ if "`permament'"=="permament"{
 		capture findfile profile.do, path(STATA;.)
 		if _rc{
 			local replace replace

@@ -12,15 +12,15 @@
 *!				Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
 *!Version 0.90  : Initial release to Github 
 *!Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
-*!Still missing: Some Input error checks
+*!Still missing: Some Input error checks (which ones are missing?)
 *!To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
-*!		 	Make behaviour of nodeltagap-option consistent across algorithms -> delta-gaps always calculated for mata and variable version, always returned for variable version 
+
 
 
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings infcorrection(real 1e-5) nodeltagap nomata noshow replace ] 
+syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings INFcorrection(real 1e-5) nodeltagap nomata noshow replace ] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables

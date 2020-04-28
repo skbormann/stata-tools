@@ -19,7 +19,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpv}
-[{help sgpv##menuInstall:menuInstall}]
+[{help sgpv##menuInstall:menu}]
 [{cmd:,}
 {it:options}] [{cmd::} {help sgpv##estimation_command:{it:estimation_command}}]
 
@@ -65,8 +65,8 @@
 {synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.
 {p_end}
 
-{syntab:menuInstall}
-{synopt:{opt perm}} install permanently the dialog boxes into the User menubar.
+{syntab:menu}
+{synopt:{opt perm:ament}} install permanently the dialog boxes into the User menubar.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -204,9 +204,9 @@ The default is "confidence".
 A prior probability outside of this interval is not sensible. 
 The default value assumes that both hypotheses are equally likely.
 
-{dlgtab: menuInstall}
+{dlgtab:menu}
 {phang}
-{opt perm} install permanently the dialog boxes into the User menubar. 
+{opt perm:ament} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
 If no profile.do exists or can be found then a new profile.do is created in the current directory. 
 At the moment, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
@@ -294,7 +294,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
  
 {marker menuInstall}{...}
   Install the dialog boxes permanently in the User menubar: User -> Statistics 
-	{stata . sgpv menuInstall, perm}  
+	{stata . sgpv menu, perm}  
 
 {title:Stored results}
 Besides its own calculations, {cmd:sgpv} also preserves the returned results from the estimation command including everything returned in r().
