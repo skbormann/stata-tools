@@ -1,5 +1,9 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version 1.01 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented), removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; shortened subcommand menuInstall to menu 
+*!Version 1.01 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
+				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
+				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
+				shortened subcommand menuInstall to menu;  ///
+				added parsing of subcommands as a convenience feature (not documented yet)
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
@@ -47,19 +51,35 @@ if !_rc{
 	local 0 `"`s(before)'"' 
 } 
 
+***Parsing of subcommands -> A convenience feature to use only one command for SGPV calculation -> no further input checks
+* Potential subcommands: value, power, fdrisk, plot, menu
+local old_0 `0'
+gettoken subcmd 0:0, parse(" ,")
+if "`subcmd'"!=""{
+	if !inlist("`subcmd'","value","power","fdrisk","plot", "menu" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk, plot and menu."
+	if ("`subcmd'"=="value"){
+		local subcmd : subinstr local subcmd "`=substr("`subcmd'",1,1)'" "sgpv"
+	} 
+	if ("`subcmd'"=="power"){
+		local subcmd : subinstr local subcmd "`=substr("`subcmd'",1,1)'" "sgp"
+	} 
+	if ("`subcmd'"=="plot"){
+		local subcmd `subcmd'sgpv
+	} 
+	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
+	`subcmd' `0'
+	exit	
+	
+}
+else{
+	local 0 `old_0'
+}
+
+
 **Define here options
 syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) FORmat(str) PERMament  debug  /*Display additional messages: undocumented*/ ] 
 
-***Parsing of subcommands -> Might be added as a new feature to use only one command for SGPV calculation
-/* Potential subcommands: value, power, fdrisk, plot, menuInstall
-if "`subcmd'"!=""{
-	if !inlist("`subcmd'","value","power","fdrisk","plot" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk and plot."
-	local 0_new `0'
-	gettoken 
-	ParseSubcmd `subcmd', 
-	
-}
-*/
+
 if "`subcmd'"=="menu"{
 	menuInstall , `permament'
 	exit
