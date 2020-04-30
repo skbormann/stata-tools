@@ -7,12 +7,12 @@
 	version 12.0
 	set more off
 	args argument
-	`0'
+	*`0'
 
 // end
 
 *Example t-test with simulated data
-capture program drop ttest_sim
+*capture program drop ttest_sim
 // program ttest_sim
 if "`argument'"=="ttest_sim"{
 	preserve

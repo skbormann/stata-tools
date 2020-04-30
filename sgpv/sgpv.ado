@@ -1,9 +1,11 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version 1.01 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
+*!Version 1.02 30.04.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
 				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
 				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
 				shortened subcommand menuInstall to menu;  ///
-				added parsing of subcommands as a convenience feature (not documented yet)
+				added parsing of subcommands as a convenience feature (not documented yet) ///
+				allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> dialog box not changed yet accordingly, not documented yet, no check of the coefficient option for an equation name
+				
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
@@ -14,7 +16,8 @@
 *!Version 0.90 : Initial Github release
 
 /*
-To-Do(Things that I wish to implement at some point or that I think that might be interesting to have: 
+To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:
+	- Consider changing the default display of results from all statistics to only SGPVs -> Fdrs  take too much time to calculate currently and deltagaps are not very informative
 	- Write a certification script which checks all possible errors (help cscript)
 	- Make error messages more descriptive and give hints how to resolve the problems.
 	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
@@ -22,7 +25,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
 	- Return more infos (Which infos are needed for further processing?)
-	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command matrixplot instead?
+	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command plotmatrix instead?
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	- improve the speed of fdrisk.ado -> the integration part takes too long. -> switch over to Mata integration functions provided by moremata-package
 	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
@@ -36,12 +39,12 @@ capture  _on_colon_parse `0'
 
 
 *Check if anything to calculate is given
-if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !ustrregexm(`"`0'"',"menu") { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist("`: word 1 of `0''","value","power","fdrisk","plot", "menu" ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
 	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
 	disp as error "No subcommand found either."
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
 	disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'e(stored estimate name)' . "
-	disp as error "The only currently available subcommand is 'menu'."
+	disp as error "The currently available subcommands are 'value', 'power', 'fdrisk', 'plot' and 'menu'."
 	exit 198
 }
 
@@ -51,12 +54,14 @@ if !_rc{
 	local 0 `"`s(before)'"' 
 } 
 
-***Parsing of subcommands -> A convenience feature to use only one command for SGPV calculation -> no further input checks
+***Parsing of subcommands -> A convenience feature to use only one command for SGPV calculation -> no further input checks of acceptable options
 * Potential subcommands: value, power, fdrisk, plot, menu
 local old_0 `0'
-gettoken subcmd 0:0, parse(" ,")
-if "`subcmd'"!=""{
-	if !inlist("`subcmd'","value","power","fdrisk","plot", "menu" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk, plot and menu."
+gettoken subcmd 0:0, parse(" ,:")
+if inlist("`subcmd'","value","power","fdrisk","plot", "menu" ){ // Change the code to allow shorter subcommand names? Look at the code for estpost.ado for one way how to do it
+	*if !inlist("`subcmd'","value","power","fdrisk","plot", "menu" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk, plot and menu."
+	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
+
 	if ("`subcmd'"=="value"){
 		local subcmd : subinstr local subcmd "`=substr("`subcmd'",1,1)'" "sgpv"
 	} 
@@ -66,7 +71,6 @@ if "`subcmd'"!=""{
 	if ("`subcmd'"=="plot"){
 		local subcmd `subcmd'sgpv
 	} 
-	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
 	`subcmd' `0'
 	exit	
 	
@@ -77,14 +81,18 @@ else{
 
 
 **Define here options
-syntax [anything(name=subcmd)] [, Quietly  Estimate(name)  Matrix(name) MATListopt(string asis) COEFficient(string) NOBonus(string) nulllo(real 0) nullhi(real 0)  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) FORmat(str) PERMament  debug  /*Display additional messages: undocumented*/ ] 
+syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  COEFficient(string) /// input-options
+ Quietly MATListopt(string asis) NOBonus(string) FORmat(str)  /// display-options
+ nulllo(real 0) nullhi(real 0) /// null-hypotheses
+ ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
+  /*PERMament*/  debug  /*Display additional messages: undocumented*/ ] 
 
-
+/*
 if "`subcmd'"=="menu"{
 	menuInstall , `permament'
 	exit
 }
-
+*/
 
 ***Option parsing
 if "`cmd'"!="" & ("`estimate'"!="" | "`matrix'"!=""){
@@ -227,15 +235,43 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  mat `input' = `inputmatrix'
  return add // save existing returned results 
  
- *Coefficient selection
+ *Coefficient selection -> needs another check for the existince of an equation name in the option -> would allow to select the calculations for specific coefficient equation combination nations
+ /* Not sure how to handle mixtures of equation-specific and general specification
+ foreach word of local coefficient{
+	if ustrregexm("`word'",":"){
+		
+	}
+ }
+ */
+ 
  if "`coefficient'"!=""{
+	*Added support for easier coefficient selection across equations
+	local coleq : coleq `input'
+	local coleq : list uniq coleq
+	if "`coleq'"=="_" local coleqnumb 0
+	else local coleqnumb = wordcount("`coleq'")
+	
 	local coefnumb : word count `coefficient'
-	forvalues i=1/`coefnumb'{
-		capture mat `coef_mat' = (nullmat(`coef_mat'), `input'[1...,"`: word `i' of `coefficient''"])
-		if _rc{
-			stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+	if `coleqnumb'==0{ // No equations found
+		forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `input'[1...,"`: word `i' of `coefficient''"])
+			if _rc{
+				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+			}
 		}
 	}
+	else if `coleqnumb'>0{ // Separate equations found
+		forvalues j=1/`coleqnumb'{
+			forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `input'[1...,"`:word `j' of `coleq'':`: word `i' of `coefficient''"])
+			if _rc{
+				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+			}
+		}
+		}
+	
+	}
+	
 	mat `input'=`coef_mat'
  }
  
@@ -343,8 +379,8 @@ program define stop
 end
 
 *Make the dialog boxes accessible from the User-menu
-program define menuInstall
- syntax [, permament *] 
+program define menu
+ syntax [, PERMament] 
  if "`permament'"=="permament"{
 		capture findfile profile.do, path(STATA;.)
 		if _rc{

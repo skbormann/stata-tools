@@ -19,7 +19,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpv}
-[{help sgpv##menuInstall:menu}]
+[{help sgpv##subcmd:subcmd}]
 [{cmd:,}
 {it:options}] [{cmd::} {help sgpv##estimation_command:{it:estimation_command}}]
 
@@ -77,7 +77,7 @@ This should be true so long the estimation command runs {help ereturn display:er
 If you want to calculate SGPVs for an estimation command or any other command which does not follow this convention, then you can use the {it: matrix(matrixname)} option. The matrix must be pre-processed to meet the expectations of {cmd:sgpv}.
  See the description {help sgpv##matrix_opt:here} for more information.{p_end}
  {p 4 6 2}
- * ONLY one thing can be used to calculate the SGPVs: an estimation command, a stored estimation result or a matrix with the necessary information.
+ * ONLY one thing can be used to calculate the SGPVs: an estimation command, a stored estimation result, a matrix with the necessary information or the previous estimation results.
 
 {marker description}{...}
 {title:Description}
@@ -132,12 +132,6 @@ This works only if no other commands did run after {cmd:sgpv}.
 {opt e:stimate(name)}     takes the name of a previously stored estimation.
 
 {phang}
-{opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
-The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
-Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
-Multiple coefficients must be separated with a space.
-
-{phang}
 {marker matrix_opt}
 {opt m:atrix(name)}  takes the name of matrix as input for the calculation. 
 The matrix must follow the structure of the r(table) matrix returned after commonly used estimation commands due to the hardcoded row numbers used for identifiying the necessary numbers. 
@@ -147,6 +141,14 @@ The rownames are: b se t pvalue ll ul{break}
 To the set rownames run: mat rownames <your matrix> =  b se t pvalue ll ul {break}
 Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be viewed {stata viewsource sgpv-leukemia-example.do:here}, if installed.
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
+
+{phang}
+{opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
+The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
+Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
+Multiple coefficients must be separated with a space.
+
+
 
 {phang}
 {opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed.
