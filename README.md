@@ -19,4 +19,4 @@ The *sgpv* command is the main command for normal users. It offers features whic
   
 # Installation
   To install the programs, just download them and the corresponding help file and dialog box to your local ado folder.
-  Or run __net install *programname*, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/) replace__
+  Or run __net install *programname*, from(https://raw.githubusercontent.com/skbormann/stata-tools/testing/) replace__
