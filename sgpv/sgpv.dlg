@@ -44,7 +44,7 @@ BEGIN
 	TruncNormal
 END
 
-LIST nobonus_values
+LIST bonus_values
 BEGIN
 	none // a filler option introduced to have a default option for the dropdownlist
 	deltagap
@@ -52,7 +52,7 @@ BEGIN
 	all
 END
 
-LIST nobonus_list
+LIST bonus_list
 BEGIN
 	None
 	Delta-Gap
@@ -61,12 +61,12 @@ BEGIN
 END
 
 
-LIST nobonus_action
+LIST bonus_action
 BEGIN
+	script fdrisk_off
+	script fdrisk_off
 	script fdrisk_on
 	script fdrisk_on	 
-	script fdrisk_off
-	script fdrisk_off
 	  
 
 END
@@ -122,10 +122,10 @@ BEGIN
 	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt)
 	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
-	TEXT tx_nobonus 		10 		_ss 	150 	., label("Deactivate Bonus Statistics:")
-	COMBOBOX cb_nobonus 	10 		_ss 	180 	., dropdownlist content(nobonus_list) values(nobonus_values) option(nobonus) default(none)  ///
-														tooltip(Deactivate the display and calculation of the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then all bonus statistcs are calculated and displayed.) ///
-														onselchangelist(nobonus_action) 
+	TEXT tx_bonus 		10 		_ss 	150 	., label("Bonus Statistics:")
+	COMBOBOX cb_bonus 	10 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
+														tooltip(Display and calculate the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then no bonus statistcs are calculated and displayed.) ///
+														onselchangelist(bonus_action) 
 	TEXT     tx_format    	_lft    +35     _iwd    .,   label(resource LBL_FORMAT) 
 	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
 													 tooltip("specifies the format for displaying the individual elements of the result matrix.   This option is NOT identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via matlistopt() overrides the setting here and also changes the format of the column names.")
@@ -238,7 +238,7 @@ BEGIN
 		option display.ck_quiet
 		
 		optionarg display.ed_matlist
-		optionarg /hidedefault display.cb_nobonus
+		optionarg /hidedefault display.cb_bonus
 		optionarg /hidedefault display.ed_format
 		
 		optionarg fdrisk.ex_nullspace

@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.00  24 Mar 2020}{...}
+{* *! version 1.01  24 Mar 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -31,7 +31,7 @@
 {p_end}
 {p2coldent :* {opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
 {p_end}
-{synopt:{opt coef:ficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
+{synopt:{opt c:oefficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
 {* syntab:Null hypothesis}
 {synopt:{opt nulllo(#)}}  change the upper limit of the null-hypothesis interval.
@@ -44,7 +44,7 @@
 {p_end}
 {synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. 
 {p_end}
-{synopt:{opt nob:onus(string)}}  deactivate the display and calculation of bonus statistics like delta gaps and fdr. 
+{synopt:{opt b:onus(string)}}   display and calculate bonus statistics like delta gaps and fdr. 
 {p_end}
 {synopt:{opth for:mat(%fmt)}} display format of the results.
 {p_end}
@@ -113,6 +113,12 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
     				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs
     				  {help plotsgpv}   - plot the SGPVs
 
+{marker subcmd}{...}
+{title:Subcommands}
+    It is possible to call the other commands of the sgpv-package with the {cmd:sgpv}-command. 
+    This is mostly a convience feature so that the help-files for the individual commands should be consulted for the options of these commands.
+    Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
+    Two examples how to use the subcommands are given {help sgpv##subcmds_example:here}.
 
 {marker options}{...}
 {title:Options}
@@ -143,10 +149,11 @@ Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be 
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
 {phang}
-{opt coef:ficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
+{opt c:oefficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
 The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
 Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
+You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See {help sgpv##multiple-equations-example: the multiple equations example} for an example.
 
 
 
@@ -164,7 +171,7 @@ Multiple coefficients must be separated with a space.
 {opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
-{opt nob:onus(string)}   deactivate the display and calculation of bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to deactivate only the display and calculations of the delta-gaps or the fdrs or both.
+{opt b:onus(string)}    display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.
 
 {phang}
 {opth for:mat(%fmt)} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). 
@@ -284,6 +291,16 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   Calculate sgpvs for the stored estimation and only the foreign coefficient
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
+	
+{marker multiple-equations-example}{...}
+  Calculate sgpvs for a multiple equation estimation command and 
+	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
+	Select only the foreign coefficient for sgpv calculation
+	{stata . sgpv, coefficient("foreign") }
+        Select only the 50% quantile equation for sgpv calculation
+	  sgpv, coefficient("q50:")  
+        Select only the 50% quantile equation and foreign coefficient for sgpv calculation
+	  sgpv, coefficient("q50:foreign") 
 
 {marker leukemia-example}{...}
   Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed. 
@@ -293,6 +310,11 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
   Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
   You can run {stata display c(matsize)} to see your current setting.
+ 
+{marker subcmds_example}{...}
+The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
+{stata . sgpv value, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)') }
+{stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
  
 {marker menuInstall}{...}
   Install the dialog boxes permanently in the User menubar: User -> Statistics 

@@ -1,10 +1,11 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version 1.02 30.04.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
+*!Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
 				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
 				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
 				shortened subcommand menuInstall to menu;  ///
-				added parsing of subcommands as a convenience feature (not documented yet) ///
-				allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> dialog box not changed yet accordingly, not documented yet, no check of the coefficient option for an equation name
+				added parsing of subcommands as a convenience feature///
+				allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> implemented what is "promised" by the dialog box text ///
+				changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested 
 				
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
@@ -17,6 +18,7 @@
 
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:
+	- Display and return the used null-hypothesis 
 	- Consider changing the default display of results from all statistics to only SGPVs -> Fdrs  take too much time to calculate currently and deltagaps are not very informative
 	- Write a certification script which checks all possible errors (help cscript)
 	- Make error messages more descriptive and give hints how to resolve the problems.
@@ -81,18 +83,12 @@ else{
 
 
 **Define here options
-syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  COEFficient(string) /// input-options
- Quietly MATListopt(string asis) NOBonus(string) FORmat(str)  /// display-options
+syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) /// input-options
+ Quietly MATListopt(string asis) Bonus(string) FORmat(str)  /// display-options
  nulllo(real 0) nullhi(real 0) /// null-hypotheses
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
-  /*PERMament*/  debug  /*Display additional messages: undocumented*/ ] 
+    debug  /*Display additional messages: undocumented*/ ] 
 
-/*
-if "`subcmd'"=="menu"{
-	menuInstall , `permament'
-	exit
-}
-*/
 
 ***Option parsing
 if "`cmd'"!="" & ("`estimate'"!="" | "`matrix'"!=""){
@@ -190,21 +186,27 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	}
 	
 	
-**Parse nobonus option
-if !inlist("`nobonus'","deltagap","fdrisk","all","none",""){
+**Parse bonus option
+*Changed the default behaviour so that the option is now a bit confusing
+if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
 	stop `"nobonus option incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
 }
-if "`nobonus'"=="deltagap"{
+if "`bonus'"=="" | "`bonus'"=="none"{ 	
 	local nodeltagap nodeltagap
-	}
-	
-if "`nobonus'"=="fdrisk"{
-	local nofdrisk nofdrisk
+	local fdrisk 
 }
 
-if "`nobonus'"=="all"{
-	local nofdrisk nofdrisk
-	local nodeltagap nodeltagap
+if "`bonus'"=="deltagap"{
+	local nodeltagap 
+	}
+	
+if "`bonus'"=="fdrisk"{
+	local fdrisk fdrisk
+}
+
+if "`bonus'"=="all"{
+	local fdrisk fdrisk
+	local nodeltagap 
 }
 
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
@@ -219,7 +221,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  
 * disp "Start calculating SGPV"
  *Create input vectors
-  tempname input  input_new sgpv pval comp rest fdrisk coef_mat
+  tempname input  input_new sgpv pval comp rest fdrisk 
  
  *Set the required input matrix
  if "`matrix'"==""{
@@ -235,46 +237,9 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  mat `input' = `inputmatrix'
  return add // save existing returned results 
  
- *Coefficient selection -> needs another check for the existince of an equation name in the option -> would allow to select the calculations for specific coefficient equation combination nations
- /* Not sure how to handle mixtures of equation-specific and general specification
- foreach word of local coefficient{
-	if ustrregexm("`word'",":"){
-		
-	}
- }
- */
- 
- if "`coefficient'"!=""{
-	*Added support for easier coefficient selection across equations
-	local coleq : coleq `input'
-	local coleq : list uniq coleq
-	if "`coleq'"=="_" local coleqnumb 0
-	else local coleqnumb = wordcount("`coleq'")
-	
-	local coefnumb : word count `coefficient'
-	if `coleqnumb'==0{ // No equations found
-		forvalues i=1/`coefnumb'{
-			capture mat `coef_mat' = (nullmat(`coef_mat'), `input'[1...,"`: word `i' of `coefficient''"])
-			if _rc{
-				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
-			}
-		}
-	}
-	else if `coleqnumb'>0{ // Separate equations found
-		forvalues j=1/`coleqnumb'{
-			forvalues i=1/`coefnumb'{
-			capture mat `coef_mat' = (nullmat(`coef_mat'), `input'[1...,"`:word `j' of `coleq'':`: word `i' of `coefficient''"])
-			if _rc{
-				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
-			}
-		}
-		}
-	
-	}
-	
-	mat `input'=`coef_mat'
- }
- 
+ *Coefficient selection 
+ CoefParse `input', coefficient(`coefficient')
+ mat `input' = r(coef_mat)
  local coln =colsof(`input')
 
 * Hard coded values for the rows from which necessary numbers are extracted
@@ -303,23 +268,21 @@ return add
  mat colnames `pval' = "P-Value"
 
 
-if "`nofdrisk'"==""{
+if "`fdrisk'"=="fdrisk"{
 *False discovery risks 	
-		mat `fdrisk' = J(`:word count `rownames'',1,.)
-		mat colnames  `fdrisk' = Fdr
+	mat `fdrisk' = J(`:word count `rownames'',1,.)
+	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
-	if `=`comp'[`i',1]'==0{
-
-	
-		qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
-		if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
+		if `=`comp'[`i',1]'==0{
+			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
+			if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
 				
 		}
 	}
 }
 
 *Final matrix composition before displaying results
-if "`nofdrisk'"!="nofdrisk"{
+if "`fdrisk'"=="fdrisk"{
 	mat `comp'= `pval',`comp' , `fdrisk'
 }
 else{
@@ -328,10 +291,9 @@ else{
  mat rownames `comp' = `rownames'
 
 *Change the format of the displayed matrix
-Format_Display `comp', format(`format')
- matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
+FormatDisplay `comp', format(`format')
+ matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {`nulllo',`nullhi'}") rowtitle(Variables) `matlistopt'
 
-*matlist `comp' , title("Comparison of ordinary P-Values and Second Generation P-Values") rowtitle(Variables) `matlistopt'
 return add
 *Return results
 return matrix comparison =  `comp'
@@ -339,7 +301,7 @@ return matrix comparison =  `comp'
 end
 
 *Re-format the input matrix and return a new matrix to circumvent the limitations set by matlist -> using the cspec and rspec options of matlist requires more code to get these options automatically correct -> for now probably not worth the effort.
-program define Format_Display, rclass
+program define FormatDisplay, rclass
 syntax name(name=matrix) [, format(string)]
 	if `"`format'"'==""{
 		local format %5.4f
@@ -347,7 +309,8 @@ syntax name(name=matrix) [, format(string)]
 	else {
 			capture local junk : display `format' 1
 			if _rc {
-					dis as err "invalid %format `format'"
+					dis as err "Invalid %format `format'"
+					dis in smcl as err "See the help file for {help format} for more information."
 					exit 120
 			}
 		}
@@ -365,10 +328,76 @@ mat colnames `display_mat' = `display_mat_coln'
 mat rownames `display_mat' = `display_mat_rown'
 
 return matrix display_mat = `display_mat' 
-*return local ecmd "`e(cmd)'" 
-*return local ecmdline "`e(cmdline)'"
-*return local sgpv_options "`'"
 
+end
+
+
+*Parse the content of the coefficient-option
+program define CoefParse, rclass
+	syntax name(name=matrix) [, coefficient(string asis)]
+	if "`coefficient'"==""{
+		return matrix coef_mat = `matrix'
+		exit
+	}
+	
+ /* Distinguish three cases:	1. variable name only
+								2. equation name only
+								3. equation and variable name together
+ 
+ */
+ * No mixtures of cases allowed yet
+ foreach coef of local coefficient{
+	*Case 1
+	if !ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){
+		local coefspec `coefspec' `coef'	
+	}
+	*Case 2
+	if ustrregexm("`coef'",":$"){
+		local eqspec `eqspec' `coef'	
+	} 
+	*Case 3
+	if ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){	
+		local eqcoefspec `eqcoefspec' `coef'		
+	}
+ }
+ 
+ if (wordcount("`eqcoefspec'")>0 & wordcount("`eqspec'")>0) | (wordcount("`eqcoefspec'")>0 & wordcount("`coefspec'")>0) | (wordcount("`eqspec'")>0 & wordcount("`coefspec'")>0){ 
+	stop "You can only specify equation-specific ('XX:YYY'), equations ('XX:') or general coefficients('YYY') in option 'coefficient' at the same time."
+ }
+ if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
+ 
+
+	if wordcount("`coefficient'")==wordcount("`coefspec'"){ // looking for the equations only needed if case 1
+	local coleq : coleq `matrix'
+	local coleq : list uniq coleq
+	if "`coleq'"=="_" local coleqnumb 0
+	else local coleqnumb = wordcount("`coleq'")
+	}
+	
+	local coefnumb : word count `coefficient'
+	tempname coef_mat
+	if `coleqnumb'==0{ // No equations found or only fully specified coefficient names given (eq:var) Case 3 & Case 2 (eq:)
+		forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`: word `i' of `coefficient''"])
+			if _rc{
+				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+			}
+		}
+	}
+	else if `coleqnumb'>0{ // Separate equations found and only general variables given Case 1
+		forvalues j=1/`coleqnumb'{
+			forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`:word `j' of `coleq'':`: word `i' of `coefficient''"])
+				if _rc{
+					stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+				}
+			}
+		}
+	
+	}
+	
+	return mat coef_mat=`coef_mat'
+	
 end
 
 *Simulate the behaviour of the R-function with the same name 

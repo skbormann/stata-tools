@@ -57,6 +57,14 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.02 03.05.2020 :
+	* Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options
+	* Removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented)
+	* Enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying 
+	* Shortened subcommand menuInstall to menu
+	* Added parsing of subcommands as a convenience feature (somewhat documented yet)
+	* Allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> implemented what is "promised" by the dialog box text 
+	* changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 * Version 0.98a: 
