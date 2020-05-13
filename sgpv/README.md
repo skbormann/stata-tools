@@ -33,7 +33,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
-* Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> requires for now the moremata package by Ben Jann due to using the mm_cond() function -> not tested the code yet 
+* Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
   * The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
@@ -57,6 +57,10 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.03 13.05.2020 : 
+  * added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an undocumented option 
+  * added some more warnings in the description of the options
+  * Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 * Version 1.02 03.05.2020 :
 	* Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options
 	* Removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented)

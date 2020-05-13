@@ -105,10 +105,10 @@ BEGIN
 	
 	GROUPBOX gb_null 		5 		_ls 	190 	80, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 
-	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) numonly
+	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) numonly tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	
 	TEXT tx_nullhi 			+100 	-20 	70 		., label("Upper Bound") 
-	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) numonly
+	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) numonly tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	
 
 END

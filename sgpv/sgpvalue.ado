@@ -1,6 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi
+*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is still possible. 
 *!Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
@@ -14,6 +14,7 @@
 *!Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
 *!Still missing: Some Input error checks (which ones are missing?)
 *!To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
+*!			Add an option to format the output	
 
 
 
@@ -50,7 +51,9 @@ syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings 
 	}
 
 
-*Potential Errors
+**Potential Errors
+* Not covered yet -> nullhi and nulllo are equal but less than esthi and estlo -> not sure how to handle it
+* Not all non-sensical inputs covered yet -> number of esthi less than nullhi;
 if `:word count `nullhi'' != `: word count `nulllo''{
 	disp as error `" Options "nullhi" and "nulllo" do not contain the same number of arguments."'
 	exit 198
@@ -59,6 +62,16 @@ if `:word count `nullhi'' != `: word count `nulllo''{
 if `:word count `esthi'' != `: word count `estlo''{
 	disp as error `" Options "esthi" and "estlo" do not contain the same number of arguments. "'
 	exit 198
+}
+
+if wordcount("`nulllo'") < wordcount("`estlo'") & wordcount("`nulllo'")>1{
+	disp as error "Options 'nulllo' and 'nullhi' must only have one argument or exactly as many arguments as options 'esthi' and 'estlo' "
+	disp as error "Options 'nulllo' and 'nullhi miss " `=wordcount("`esthi'")-wordcount("`nullhi'")' " number of arguments."
+	exit 198
+}
+
+if wordcount("`nulllo'") > wordcount("`estlo'"){
+	stop "Options 'nulllo' and 'nullhi' cannot have more arguments than options 'esthi' and 'estlo'. "
 }
 
   if `:word count `nulllo''==1 {
@@ -147,7 +160,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 		*Warnings -> Make warning messages more descriptive
 			if "`warnings'"!="nowarnings"{
 				if (`est_len'<0  ) & (`null_len'<0){
-					disp as error "The `i'th interval length is negative." 
+					disp as error "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
 				}
 				*if isinfinite(abs(`est_len')+abs(`null_len')){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
 				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
@@ -155,7 +168,10 @@ else{	// Run if rows less than matsize -> the "original" approach
 				}
 				
 				if (`est_len'==0 | `null_len'==0 ) {
-					disp as error "The `i'th interval has a zero length."
+				/*
+				if `null_len'==0 disp as error "The `i'th null hypothesis interval (`null_lo', `null_hi') is a point null hypothesis. Consider instead specifiying a true interval null hypothesis. " 
+				*/
+					disp as error "The `i'th interval has a zero length. Consider using an interval hypothesis instead of a point hypothesis."
 				}
 		}
 		

@@ -1,12 +1,13 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
+*!Version 1.03 13.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an undocumented option; added some more warnings in the description of the options ///
+				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 *!Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
 				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
 				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
 				shortened subcommand menuInstall to menu;  ///
-				added parsing of subcommands as a convenience feature///
+				added parsing of subcommands as a convenience feature ///
 				allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> implemented what is "promised" by the dialog box text ///
-				changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested 
-				
+				changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested		
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
 *!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
@@ -18,11 +19,14 @@
 
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:
-	- Display and return the used null-hypothesis 
-	- Consider changing the default display of results from all statistics to only SGPVs -> Fdrs  take too much time to calculate currently and deltagaps are not very informative
+	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
+	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
+	- Change input type of options nulllo and nullhi from 'real' to 'string' to allow the same flexibility like the other commands -> allow a different null-hypothesis for each coefficient -> requires changes for the fdrisk option-parsing/generation & additional checks to avoid non-sensical input.
+	- Write more examples in the help file which describe how apply different null-hypotheses to different coefficients.
+	- Add more explicit warning against a point null-hypothesis in the output
+	- Display and return the used null-hypothesis  -> should be already done, at least display
 	- Write a certification script which checks all possible errors (help cscript)
-	- Make error messages more descriptive and give hints how to resolve the problems.
-	- allow more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations
+	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
 	- support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
 	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
@@ -87,7 +91,7 @@ syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(st
  Quietly MATListopt(string asis) Bonus(string) FORmat(str)  /// display-options
  nulllo(real 0) nullhi(real 0) /// null-hypotheses
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
-    debug  /*Display additional messages: undocumented*/ ] 
+    debug  /*Display additional messages: undocumented*/ NONULLwarnings /*Disable showing warning messages when using the default null-hypothesis */ ] 
 
 
 ***Option parsing
@@ -129,7 +133,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	  }
 	}
 
-	**Process fdrisk options
+	**Process fdrisk options -> needs changes to allow multiple null intervals
 	if `nulllo' ==. stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
 	if `nullhi' ==. stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
 	*Nullspace option
@@ -189,11 +193,11 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 **Parse bonus option
 *Changed the default behaviour so that the option is now a bit confusing
 if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
-	stop `"nobonus option incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
+	stop `"bonus option incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
 }
 if "`bonus'"=="" | "`bonus'"=="none"{ 	
 	local nodeltagap nodeltagap
-	local fdrisk 
+	local fdrisk_stat 
 }
 
 if "`bonus'"=="deltagap"{
@@ -201,11 +205,11 @@ if "`bonus'"=="deltagap"{
 	}
 	
 if "`bonus'"=="fdrisk"{
-	local fdrisk fdrisk
+	local fdrisk_stat fdrisk
 }
 
 if "`bonus'"=="all"{
-	local fdrisk fdrisk
+	local fdrisk_stat fdrisk
 	local nodeltagap 
 }
 
@@ -268,13 +272,13 @@ return add
  mat colnames `pval' = "P-Value"
 
 
-if "`fdrisk'"=="fdrisk"{
-*False discovery risks 	
+if "`fdrisk_stat'"=="fdrisk"{
+*False discovery risks 	-> needs changes to allow multiple null intervals
 	mat `fdrisk' = J(`:word count `rownames'',1,.)
 	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
-			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')  // Not sure yet if these are the best default values -> will need to implement possibilities to set these options
+			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 
 			if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
 				
 		}
@@ -282,7 +286,7 @@ if "`fdrisk'"=="fdrisk"{
 }
 
 *Final matrix composition before displaying results
-if "`fdrisk'"=="fdrisk"{
+if "`fdrisk_stat'"=="fdrisk"{
 	mat `comp'= `pval',`comp' , `fdrisk'
 }
 else{
@@ -294,13 +298,23 @@ else{
 FormatDisplay `comp', format(`format')
  matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {`nulllo',`nullhi'}") rowtitle(Variables) `matlistopt'
 
+if "`nonullwarnings'"=="" & (`nulllo'==0 & `nullhi'==0){
+	disp as error _n "Warning:"
+	disp as error "You used the default point 0 null-hypothesis for calculating the SGPVs."
+	disp as error "This is allowed but you are strongly encouraged to set a more reasonable interval null-hypothesis."
+	disp as error "The default point 0 null-hypothesis will result in having SGPVs of either 0 or 0.5."	
+}
+
 return add
 *Return results
 return matrix comparison =  `comp'
 
 end
 
+
+*Additional helper commands--------------------------------------------------------------
 *Re-format the input matrix and return a new matrix to circumvent the limitations set by matlist -> using the cspec and rspec options of matlist requires more code to get these options automatically correct -> for now probably not worth the effort.
+*Use round-function instead? Should result in easier and shorter code
 program define FormatDisplay, rclass
 syntax name(name=matrix) [, format(string)]
 	if `"`format'"'==""{

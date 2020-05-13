@@ -1,6 +1,6 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> requires for now the moremata package by Ben Jann due to using the mm_cond() function -> not tested the code yet 
+*!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 *!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *!Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
 *!				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
@@ -116,7 +116,7 @@ if `"`nullcol'"'==""{
 			mat `sgpvs' = r(results)
 			if ("`sortorder'"=="sgpv"){
 				if `=rowsof(`sgpvs')'<=c(matsize){				
-					mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) // Not possible if matrix is too large -> requires different solution
+					mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) 
 					mat colnames `sgpvcombo' = "sgpvcombo"
 					forvalues i=1/`=rowsof(`sgpvs')'{ // Only needed if sorting is set to sgpv
 						if `sgpvs'[`i',1]==0{
@@ -129,29 +129,24 @@ if `"`nullcol'"'==""{
 					}
 				}
 				else if `=rowsof(`sgpvs')'>c(matsize){ //Not tested yet -> need test case
-					capture findfile lmoremata.mlib
-					if _rc qui ssc install moremata, replace
+					*capture findfile lmoremata.mlib
+					*if _rc qui ssc install moremata, replace
 					mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
 					mata: sgpvcombo = J(rows(sgpv),1.)
-					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond
+					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond as a shortcut
 					mata: st_matrix("`sgpvcombo'",sgpvcombo)
 					mat colnames `sgpvcombo' = "sgpvcombo"
 				}
 			}
 	}
-	/*if c(matsize)<`=rowsof(`sgpvs')'{
-	
-	}*/
-	*else{
 
-	*}
 	*Convert matrix to variables -> directly plotting of matrices not possible
 	preserve
 	*Prepare matrix for conversion
 	if (`varsfound'==0 & "`setorder'"=="sgpv") svmat `sgpvcombo' ,names(col)
 	
 	*Sort dataset
-	if "`setorder'"=="sgpv"{ //Not correct parsing yet of the sorting order input
+	if "`setorder'"=="sgpv"{ 
 		if `varsfound'==0 local order sgpvcombo
 		if `varsfound'==1 local order \`sgpvcomb'
 	
@@ -212,5 +207,37 @@ if `"`nullcol'"'==""{
 	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `twoway_opt'
 	
 	restore
+end
+
+* Included this code to remove the requirement for having the moremata package installed
+*! mm_cond.mata
+*! version 1.0.0  29feb2008  Ben Jann
+version 9.2
+mata:
+
+transmorphic matrix mm_cond(real matrix x, transmorphic matrix y, transmorphic matrix z)
+{
+        transmorphic matrix res
+        real scalar r, R, c, C
+        transmorphic scalar rx, cx, ry, cy, rz, cz
+
+        if (eltype(y) != eltype(z)) _error(3250)
+        R = max((rows(x),rows(y),rows(z)))
+        C = max((cols(x),cols(y),cols(z)))
+        rx = (rows(x)==1 ? &1 : (rows(x)<R ? _error(3200) : &r))
+        cx = (cols(x)==1 ? &1 : (cols(x)<C ? _error(3200) : &c))
+        ry = (rows(y)==1 ? &1 : (rows(y)<R ? _error(3200) : &r))
+        cy = (cols(y)==1 ? &1 : (cols(y)<C ? _error(3200) : &c))
+        rz = (rows(z)==1 ? &1 : (rows(z)<R ? _error(3200) : &r))
+        cz = (cols(z)==1 ? &1 : (cols(z)<C ? _error(3200) : &c))
+        res = J(R,C, missingof(y))
+        for (r=1;r<=R;r++) {
+                for (c=1;c<=C;c++) {
+                        res[r,c] = (x[*rx,*cx] ? y[*ry,*cy] : z[*rz,*cz])
+                }
+        }
+        return(res)
+}
+
 end
 

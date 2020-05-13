@@ -158,10 +158,12 @@ You can also select only an equation by using "eq:" or select a specific equatio
 
 
 {phang}
-{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed.
+{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. What is reasonable lower bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+Using this default value will always result in having SGPVs of value 0 or 0.5!
 
 {phang}
-{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed.
+{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. What is reasonable upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+Using this default value will always result in having SGPVs of value 0 or 0.5!
 
 {dlgtab:Display}
 {phang}
@@ -231,7 +233,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   {stata . sysuse auto, clear}
 {marker prefix}{...}
   Usage of {cmd:sgpv} as a prefix-command:
-  {stata ". sgpv: regress price mpg weight foreign"} 
+  {stata ". sgpv, b(all): regress price mpg weight foreign"} 
   
   Example Output:
   		
@@ -254,12 +256,14 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   
   Comparison of ordinary P-Values and Second Generation P-Values
   
-       Variables |   P-Value       SGPV  Delta-Gap        Fdr        Fcr 
-    -------------+-------------------------------------------------------
-    	     mpg |  .7692938         .5          .          .          . 
-          weight |  5.99e-07          0   2.206717    .047926          . 
-         foreign |  9.72e-07          0   2308.909   .0480251          . 
-           _cons |  .0874262         .5          .          .          . 
+
+       Variables |   P-Value       SGPV  Delta-Gap        Fdr 
+    -------------+--------------------------------------------
+             mpg |     .7693         .5          .          . 
+          weight |         0          0     2.2067      .0479 
+         foreign |         0          0       2300       .048 
+           _cons |     .0874         .5          .          . 
+
    
   {marker interpretation_example}{...}
   Interpretation: There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
@@ -267,10 +271,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   This is the standard null-hypothesis of no effect.	
   You will usually have a more relastic interval which is larger than 0 due to measurement errors, scientific relevance, etc. 
   The delta-gap can be used to compare two different studies for the same model/estimation when both report second-generation p-values of zero (p_δ = 0).
-  So for this example, the delta-gap is not needed, but still provides information about the distance
-  between either the upper or the lower bound of the confidence interval and 0.
-  Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance
-  that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
+  So for this example, the delta-gap is not needed, but still provides information about the distance between either the upper or the lower bound of the confidence interval and 0.
+  Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
   Whether 5% is much, is for you to decide.
   
   {bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019).
@@ -313,7 +315,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
  
 {marker subcmds_example}{...}
 The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
-{stata . sgpv value, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)') }
+{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
 {stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
  
 {marker menuInstall}{...}
