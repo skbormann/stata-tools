@@ -1,17 +1,19 @@
 *!False confirmatory/discovery risk calculations for Second Generation P-Values
-*!Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
-*!Version 0.97a: Made error messages hopefully more understandable.
-*!Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
-*!Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
-*!Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
-*!Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
-*!Version 0.90 : Initial Github release
-*!To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
-*!		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
-*!		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box -> make options nullspace_lower and nullspace_upper and the same for altspace available.
-*! 		Make error messages more descriptive and give hints how resolve the problems.
+*!Author: Sven-Kristjan Bormann
+*Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
+*Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
+*Version 1.00 : Initial SSC release, no changes compared to the last Github version.
+*Version 0.97a: Made error messages hopefully more understandable.
+*Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas. 
+*Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details to the help file.
+*Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
+*Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
+*Version 0.90 : Initial Github release
+*To-Do: Rewrite to use Mata whenever possible instead of workarounds in Stata -> Shorten the code and make it faster
+*		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
+*		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box -> make options nullspace_lower and nullspace_upper and the same for altspace available.
+* 		Make error messages more descriptive and give hints how resolve the problems.
 
 
 capture program drop fdrisk
@@ -229,8 +231,8 @@ if `: word count `altspace''==2{
 	disp _n "The false confirmation rate (fcr) is: " %9.0g `fcr'
   }
 
-  return local fdr  `fdr'
-  return local fcr  `fcr'  	
+  if "`fdr'" !="" return scalar fdr = `fdr'
+  if "`fcr'" !="" return scalar fcr = `fcr'  	
 end
 
 *Simulate the behaviour of the R-function with the same name 

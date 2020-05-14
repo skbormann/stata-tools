@@ -48,7 +48,8 @@
 {p_end}
 {synopt:{opth for:mat(%fmt)}} display format of the results.
 {p_end}
-
+{synopt:{opt nonull:warnings}} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs.
+{p_end}
 {syntab:Fdrisk}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
 {p_end}
@@ -158,11 +159,15 @@ You can also select only an equation by using "eq:" or select a specific equatio
 
 
 {phang}
-{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. What is reasonable lower bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 
+Please change this value to something more reasonable. What is reasonable lower bound of no scientifically interesting effect(s), depends on your dataset and your research question.
 Using this default value will always result in having SGPVs of value 0 or 0.5!
 
 {phang}
-{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. What is reasonable upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 
+Please change this value to something more reasonable. What is reasonable upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
 Using this default value will always result in having SGPVs of value 0 or 0.5!
 
 {dlgtab:Display}
@@ -179,6 +184,9 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!
 {opth for:mat(%fmt)} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). 
 This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. 
 Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
+
+{phang}
+{opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. You should disable these warning messages only when you are certain that using the default point 0 null-hypothesis is what you want to use and understand the consequences of doing so.
 
 {dlgtab:Fdrisk}
 {pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end}
@@ -289,10 +297,13 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   Now run a quantile regression instead	
 	{stata . qreg price mpg weight foreign} 
 	{stata . estimates store priceqreg}
-
-  Calculate sgpvs for the stored estimation and only the foreign coefficient
+{* Add examples with alternative null-hypothesis}
+  Calculate sgpvs for the stored estimation and only the foreign coefficient 
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
+  
+  Set an alternative null-hypothesis: 1% of the mean value of the price variable (-62, 62)  
+	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly: regress price mpg weight foreign"}
 	
 {marker multiple-equations-example}{...}
   Calculate sgpvs for a multiple equation estimation command and 
@@ -314,9 +325,9 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   You can run {stata display c(matsize)} to see your current setting.
  
 {marker subcmds_example}{...}
-The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
-{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
-{stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+  The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
+	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
+	{stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
  
 {marker menuInstall}{...}
   Install the dialog boxes permanently in the User menubar: User -> Statistics 

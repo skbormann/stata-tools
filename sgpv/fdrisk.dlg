@@ -48,7 +48,7 @@ BEGIN
 	1
 END
 
-DIALOG main, label("Fdrisk 1.00 - False discovery/confirmation risk") tabtitle("Main")
+DIALOG main, label("Fdrisk 1.00 - False discovery/confirmation risk (Fdr/Fcr)") tabtitle("Main")
 BEGIN
 
 
@@ -61,7 +61,7 @@ BEGIN
 	EXP ex_nullhi	 	    @	 _ss    250      ., label("Expression") option(nullhi) ///
 													tooltip("Set upper bound of the null-hypothesis interval") error(Upper Bound null-hypothesis interval)
 	
-	TEXT tx_sgpval           300  -60       100   ., label("False ... risk:")
+	TEXT tx_sgpval           300  -60       140   ., label("Set Fdr/Fcr:")
 	COMBOBOX cb_sgpval       @  _ss      40   20, option(sgpval) content(sgpval_list) dropdownlist  default(0) tooltip("If you choose 0, the False Discovery Risk will be calculated. If you choose 1, the False Confirmation Risk will be calculated.")
 	
 	TEXT tx_se			    300   _ss   80      ., label("Standard Error")

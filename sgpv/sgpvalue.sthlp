@@ -71,32 +71,41 @@ A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
-To specify that the upper limit is +infinity, just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
-Typically the upper bound of a confidence interval is used. 
-A variable containing the upper bound can be also used.
-
-{phang}
 {opt estlo(string)}  lower bound of interval estimate. Values may be finite or infinite.
  To specify that the lower limit is -infinity, just specify the missing value . in this option. 
- Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
+ Multiple lower bounds can be entered. 
+ The number of upper bounds must match the number of lower bounds specified in option {it:esthi}.
+ They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
  {help exp:Expressions}/formulas are also allowed as input.
 Typically the lower bound of a confidence interval can be used. 
-A variable containing the lower bound can be also used.
+A variable containing the lower bounds can be also used, but then a variable containing the upper bounds must be used for option {it:esthi}.
+
+
+{phang}
+{opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
+To specify that the upper limit is +infinity, just specify the missing value . in this option. 
+The number of upper bounds must match the number of lower bounds specified in option {it:estlo}.
+Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
+Typically the upper bound of a confidence interval is used. 
+A variable containing the upper bounds can be also used, but then a variable containing the lower bounds must be used for option {it:estlo}.
+
+{phang}
+{opt nulllo(string)} lower bound of null interval. Values may be finite or infinite.
+ To specify that the lower limit is -infinity, just specify the missing value . in this option. 
+ Multiple lower bounds can be entered. 
+ In this case, the number of lower bounds must match the number of lower bounds specified in option {it:estlo}.
+ The number of lower bounds must always the number of upper bounds in option {it:nullhi}.
+ They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
+ 
 
 {phang}
 {opt nullhi(string)}     upper bound of null interval. Values may be finite or infinite.
-To specify that the upper limit is +infinity, just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
-Typically the upper bound of a confidence interval is used. 
-A variable containing the upper bound can be also used.
+To specify that the upper limit is +infinity, just specify the missing value . in this option. 
+Multiple upper bounds can be entered. 
+ In this case, the number of upper bounds must match the number of upper bounds specified in option {it:esthi}.
+ The number of lower bounds must always the number of upper bounds in option {it:nulllo}.
+They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
 
-{phang}
-{opt nulllo(string)}     lower bound of null interval. Values may be finite or infinite.
- To specify that the lower limit is -infinity, just specify the missing value . in this option. 
- Multiple lower bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
- {help exp:Expressions}/formulas are also allowed as input.
-Typically the lower bound of a confidence interval can be used. 
-A variable containing the lower bound can be also used.
 
 {dlgtab:Display}
 {phang}
@@ -110,9 +119,12 @@ A variable containing the lower bound can be also used.
 
 {dlgtab:Larger input}
 {phang}
-{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. 
+{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. 
+If this option is set, an approach based on variables is used. 
 Using variables instead of Mata will be faster, but new variables containing the results are created. 
-If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata because it takes time to return a large matrix.
+The results will saved in one variable named "pdelta" for the SGPVs and one variable named "dg" for the delta gaps.
+If you don't want to create new variables and time is not an issue then don't set this option. 
+Stata might become unresponsive when using Mata because it takes time to return a large matrix.
 
 {phang}
 {opt replace} replace    replace existing variables in case the nomata-option was used.

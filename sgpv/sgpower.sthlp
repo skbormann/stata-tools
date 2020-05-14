@@ -99,7 +99,7 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 {pstd}
 {p_end}
 {phang}
-{opt b:onus}     display the additional diagnostics for error type I.
+{opt b:onus}     display the additional diagnostics for error type I. {* Move here descriptions of the bonus statistics}
 
 {pstd}
 {p_end}
@@ -118,13 +118,14 @@ Plot the power curve examples (view the {view sgpower-plot-example.do:code} if i
 {title:Stored results}
 
 {synoptset 15 tabbed}{...}
-{p2col 5 15 19 2: Locals}{p_end}
+{p2col 5 15 19 2: Scalars}{p_end}
 {synopt:{cmd:r(poweralt)}}  probability of SGPV = 0 calculated assuming the parameter is equal to {cmd:true}.	 That is, {cmd:poweralt} = P(SGPV = 0 | θ = {cmd:true}).  {p_end}
 {synopt:{cmd:r(powernull)}}  probability of SGPV = 1 calculated assuming the parameter is equal to {cmd:true}. 	That is, {cmd:powernull} = P(SGPV = 1 | θ = {cmd:true}). {p_end}
 {synopt:{cmd:r(powerinc)}}  probability of 0 < SGPV < 1 calculated assuming the parameter is equal to {cmd:true}. 	That is, {cmd:powerinc} = P(0 < SGPV < 1 | θ = {cmd:true}). {p_end}
 {synopt:{cmd:r(minI)}}  is the minimum type I error over the range ({cmd:"nulllo"}, {cmd:"nullhi"}), which occurs at the midpoint of ({cmd:"nulllo"}, {cmd:"nullhi"}). {p_end}
 {synopt:{cmd:r(maxI)}}  is the maximum type I error over the range ({cmd:"nulllo"}, {cmd:"nullhi"}), which occurs at the boundaries of the null hypothesis, {cmd:"nulllo"} and {cmd:"nullhi"}.  {p_end}
-{synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:"nulllo"}, {cmd:"nullhi"}). If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error calculated assuming the true parameter value θ is equal to 0. {p_end}
+{synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:"nulllo"}, {cmd:"nullhi"}). 
+If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error calculated assuming the true parameter value θ is equal to 0. {p_end}
 
 
 {title:References}

@@ -1,21 +1,22 @@
-*! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis
-*!Version 1.03 13.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an undocumented option; added some more warnings in the description of the options ///
-				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
-*!Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
+*! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
+*!Author: Sven-Kristjan Bormann
+*!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
+*!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
+*Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
 				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
 				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
 				shortened subcommand menuInstall to menu;  ///
 				added parsing of subcommands as a convenience feature ///
 				allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> implemented what is "promised" by the dialog box text ///
 				changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested		
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
-*!Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
-*!Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
-*!Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
-*!Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
-*!Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
-*!Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
-*!Version 0.90 : Initial Github release
+*Version 1.00 : Initial SSC release, no changes compared to the last Github version.
+*Version 0.99 : Removed automatic calculation of Fcr -> setting the correct interval boundaries of option altspace() not possible automatically
+*Version 0.98a: Displays now the full name of a variable in case of multi equation commands. Shortened the displayed result and added a format option -> get s overriden by the same named option of matlistopt(); Do not calculate any more results for coefficients in r(table) with missing p-value -> previously only checked for missing standard error which is sometimes not enough, e.g. in case of heckman estimation. 
+*Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
+*Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
+*Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
+*Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
+*Version 0.90 : Initial Github release
 
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:
@@ -88,10 +89,10 @@ else{
 
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) /// input-options
- Quietly MATListopt(string asis) Bonus(string) FORmat(str)  /// display-options
+ Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
  nulllo(real 0) nullhi(real 0) /// null-hypotheses
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
-    debug  /*Display additional messages: undocumented*/ NONULLwarnings /*Disable showing warning messages when using the default null-hypothesis */ ] 
+    debug  /*Display additional debug messages: undocumented*/  ] 
 
 
 ***Option parsing
@@ -279,7 +280,8 @@ if "`fdrisk_stat'"=="fdrisk"{
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
 			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 
-			if "`r(fdr)'"!= "" mat `fdrisk'[`i',1] = `r(fdr)'
+			capture confirm scalar r(fdr)
+			if !_rc mat `fdrisk'[`i',1] = r(fdr)
 				
 		}
 	}
@@ -299,10 +301,10 @@ FormatDisplay `comp', format(`format')
  matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {`nulllo',`nullhi'}") rowtitle(Variables) `matlistopt'
 
 if "`nonullwarnings'"=="" & (`nulllo'==0 & `nullhi'==0){
-	disp as error _n "Warning:"
-	disp as error "You used the default point 0 null-hypothesis for calculating the SGPVs."
-	disp as error "This is allowed but you are strongly encouraged to set a more reasonable interval null-hypothesis."
-	disp as error "The default point 0 null-hypothesis will result in having SGPVs of either 0 or 0.5."	
+	disp _n "Warning:"
+	disp "You used the default point 0 null-hypothesis for calculating the SGPVs."
+	disp "This is allowed but you are strongly encouraged to set a more reasonable interval null-hypothesis."
+	disp "The default point 0 null-hypothesis will result in having SGPVs of either 0 or 0.5."	
 }
 
 return add

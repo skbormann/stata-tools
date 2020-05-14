@@ -1,23 +1,24 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
-*!Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Author: Sven-Kristjan Bormann
+*Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
 *!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
-*!Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
-*!				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
-*!				 Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
-*!				 Changed the default behaviour of xtitle() option -> now a default title is shown if not set
-*!				 Added do-file to make running the example in the help-file easier.
-*!Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
-*!				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used.
-*!				 Fixed intcol-option -> now parses correctly color names and  RGB-values
-*!				 Changed behaviour of intcol-option -> now three separate color options for easier providing custom colors,
-*!				 the change is necessary to make it possible (easier) to set the colors in the dialog box 
-*!Version 0.91 : Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
-*!				Corrected minor errors in the documentation
-*!Version 0.90 : Initial Github release
+*Version 1.00 : Initial SSC release, no changes compared to the last Github version.
+*Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
+*				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
+*				 Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
+*				 Changed the default behaviour of xtitle() option -> now a default title is shown if not set
+*				 Added do-file to make running the example in the help-file easier.
+*Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
+*				 Fixed nullcol-option -> now parses correctly color names and sets the color correctly, previous only the default color was used.
+*				 Fixed intcol-option -> now parses correctly color names and  RGB-values
+*				 Changed behaviour of intcol-option -> now three separate color options for easier providing custom colors,
+*				 the change is necessary to make it possible (easier) to set the colors in the dialog box 
+*Version 0.91 : Changed the handling of additional plotting options to avoid hard to understand error messages of the twoway-command.
+*				Corrected minor errors in the documentation
+*Version 0.90 : Initial Github release
 
 
-program define plotsgpv
+program define plotsgpv, sortpreserve
 version 12.0
 syntax [if] [in] ,  estlo(string) esthi(string) nulllo(string) nullhi(string)  /// 
 [SETOrder(string) Xshow(string) NULLCol(string asis) intcol1(string asis) intcol2(string asis) intcol3(string asis)	 ///

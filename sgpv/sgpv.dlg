@@ -117,6 +117,7 @@ DIALOG display ,tabtitle("Display options")
 BEGIN
 
 	CHECKBOX ck_quiet 		10 		_lft 	100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
+	CHECKBOX ck_nonull		120		_lft    200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
 	
 	TEXT tx_matlist 		10 		_ls 	200 	., label("Further results display options")
 	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt)
@@ -236,6 +237,7 @@ BEGIN
 		optionarg /hidedefault main.ed_nulllo
 		
 		option display.ck_quiet
+		option display.ck_nonull
 		
 		optionarg display.ed_matlist
 		optionarg /hidedefault display.cb_bonus

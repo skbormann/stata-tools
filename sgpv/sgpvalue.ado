@@ -1,20 +1,20 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
 *!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is still possible. 
-*!Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
-*!Version 1.00 : Initial SSC release, no changes compared to the last Github version.
-*!Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
-*!				Fixed a bug with the nodeltagap-option.
-*!				Added more examples from the R-code (as a do-file).
-*!Version 0.98 : Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes
-*!Version 0.95a: Fixed some issues in the documentation.
-*!Version 0.95 : Added support for using variables as inputs for options esthi() and estlo(); Added Mata function for SGPV calculations in case c(matsize) is smaller than the input vectors; 
-*!				Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
-*!Version 0.90  : Initial release to Github 
-*!Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
-*!Still missing: Some Input error checks (which ones are missing?)
-*!To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
-*!			Add an option to format the output	
+*Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
+*Version 1.00 : Initial SSC release, no changes compared to the last Github version.
+*Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
+*				Fixed a bug with the nodeltagap-option.
+*				Added more examples from the R-code (as a do-file).
+*Version 0.98 : Implement initial handling of infinite values (one sided intervals) -> not 100% correct yet -> treatment of missing values in variables is questionable and might need further thought and changes
+*Version 0.95a: Fixed some issues in the documentation.
+*Version 0.95 : Added support for using variables as inputs for options esthi() and estlo(); Added Mata function for SGPV calculations in case c(matsize) is smaller than the input vectors; 
+*				Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
+*Version 0.90  : Initial release to Github 
+*Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
+*Still missing: Some Input error checks (which ones are missing?)
+*To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
+*			Add an option to format the output	
 
 
 
@@ -351,7 +351,7 @@ end
 
 ***Mata function(s)
 mata:
-
+version 12.0
 void function sgpv(string varlist, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection ,| string scalar nodeltagap){ 
 // void function sgpv(string varlist, string scalar sgpvmat, real rowvector nulllo, real scalar rowvector, real scalar infcorrection ,| string scalar nodeltagap){ 
 

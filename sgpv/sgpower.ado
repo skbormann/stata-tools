@@ -1,13 +1,15 @@
 *!Power function calculations for Second Generation P-Values
-*!Based on the R-code for sgpower.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.00  : Initial SSC release, no changes compared to the last Github version.
-*!Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
-*!Version 0.91 	: Removed dependency on user-provided integrate-command. 
-*!Version 0.90 	: Initial Github Release
-*!Works only on one interval and one true value at the moment; 
-*!The standard error has to be a number and cannot be an expression like in the R-code
-*!Not possible to plot directly the power function yet, an example how to plot the power function is located in the file sgpower_plot_example.do
-*!The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
+*!Author: Sven-Kristjan Bormann
+*Based on the R-code for sgpower.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.01  14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
+*Version 1.00  : Initial SSC release, no changes compared to the last Github version.
+*Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
+*Version 0.91 	: Removed dependency on user-provided integrate-command. 
+*Version 0.90 	: Initial Github Release
+*Works only on one interval and one true value at the moment; 
+*The standard error has to be a number and cannot be an expression like in the R-code
+*Not possible to plot directly the power function yet, an example how to plot the power function is located in the file sgpower_plot_example.do
+*The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
 
 capture program drop sgpower
 program define sgpower, rclass
@@ -90,11 +92,12 @@ if "`bonus'"!=""{
   }
 }
 
-return local poweralt  `power0'
-return local powernull  `power1'
-return local powerinc  `powerinc'
-return local minI  `minI'
-return local maxI  `maxI'
-return local avgI `avgI'
-
+return scalar poweralt = `power0'
+return scalar powernull = `power1'
+return scalar powerinc = `powerinc'
+if "`bonus'"!=""{
+return scalar minI = `minI'
+return scalar maxI = `maxI'
+return scalar avgI = `avgI'
+}
 end

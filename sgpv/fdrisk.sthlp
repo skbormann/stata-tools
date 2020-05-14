@@ -136,7 +136,7 @@ The default value assumes that both hypotheses are equally likely.
 {title:Stored results}
 
 {synoptset 15 tabbed}{...}
-{p2col 5 15 19 2: Locals}{p_end}
+{p2col 5 15 19 2: Scalars}{p_end}
 {synopt:{cmd:r(fdr)}}  false discovery risk {p_end}
 {synopt:{cmd:r(fcr)}}  false confirmation risk  {p_end}
 
