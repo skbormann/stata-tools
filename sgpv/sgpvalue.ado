@@ -160,18 +160,15 @@ else{	// Run if rows less than matsize -> the "original" approach
 		*Warnings -> Make warning messages more descriptive
 			if "`warnings'"!="nowarnings"{
 				if (`est_len'<0  ) & (`null_len'<0){
-					disp as error "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
+					disp "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
 				}
 				*if isinfinite(abs(`est_len')+abs(`null_len')){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
 				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
-					disp as error "The `i'th interval has infinite length."
+					disp "The `i'th interval has infinite length."
 				}
 				
 				if (`est_len'==0 | `null_len'==0 ) {
-				/*
-				if `null_len'==0 disp as error "The `i'th null hypothesis interval (`null_lo', `null_hi') is a point null hypothesis. Consider instead specifiying a true interval null hypothesis. " 
-				*/
-					disp as error "The `i'th interval has a zero length. Consider using an interval hypothesis instead of a point hypothesis."
+					disp "The `i'th interval has a zero length. Consider using an interval hypothesis instead of a point hypothesis."
 				}
 		}
 		
@@ -227,7 +224,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 		** Return Missing value for nonsense intervals
 		if `est_lo'>`est_hi' | `null_lo'>`null_hi'{
 			local pdelta .
-			if "`warnings'"!="nowarnings" disp as error "The `i'th interval limits are likely reversed."
+			if "`warnings'"!="nowarnings" disp "The `i'th interval limits are likely reversed."
 		}
 		
 		

@@ -1,7 +1,7 @@
 *!False confirmatory/discovery risk calculations for Second Generation P-Values
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
+*!Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
 *Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.97a: Made error messages hopefully more understandable.

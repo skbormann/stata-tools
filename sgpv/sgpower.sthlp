@@ -18,7 +18,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpower}
-{cmd:,} true(#) nulllo(#) nullhi(#) inttype(interval_type) intlevel(#)
+{cmd:,} true(#) nulllo(#) nullhi(#) {cmdab:intt:ype(interval_type)} {cmdab:intl:evel(#)}
 [{it:options}]
 
 {synoptset 20 tabbed}{...}
@@ -49,9 +49,11 @@
 {title:Description}
 {pstd}
 Compute power/type I error for Second-Generation P-Values approach. See {help sgpvalue##description:here} for more information about the Second-Generation P-Values.{p_end}
+
 {pstd}
 An additional {stata db sgpower:GUI} makes using this command easier.
-To make the GUI available from the User-menubar, you have to run {stata sgpv menuInstall}.{p_end}
+To make the GUI available from the User-menubar, you have to run {stata sgpv menu}.{p_end}
+
 {pstd}
 The power functions are the following based on the equations (S4), (S6), (S8) and (S9) 
 from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0188299.s001&type=supplementary":the supplementary material} to Blume et al.(2018): {p_end}

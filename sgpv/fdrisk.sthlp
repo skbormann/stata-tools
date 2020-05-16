@@ -19,8 +19,8 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:fdrisk}
-{cmd:,} nulllo(string) nullhi(string) stderr(#) inttype(string) intlevel(string) nullspace(string) nullweights(string) altspace(string) altweights(string)
-[{it:pi0(#)}]
+{cmd:,} nulllo(string) nullhi(string) {cmdab:std:err(#)} {cmdab:intt:ype(interval_type)} {cmdab:intl:evel(string)} {cmdab:nulls:pace(string)} {cmdab:nullw:eights(string)} {cmdab:alts:pace(string)} {cmdab:altw:eights(string)}
+[{cmdab:sgpv:al(#)} {cmdab:p:i0(#)}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}

@@ -4,8 +4,8 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 */
 /*
-sgpv dialog version 1.01, 23.03.2020, Sven-Kristjan Bormann
-for sgpv version 1.01
+sgpv dialog version 1.02, 23.03.2020, Sven-Kristjan Bormann
+for sgpv version 1.03
 
 To install in User Statistics menu via Stata commands:
   

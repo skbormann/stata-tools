@@ -1,5 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.03a 16.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis
 *!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 *Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
@@ -133,18 +134,20 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 			local inputmatrix `matrix'
 	  }
 	}
+	*Add here code to catch input errors when allowing multiple null-hypotheses
 
 	**Process fdrisk options -> needs changes to allow multiple null intervals
 	if `nulllo' ==. stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
 	if `nullhi' ==. stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
+	
 	*Nullspace option
 	if "`nullspace'"!=""{
 		local nullspace `nullspace'
 	}
-	else if `nullhi'!= `nulllo'{
+	else if "`nullhi'"!= "`nulllo'"{
 		local nullspace `nulllo' `nullhi'
 	}
-	else if `nullhi'== `nulllo'{
+	else if "`nullhi'"== "`nulllo'"{
 		local nullspace `nulllo'
 	}
 	*Intlevel
@@ -263,7 +266,8 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  }
   local rownames : colfullnames `input_new' //Save the variable names for later display
 
- 
+*Needs modifications to allow multiple null-hypotheses 
+*Add here code to match coefficients with their aasigned null-hypothesis in case of multiple null-hypotheses
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
 if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
 
@@ -279,7 +283,10 @@ if "`fdrisk_stat'"=="fdrisk"{
 	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
-			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 
+			qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')
+			*qui fdrisk, nullhi(`=word("`nullhi'",`i')') nulllo(`=word("`nulllo'",`i')') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 
+			
+			
 			capture confirm scalar r(fdr)
 			if !_rc mat `fdrisk'[`i',1] = r(fdr)
 				
@@ -298,7 +305,10 @@ else{
 
 *Change the format of the displayed matrix
 FormatDisplay `comp', format(`format')
- matlist r(display_mat) , title("Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {`nulllo',`nullhi'}") rowtitle(Variables) `matlistopt'
+*Display the results and adjust the title based on the null-hypothesis
+local interval_name = cond(`nullhi'==`nulllo',"point","interval")
+local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","{`nulllo',`nullhi'}")
+ matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' "') rowtitle(Variables) `matlistopt'
 
 if "`nonullwarnings'"=="" & (`nulllo'==0 & `nullhi'==0){
 	disp _n "Warning:"

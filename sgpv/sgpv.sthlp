@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.01  24 Mar 2020}{...}
+{* *! version 1.03  16 May 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -236,8 +236,6 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
 {marker examples}{...}
 {title:Examples}
-{* pstd}
-
   {stata . sysuse auto, clear}
 {marker prefix}{...}
   Usage of {cmd:sgpv} as a prefix-command:
@@ -262,7 +260,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
       ------------------------------------------------------------------------------
   
   
-  Comparison of ordinary P-Values and Second Generation P-Values
+  Comparison of ordinary P-Values and Second Generation P-Values for a point Null-Hypothesis of 0
   
 
        Variables |   P-Value       SGPV  Delta-Gap        Fdr 
@@ -297,7 +295,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   Now run a quantile regression instead	
 	{stata . qreg price mpg weight foreign} 
 	{stata . estimates store priceqreg}
-{* Add examples with alternative null-hypothesis}
+
   Calculate sgpvs for the stored estimation and only the foreign coefficient 
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
@@ -305,15 +303,45 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   Set an alternative null-hypothesis: 1% of the mean value of the price variable (-62, 62)  
 	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly: regress price mpg weight foreign"}
 	
+    Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {-62,62}
+    
+       Variables |   P-Value       SGPV  Delta-Gap        Fdr 
+    -------------+--------------------------------------------
+             mpg |     .7693         .5          .          . 
+          weight |         0          1          .          . 
+         foreign |         0          0    36.2405      .0394 
+           _cons |     .0874         .5          .          . 
+
+	The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
+	The example illustrates the need to set a scientifically reasonable null-hypothesis. For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
+	To set a separate/different null-hypothesis for each coefficient, you need to iterate through the list of coefficients.
+	See the code below as example how to do that.
+	Direct support for multiple null-hypotheses is planned for a later version of this command.
+	
+	regress price mpg weight foreign
+	local coeflist mpg weight foreign // Put here the coefficients for which you want to calculate the SGPVs
+	local nulllb 20 2 3000 // lower bounds of null-hypotheses
+	local nullub 40 4 6000 // upper bounds of null-hypotheses
+	local i 1
+	foreach coef of local coeflist{
+	 sgpv ,coefficient(`coef') nulllo(`=word("`nulllb'",`i')') nullhi(`=word("`nullub'",`i')') quietly
+	 mat res = r(comparison) // collect the results in matrix for further processing
+	 mat results =(nullmat(results) \ res ) 
+	 local ++i
+	}
+	matlist results, title("Collection of results") rowtitle(Coefficients)
+	{stata do sgpv-multiple-null-hypotheses-example.do:Click here to run this example}
+	
+	
 {marker multiple-equations-example}{...}
-  Calculate sgpvs for a multiple equation estimation command and 
+  Calculate sgpvs for a multiple equation estimation command and select coefficients
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
 	Select only the foreign coefficient for sgpv calculation
-	{stata . sgpv, coefficient("foreign") }
+	{stata . sgpv, coefficient(foreign) }
         Select only the 50% quantile equation for sgpv calculation
-	  sgpv, coefficient("q50:")  
+	  sgpv, coefficient(q50:)  
         Select only the 50% quantile equation and foreign coefficient for sgpv calculation
-	  sgpv, coefficient("q50:foreign") 
+	  sgpv, coefficient(q50:foreign) 
 
 {marker leukemia-example}{...}
   Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed. 
