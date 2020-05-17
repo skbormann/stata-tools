@@ -78,7 +78,7 @@ BEGIN
 END
 
 
-DIALOG main, label("sgpv 1.00 - Second Generation P-Values") tabtitle("Main")
+DIALOG main, label("sgpv 1.03 - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")

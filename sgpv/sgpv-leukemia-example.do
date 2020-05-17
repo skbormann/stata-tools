@@ -3,7 +3,7 @@
 *!The leukemia dataset does not contain missing values/ rows or columns with no usuable information
 *!You have to make sure that this condition holds for your own large matrix or dataset.
 preserve
-sysuse leukemia, clear
+sysuse leukstats, clear
 sort p_value // To show the results the same way they are shown in the example for plotsgpv
 mata: final =J(1,5,.)
 * Partition the observations into chunks of the size of c(matsize), the maximum allowed matrix size

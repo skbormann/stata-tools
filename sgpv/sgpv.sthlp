@@ -152,7 +152,7 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 {phang}
 {opt c:oefficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
 The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
-Otherwise you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
+Otherwise, you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
 You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See {help sgpv##multiple-equations-example: the multiple equations example} for an example.
 
@@ -211,7 +211,9 @@ The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set
 If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".
 
 {phang}
-{opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k). The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. 
+{opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. 
+If "inttype" is "likelihood", the level is 1/k (not k). 
+The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. 
 
 {phang}
 {opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. 
@@ -236,10 +238,23 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
 {marker examples}{...}
 {title:Examples}
+
+    Contents
+    	{help sgpv##prefix:Basic Usage}
+	{help sgpv##interpretation_example:How to interpret results}
+	{help sgpv##exporting_results:Exporting results}
+    	{help sgpv##stored_estimations:Using stored estimations}
+    	{help sgpv##alternative_null-hypothesis:Setting a different null-hypothesis}
+    	{help sgpv##multiple-null-hypotheses-example:Setting an individual null-hypotheses for each coefficient}
+    	{help sgpv##multiple-equations-example:Selecting coefficients}
+	{help sgpv##leukemia-example:Calculating SGPVs for a large dataset of estimation or t-test results}
+    	{help sgpv##subcmds_example:Using subcommands} 
+				
+{* dlgtab:Basic Usage}
+  {title:Usage of {cmd:sgpv} as a prefix-command:}
+{marker prefix}
   {stata . sysuse auto, clear}
-{marker prefix}{...}
-  Usage of {cmd:sgpv} as a prefix-command:
-  {stata ". sgpv, b(all): regress price mpg weight foreign"} 
+  {stata ". sgpv, bonus(all): regress price mpg weight foreign"} 
   
   Example Output:
   		
@@ -271,8 +286,9 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
            _cons |     .0874         .5          .          . 
 
    
-  {marker interpretation_example}{...}
-  Interpretation: There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
+  {title:Interpretation example:}
+  {marker interpretation_example}  
+  There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
   Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
   This is the standard null-hypothesis of no effect.	
   You will usually have a more relastic interval which is larger than 0 due to measurement errors, scientific relevance, etc. 
@@ -285,7 +301,15 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   I cannot guarantee that my understanding is correct.
   These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
   
+  {title:Exporting results}
+  {marker exporting_results}
+  You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.
+  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier
+  {stata . estout e(comparison)} //display the results
+  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document
   
+  {title:Using stored estimations}
+  {marker stored_estimations} 
   Save estimation for later usage 
 	{stata . estimate store pricereg} 
 
@@ -300,6 +324,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
   
+  {title:Setting a different null-hypothesis}
+  {marker alternative_null-hypothesis}
   Set an alternative null-hypothesis: 1% of the mean value of the price variable (-62, 62)  
 	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly: regress price mpg weight foreign"}
 	
@@ -314,26 +340,29 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
 	The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
 	The example illustrates the need to set a scientifically reasonable null-hypothesis. For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
-	To set a separate/different null-hypothesis for each coefficient, you need to iterate through the list of coefficients.
-	See the code below as example how to do that.
-	Direct support for multiple null-hypotheses is planned for a later version of this command.
 	
-	regress price mpg weight foreign
-	local coeflist mpg weight foreign // Put here the coefficients for which you want to calculate the SGPVs
-	local nulllb 20 2 3000 // lower bounds of null-hypotheses
-	local nullub 40 4 6000 // upper bounds of null-hypotheses
-	local i 1
-	foreach coef of local coeflist{
-	 sgpv ,coefficient(`coef') nulllo(`=word("`nulllb'",`i')') nullhi(`=word("`nullub'",`i')') quietly
-	 mat res = r(comparison) // collect the results in matrix for further processing
-	 mat results =(nullmat(results) \ res ) 
-	 local ++i
-	}
-	matlist results, title("Collection of results") rowtitle(Coefficients)
-	{stata do sgpv-multiple-null-hypotheses-example.do:Click here to run this example}
+    {title:Setting an individual null-hypotheses for each coefficient}
+	{marker multiple-null-hypotheses-example}
+    To set a separate/different null-hypothesis for each coefficient, you need to iterate through the list of coefficients.
+    Direct support for multiple null-hypotheses is planned for a later version of this command.
+    See the code below as example how to do that.
 	
+	{com}regress price mpg weight foreign
+	{com}local coeflist mpg weight foreign // Put here the coefficients for which you want to calculate the SGPVs
+	{com}local nulllb 20 2 3000 // lower bounds of null-hypotheses
+	{com}local nullub 40 4 6000 // upper bounds of null-hypotheses
+	{com}local i 1
+	{com}foreach coef of local coeflist{
+		 {com}sgpv ,coefficient(`coef') nulllo(`=word("`nulllb'",`i')') nullhi(`=word("`nullub'",`i')') quietly
+		 {com}mat res = r(comparison) // collect the results in matrix for further processing
+		 {com}mat results =(nullmat(results) \ res ) 
+		 {com}local ++i
+	{com}}
+	{com}matlist results, title("Collection of results") rowtitle(Coefficients)
+	{stata do sgpv-multiple-null-hypotheses-example.do:(click to run)}
 	
-{marker multiple-equations-example}{...}
+  {title:Selecting coefficients}	
+  {marker multiple-equations-example}{...}
   Calculate sgpvs for a multiple equation estimation command and select coefficients
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
 	Select only the foreign coefficient for sgpv calculation
@@ -343,16 +372,23 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
         Select only the 50% quantile equation and foreign coefficient for sgpv calculation
 	  sgpv, coefficient(q50:foreign) 
 
-{marker leukemia-example}{...}
-  Calculate the SGPVs and bonus statistics for the leukemia dataset (view the {view sgpv-leukemia-example.do:code} if installed. 
-  If not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here}):
+
+  {title:Calculating SGPVs for a large dataset of estimation or t-test results}
+  {marker leukemia-example}
+  The example leukemia dataset can be used to show how the SGPVs can be calculated for a large dataset which contains the information usually returned in the {cmd:{it:r(table)}} matrix.
+  The leukemia dataset contains from 7218 gene specific t-tests for a difference in mean expression.
+  More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
+  The example file below will calculate the SGPVs and bonus statistics for the leukemia dataset. 
+  You can view the {view sgpv-leukemia-example.do:code} if installed. 
+  If not, you can install it {net "get sgpv.pkg, replace":by clicking here} together with the other ancillary files:
 	{stata . do sgpv-leukemia-example.do}
 	
   This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
   Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
   You can run {stata display c(matsize)} to see your current setting.
- 
-{marker subcmds_example}{...}
+
+  {title:Subcommands examples} 
+  {marker subcmds_example}
   The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
 	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
 	{stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}

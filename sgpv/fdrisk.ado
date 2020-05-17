@@ -255,49 +255,6 @@ restore
  
 end
 
-/*
-program define mataInt,rclass
-syntax , Function(string) Lower(real) Upper(real) [*]
 
-*Parse the rest of the options -> use two syntax lines to have the same interface for both integration commands
-local 0 `options'
-syntax ,nulllo(real) nullhi(real) stderr(real) z(real) func(string)
-mata: fdrisk(`lower',`upper')
-
-return local integral 
-end
-
-*Implement integration using the mata-functions provided by the moremata-package
-mata:
-void function fdrisk(real scalar lower, real scalar upper ,real scalar nulllo, real scalar nullhi, real scalar stderr, real scalar z, string scalar func){
-
-
-}
-
-
-real matrix function power0(real scalar x, real scalar nulllo, real scalar nullhi, real scalar stderr, real scalar z){
-	return(normal(nulllo :/ stderr :- x :/stderr :- z) :+ normal(-nullhi :/ stderr :+ x :/stderr :- z))
-}
-
-real matrix function power1(real scalar x, real scalar nulllo, real scalar nullhi, real scalar stderr, real scalar z){
-	return(normal(nullhi :/ stderr - x :/ stderr :- z) :- normal( nulllo :/ stderr - x:/ stderr :+ z))
-}
-
-//Example call to mm_integrate_sr
-mm_integrate_sr(&power0(),lower,upper,1000,1,x,nulllo,nullhi,stderr,z)
-
-//Two convenience functions to make reading the code easier: Function names chosen to not conflict with internal Mata functions
-real scalar function min_s(real scalar x, real scalar y){
-	return(x > y ? y :x)
-}
-
-real scalar function max_s(real scalar x, real scalar y){
-	return(x > y ? x : y)
-}	
-
-end
-
-
-*/
 
 

@@ -1,6 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.03a 16.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis
+*!Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
 *!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 *Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
@@ -20,21 +20,21 @@
 *Version 0.90 : Initial Github release
 
 /*
-To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:
-	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
+To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:)
+	Internal changes (Mostly re-organising the code for shorter and easier maintained code):
 	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
 	- Change input type of options nulllo and nullhi from 'real' to 'string' to allow the same flexibility like the other commands -> allow a different null-hypothesis for each coefficient -> requires changes for the fdrisk option-parsing/generation & additional checks to avoid non-sensical input.
-	- Write more examples in the help file which describe how apply different null-hypotheses to different coefficients.
-	- Add more explicit warning against a point null-hypothesis in the output
-	- Display and return the used null-hypothesis  -> should be already done, at least display
 	- Write a certification script which checks all possible errors (help cscript)
+	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
+	
+	External changes (Mostly more features):
+	- Add support for multiple null-hypotheses -> allow a different null-hypothesis for each coefficient
+	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
 	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
 	- support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
-	- Make results exportable or change the command to an e-class command to allow processing in commands like esttab or estpost from Ben Jann 
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
 	- Return more infos (Which infos are needed for further processing?)
-	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command plotmatrix instead?
-	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
+	- Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command plotmatrix instead?	
 	- improve the speed of fdrisk.ado -> the integration part takes too long. -> switch over to Mata integration functions provided by moremata-package
 	- add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
 */
@@ -246,7 +246,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  return add // save existing returned results 
  
  *Coefficient selection 
- CoefParse `input', coefficient(`coefficient')
+ ParseCoef `input', coefficient(`coefficient')
  mat `input' = r(coef_mat)
  local coln =colsof(`input')
 
@@ -267,7 +267,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
   local rownames : colfullnames `input_new' //Save the variable names for later display
 
 *Needs modifications to allow multiple null-hypotheses 
-*Add here code to match coefficients with their aasigned null-hypothesis in case of multiple null-hypotheses
+*Add here code to match coefficients with their assigned null-hypothesis in case of multiple null-hypotheses
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
 if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
 
@@ -359,7 +359,7 @@ end
 
 
 *Parse the content of the coefficient-option
-program define CoefParse, rclass
+program define ParseCoef, rclass
 	syntax name(name=matrix) [, coefficient(string asis)]
 	if "`coefficient'"==""{
 		return matrix coef_mat = `matrix'
