@@ -189,7 +189,7 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 (If you did not already install the example dataset, then you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here} together with the file {it:plotsgpv-leukemia-example.do} which helps you run the example in Stata. )
 Run following the lines with the help of {stata do plotsgpv-leukemia-example.do}
 
-	. sysuse leukstats 
+	. sysuse leukstats ,clear 
 	. plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) setorder(p_value) xshow(7000) title("Leukemia Example") ///
 	xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") nullpt(0) nomata replace noshow  ///
 	twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' ///

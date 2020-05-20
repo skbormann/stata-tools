@@ -1,5 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.04  20.05.2020 : Added initial support/code (not working yet) for multiple null-hypotheses; added a noconstant-option to remove constant from list of coefficients 
 *!Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
 *!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
@@ -89,9 +90,10 @@ else{
 
 
 **Define here options
-syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) /// input-options
+syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
  nulllo(real 0) nullhi(real 0) /// null-hypotheses
+ /*nulllo(string) nullhi(string)*/ /// null-hypotheses -> necessary change in the syntax command/diagram
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/  ] 
 
@@ -136,6 +138,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	}
 	*Add here code to catch input errors when allowing multiple null-hypotheses
 
+	
 	**Process fdrisk options -> needs changes to allow multiple null intervals
 	if `nulllo' ==. stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
 	if `nullhi' ==. stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
@@ -246,7 +249,8 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  return add // save existing returned results 
  
  *Coefficient selection 
- ParseCoef `input', coefficient(`coefficient')
+ *local coeforig  `coefficient' // save coefficients in case this local gets overriden at some point
+ ParseCoef `input', coefficient(`coefficient') `noconstant'
  mat `input' = r(coef_mat)
  local coln =colsof(`input')
 
@@ -267,6 +271,9 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
   local rownames : colfullnames `input_new' //Save the variable names for later display
 
 *Needs modifications to allow multiple null-hypotheses 
+*! ParseNull, coefficient(`rownames') coeforig(`coefficient')
+* local nulllo `r(nulllo)'
+* local nullhi `r(nullhi)'
 *Add here code to match coefficients with their assigned null-hypothesis in case of multiple null-hypotheses
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
 if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
@@ -278,7 +285,7 @@ return add
 
 
 if "`fdrisk_stat'"=="fdrisk"{
-*False discovery risks 	-> needs changes to allow multiple null intervals
+*False discovery risks 	-> needs changes to allow multiple null intervals -> in theory all options for fdrisk could be extended to have individual settings for each coefficient -> will be implemented only if ever somebody needs this feature
 	mat `fdrisk' = J(`:word count `rownames'',1,.)
 	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
@@ -306,6 +313,30 @@ else{
 *Change the format of the displayed matrix
 FormatDisplay `comp', format(`format')
 *Display the results and adjust the title based on the null-hypothesis
+*Modify display of results to allow multiple null-hypotheses
+/*Ideas:
+ -> Add two columns containing the individual nulllo and nullhi values? -> requires transforming these locals into matrix columns  
+ 
+ Code: if 'multiple-null-hypotheses' detected then 
+ if wordcount("`nulllo'")>1  { // & wordcount("`nulllo'")==wordcount("`rownames'")
+ tempname  null_mat 
+ mat `null_mat'=J(1..`=wordcount("`rownames'")',2,.)
+ local nulllo_col = subinstr("`nulllo'"," ","\",.)
+ local nullhi_col = subinstr("`nullhi'"," ","\",.)
+ mat `null_mat'= `nulllo_col',`nullhi_col'
+ mat colnames `null_mat' = "H0-Lower Bound" "H0-Upper Bound"
+ mat `comp' = `comp',`null_mat'
+ 
+ -> Change title in matlist command
+ 
+ }		
+
+*/
+/*
+ if wordcount("`nulllo'")==1{
+  -> Put here code from below
+ }
+*/
 local interval_name = cond(`nullhi'==`nulllo',"point","interval")
 local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","{`nulllo',`nullhi'}")
  matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' "') rowtitle(Variables) `matlistopt'
@@ -325,6 +356,133 @@ end
 
 
 *Additional helper commands--------------------------------------------------------------
+
+
+
+*Parse the content of the coefficient-option
+program define ParseCoef, rclass
+	syntax name(name=matrix) [, coefficient(string asis)  noconstant ] // Add nocons-option to remove the constant if only equations are specified
+	tempname coef_mat nocons_mat
+	if "`coefficient'"==""  & "`constant'"=="" {
+		return matrix coef_mat = `matrix'
+		exit
+	}
+	 else if "`coefficient'"=="" & "`constant'"=="noconstant"{
+		local coefficient : colfullnames `matrix'
+		foreach coef of local coefficient{
+			if !ustrregexm("`coef'","_cons"){
+			mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`coef'"])
+			} 
+		}
+		return matrix coef_mat = `coef_mat'
+		exit
+	}
+	
+	
+	
+ /* Distinguish three cases:	1. variable name only
+								2. equation name only
+								3. equation and variable name together
+ 
+ */
+ * No mixtures of cases allowed yet
+ foreach coef of local coefficient{
+	*Case 1
+	if !ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){
+		local coefspec `coefspec' `coef'	
+	}
+	*Case 2
+	if ustrregexm("`coef'",":$"){
+		local eqspec `eqspec' `coef'	
+	} 
+	*Case 3
+	if ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){	
+		local eqcoefspec `eqcoefspec' `coef'		
+	}
+ }
+ 
+ *Make sure that only one specification/case is provided
+ if (wordcount("`eqcoefspec'")>0 & wordcount("`eqspec'")>0) | (wordcount("`eqcoefspec'")>0 & wordcount("`coefspec'")>0) | (wordcount("`eqspec'")>0 & wordcount("`coefspec'")>0){ 
+	stop `"You can only specify equation-specific (XX:YYY), equations (XX:) or general coefficients(YYY) in option {it:coefficient} at the same time."'
+ }
+ 
+ * looking for the equations only needed if case 1 and set to 0 for case 2 & 3
+ if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
+	if wordcount("`coefficient'")==wordcount("`coefspec'"){ 
+		local coleq : coleq `matrix'
+		local coleq : list uniq coleq
+		if "`coleq'"=="_" local coleqnumb 0
+		else local coleqnumb = wordcount("`coleq'")
+	}
+	
+	local coefnumb : word count `coefficient'
+	if `coleqnumb'==0{ // No equations found or only fully specified coefficient names given (eq:var) Case 3 & Case 2 (eq:) -> how remove constant from case 2?
+		forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`: word `i' of `coefficient''"])
+			if _rc{
+				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+			}
+			
+			if "`constant'"=="noconstant" & wordcount("`eqspec'")>0 { // removing constant makes only sense for case 2
+				mat `coef_mat' = `coef_mat'[1...,`=colnumb(`coef_mat',"_cons")-1']
+			}
+		
+			
+		}
+	}
+	else if `coleqnumb'>0{ // Separate equations found and only general variables given Case 1
+		forvalues j=1/`coleqnumb'{
+			forvalues i=1/`coefnumb'{
+			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`:word `j' of `coleq'':`: word `i' of `coefficient''"])
+				if _rc{
+					stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
+				}
+			}
+		}
+	
+	}
+	
+	return mat coef_mat=`coef_mat'
+	
+end
+
+*Match coefficients and null-hypotheses in case of multiple null-hypotheses
+program define ParseNull, rclass
+	syntax [anything], COEFfient(string asis) coeforig(string asis) nulllo(string) nullhi(string) 
+
+	*Count number of coefficients and compare with number of null-hypotheses
+	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
+
+	local coefn =wordcount("`coefficient'")
+	local coeforign = wordcount("`coeforig'")
+	local nulln =wordcount("`nulllo'")
+
+	if `coefn'==`nulln'{ //Assuming case 1 & only single equation or 3
+		return local nulllo `nulllo'
+		return local nullhi `nullhi'
+		exit
+	}
+	else if `coefn'!=`nulln'{ //Assuming case 2 or omitted coefficients or case 1 with multiple equations
+		
+		foreach coef of local coefficient{ //There should be a more efficient solution than looping over two lists, but it should work for now to match coefficients with null-hypotheses
+			forvalues i=1/`coeforign'{
+				if ustrregexm("`coef'","`=word("`coeforig'",`i')'"){
+					local nulllofull `nulllofull' `=word("`nulllo'",`i')'
+					local nullhifull `nullhifull' `=word("`nullhi'",`i')'				
+				}
+			}
+		
+		}
+	}
+
+	*Case 1 "XXX" : one hypothesis -> one coefficient
+	*Case 2 "XXX:" one hypothesis -> many coefficients
+	*Case 3 "XXX:YYY" one hypothesis -> one coefficient
+	*Return results
+	return local nulllo `nulllofull'
+	return local nullhi `nullhifull'
+end
+
 *Re-format the input matrix and return a new matrix to circumvent the limitations set by matlist -> using the cspec and rspec options of matlist requires more code to get these options automatically correct -> for now probably not worth the effort.
 *Use round-function instead? Should result in easier and shorter code
 program define FormatDisplay, rclass
@@ -355,75 +513,6 @@ mat rownames `display_mat' = `display_mat_rown'
 
 return matrix display_mat = `display_mat' 
 
-end
-
-
-*Parse the content of the coefficient-option
-program define ParseCoef, rclass
-	syntax name(name=matrix) [, coefficient(string asis)]
-	if "`coefficient'"==""{
-		return matrix coef_mat = `matrix'
-		exit
-	}
-	
- /* Distinguish three cases:	1. variable name only
-								2. equation name only
-								3. equation and variable name together
- 
- */
- * No mixtures of cases allowed yet
- foreach coef of local coefficient{
-	*Case 1
-	if !ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){
-		local coefspec `coefspec' `coef'	
-	}
-	*Case 2
-	if ustrregexm("`coef'",":$"){
-		local eqspec `eqspec' `coef'	
-	} 
-	*Case 3
-	if ustrregexm("`coef'",":") & !ustrregexm("`coef'",":$"){	
-		local eqcoefspec `eqcoefspec' `coef'		
-	}
- }
- 
- if (wordcount("`eqcoefspec'")>0 & wordcount("`eqspec'")>0) | (wordcount("`eqcoefspec'")>0 & wordcount("`coefspec'")>0) | (wordcount("`eqspec'")>0 & wordcount("`coefspec'")>0){ 
-	stop "You can only specify equation-specific ('XX:YYY'), equations ('XX:') or general coefficients('YYY') in option 'coefficient' at the same time."
- }
- if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
- 
-
-	if wordcount("`coefficient'")==wordcount("`coefspec'"){ // looking for the equations only needed if case 1
-	local coleq : coleq `matrix'
-	local coleq : list uniq coleq
-	if "`coleq'"=="_" local coleqnumb 0
-	else local coleqnumb = wordcount("`coleq'")
-	}
-	
-	local coefnumb : word count `coefficient'
-	tempname coef_mat
-	if `coleqnumb'==0{ // No equations found or only fully specified coefficient names given (eq:var) Case 3 & Case 2 (eq:)
-		forvalues i=1/`coefnumb'{
-			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`: word `i' of `coefficient''"])
-			if _rc{
-				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
-			}
-		}
-	}
-	else if `coleqnumb'>0{ // Separate equations found and only general variables given Case 1
-		forvalues j=1/`coleqnumb'{
-			forvalues i=1/`coefnumb'{
-			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`:word `j' of `coleq'':`: word `i' of `coefficient''"])
-				if _rc{
-					stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
-				}
-			}
-		}
-	
-	}
-	
-	return mat coef_mat=`coef_mat'
-	
 end
 
 *Simulate the behaviour of the R-function with the same name 

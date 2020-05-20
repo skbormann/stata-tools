@@ -67,6 +67,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.04  20.05.2020 : Added a noconstant-option to remove constant from list of coefficients
 * Version 1.03a 17.05.2020 : 
   * Made the title of the displayed matrix adapt to the type of null-hypothesis
   * Fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset

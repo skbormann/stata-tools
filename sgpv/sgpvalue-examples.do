@@ -23,7 +23,7 @@ if "`argument'"=="ttest_sim"{
 	qui gen x2 = rnormal(3,2)
 	qui ttest x1==x2
 	local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975)
-	local ci2 = (`r(mu_1)'-`r(mu_2)')+`r(se)'*invt(`=_N-2',0.975)
+	local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975)
 	 sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1) 
 	restore
 

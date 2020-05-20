@@ -33,6 +33,8 @@
 {p_end}
 {synopt:{opt c:oefficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
+{synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term
+{p_end}
 {* syntab:Null hypothesis}
 {synopt:{opt nulllo(#)}}  change the upper limit of the null-hypothesis interval.
 {p_end}
@@ -156,7 +158,8 @@ Otherwise, you have to use {help fvvarlist:the factor-variable notation} e.g. 1.
 Multiple coefficients must be separated with a space.
 You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See {help sgpv##multiple-equations-example: the multiple equations example} for an example.
 
-
+{phang}
+{opt nocons:tant} do not calculate SGPVs, delta-gaps and Fdrs for the constant term. The constant term is also removed from the list of coefficients if the {it:coefficient}-option is used and only equations are specified.
 
 {phang}
 {opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
@@ -341,6 +344,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
 	The example illustrates the need to set a scientifically reasonable null-hypothesis. For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
+	{* Remove or change this part after implementing support for multiple null-hypotheses}
     {title:Setting an individual null-hypotheses for each coefficient}
 	{marker multiple-null-hypotheses-example}
     To set a separate/different null-hypothesis for each coefficient, you need to iterate through the list of coefficients.
@@ -362,7 +366,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{stata do sgpv-multiple-null-hypotheses-example.do:(click to run)}
 	
   {title:Selecting coefficients}	
-  {marker multiple-equations-example}{...}
+  {marker multiple-equations-example}
   Calculate sgpvs for a multiple equation estimation command and select coefficients
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
 	Select only the foreign coefficient for sgpv calculation

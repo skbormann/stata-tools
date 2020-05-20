@@ -158,7 +158,7 @@ The following examples are based on the original documentation for the R-code, b
 		. qui gen x2 = rnormal(3,2)
 		. qui ttest x1==x2
 		. local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975)
-		. local ci2 = (`r(mu_1)'-`r(mu_2)')+`r(se)'*invt(`=_N-2',0.975)
+		. local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975)
 		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1) 
 		. restore
 
@@ -169,7 +169,7 @@ The following examples are based on the original documentation for the R-code, b
 		. qui gen x1 = rnormal(0,2) 
 		. qui gen x2 = rnormal(3,2)
 		. qui ttest x1==x2 
-		. local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975) // This formula is extracted from ttest-command. The CI's are not reported directly by Stata :-(
+		. local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975) 
 		. local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975)
 		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1)
 		. restore
