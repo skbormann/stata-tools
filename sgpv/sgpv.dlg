@@ -1,11 +1,11 @@
 /*
-Draft of a dialog box for SGPV
 To-Do/Further improvements: 	Add additional input checks for nullweights and altweighs to allow only certain inputs for nullspace and altspace
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
+								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses
 */
 /*
-sgpv dialog version 1.02, 23.03.2020, Sven-Kristjan Bormann
-for sgpv version 1.03
+sgpv dialog version 1.03, 21.05.2020, Sven-Kristjan Bormann
+for sgpv version 1.1
 
 To install in User Statistics menu via Stata commands:
   
@@ -78,7 +78,7 @@ BEGIN
 END
 
 
-DIALOG main, label("sgpv 1.03 - Second Generation P-Values") tabtitle("Main")
+DIALOG main, label("sgpv 1.1 - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
@@ -101,14 +101,16 @@ BEGIN
 														tooltip("The variable name needs to be exactly the same as returned by estimation output in the matrix r(table). If you did not use factor-variable notation, then the names are identical to the variable names. Otherwise you have to use the factor-variable notation e.g. 1.foreign if you estimated 'reg price mpg i.foreign'.")
 	TEXT tx_coefficient 	@ 		_ss		@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP)
 	TEXT tx_coefficient2 	@ 		_vss 	@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP2)
+	TEXT tx_coefficient3    @		_ss		@		., label("Only one of these specifications can be used at the same time.")
 	//TEXT tx_coefficient3	@		_vss	@		., label("The variable name needs to be exactly the same as returned by estimation output in the matrix r(table). If you did not use factor-variable notation, then the names are identical to the variable names.  For example: 1.foreign ")
 	
 	GROUPBOX gb_null 		5 		_ls 	190 	80, label("Null-Hypothesis Interval")
 	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 
-	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) numonly tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
+	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
+	//Add here infos about multiple null-hypotheses
 	
 	TEXT tx_nullhi 			+100 	-20 	70 		., label("Upper Bound") 
-	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) numonly tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
+	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	
 
 END

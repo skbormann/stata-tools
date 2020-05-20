@@ -35,16 +35,17 @@
 {p_end}
 {synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term
 {p_end}
-{* syntab:Null hypothesis}
-{synopt:{opt nulllo(#)}}  change the upper limit of the null-hypothesis interval.
+
+{syntab:Null hypothesis}
+{synopt:{opt nulllo(string)}}  change the upper limit of the null-hypothesis interval(s).
 {p_end}
-{synopt:{opt nullhi(#)}}  change the lower limit of the null-hypothesis interval.
+{synopt:{opt nullhi(string)}}  change the lower limit of the null-hypothesis interval(s).
 {p_end}
 
 {syntab:Display}
 {synopt:{opt q:uietly}}  suppress the output of the estimation command.
 {p_end}
-{synopt:{opt matl:istopt(string asis)}}  change the options of the displayed matrix. 
+{synopt:{opt matl:istopt(string)}}  change the options of the displayed matrix. 
 {p_end}
 {synopt:{opt b:onus(string)}}   display and calculate bonus statistics like delta gaps and fdr. 
 {p_end}
@@ -52,6 +53,7 @@
 {p_end}
 {synopt:{opt nonull:warnings}} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs.
 {p_end}
+
 {syntab:Fdrisk}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
 {p_end}
@@ -161,24 +163,35 @@ You can also select only an equation by using "eq:" or select a specific equatio
 {phang}
 {opt nocons:tant} do not calculate SGPVs, delta-gaps and Fdrs for the constant term. The constant term is also removed from the list of coefficients if the {it:coefficient}-option is used and only equations are specified.
 
+{dlgtab:Null-Hypothesis}
 {phang}
-{opt nulllo(#)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
-The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 
-Please change this value to something more reasonable. What is reasonable lower bound of no scientifically interesting effect(s), depends on your dataset and your research question.
-Using this default value will always result in having SGPVs of value 0 or 0.5!
+{opt nulllo(string)}  change the lower limit of the null-hypothesis interval. 
+The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+More than one null-hypothesis is also supported. Each lower bound must be separated with a space. 
+The number of lower bounds must match the number of arguments set in the {cmd:coefficient}-option.
+The number of lower and upper bounds must also match. 
+See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration.
+One-sided null-hypotheses are not supported yet.
 
 {phang}
-{opt nullhi(#)}  change the lower limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+{opt nullhi(string)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
+The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
+The number of lower and upper bounds must also match. 
+See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. 
+One-sided null-hypotheses are not supported yet.  
+
+{pstd}
 The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 
-Please change this value to something more reasonable. What is reasonable upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
-Using this default value will always result in having SGPVs of value 0 or 0.5!
+Please change this value to something more reasonable. What is reasonable lower or upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+Using this default value will always result in having SGPVs of value 0 or 0.5!{p_end}
 
 {dlgtab:Display}
 {phang}
 {opt q:uietly}     suppress the output of the estimation command.
 
 {phang}
-{opt matl:istopt(string asis)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
+{opt matl:istopt(string)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
 {opt b:onus(string)}    display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.
@@ -345,25 +358,14 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	The example illustrates the need to set a scientifically reasonable null-hypothesis. For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
 	{* Remove or change this part after implementing support for multiple null-hypotheses}
-    {title:Setting an individual null-hypotheses for each coefficient}
-	{marker multiple-null-hypotheses-example}
-    To set a separate/different null-hypothesis for each coefficient, you need to iterate through the list of coefficients.
-    Direct support for multiple null-hypotheses is planned for a later version of this command.
-    See the code below as example how to do that.
+  {title:Setting an individual null-hypotheses for each coefficient}
+  {marker multiple-null-hypotheses-example}
+  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null-hypotheses  with a space. 
+  The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.
+	. sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign
 	
-	{com}regress price mpg weight foreign
-	{com}local coeflist mpg weight foreign // Put here the coefficients for which you want to calculate the SGPVs
-	{com}local nulllb 20 2 3000 // lower bounds of null-hypotheses
-	{com}local nullub 40 4 6000 // upper bounds of null-hypotheses
-	{com}local i 1
-	{com}foreach coef of local coeflist{
-		 {com}sgpv ,coefficient(`coef') nulllo(`=word("`nulllb'",`i')') nullhi(`=word("`nullub'",`i')') quietly
-		 {com}mat res = r(comparison) // collect the results in matrix for further processing
-		 {com}mat results =(nullmat(results) \ res ) 
-		 {com}local ++i
-	{com}}
-	{com}matlist results, title("Collection of results") rowtitle(Coefficients)
-	{stata do sgpv-multiple-null-hypotheses-example.do:(click to run)}
+  The same null-hypotheses but this time one null-hypothesis for each selected equation or quantile
+	. sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)
 	
   {title:Selecting coefficients}	
   {marker multiple-equations-example}
@@ -371,8 +373,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
 	Select only the foreign coefficient for sgpv calculation
 	{stata . sgpv, coefficient(foreign) }
-        Select only the 50% quantile equation for sgpv calculation
-	  sgpv, coefficient(q50:)  
+        Select only the 10%, 50% and 90% quantile equation for sgpv calculation
+	  sgpv, coefficient(q10: q50: q90:)  
         Select only the 50% quantile equation and foreign coefficient for sgpv calculation
 	  sgpv, coefficient(q50:foreign) 
 
