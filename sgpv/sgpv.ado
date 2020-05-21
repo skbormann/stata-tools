@@ -1,6 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1  20.05.2020 : Added initial support for multiple null-hypotheses (somewhat documented); added a noconstant-option to remove constant from list of coefficients 
+*!Version 1.1  20.05.2020 : Added initial support for multiple null-hypotheses (somewhat documented); added a noconstant-option to remove constant from list of coefficients; fixed an error in the perm-option of the "sgpv menu"-subcommand 
 *!Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
 *!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
@@ -29,6 +29,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	
 	External changes (Mostly more features):
+	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set
 	- Make help-file easier to understand, especially what input the option require
 	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
 	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
@@ -322,10 +323,14 @@ if "`fdrisk_stat'"=="fdrisk"{
 	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
-			// qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')
+		if wordcount("`nullhi'")==1{
+			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')
+			}
+		else if wordcount("`nullhi'")>1{			
 			qui fdrisk, nullhi(`=word("`nullhi'",`i')') nulllo(`=word("`nulllo'",`i')') ///
 			stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') ///
-			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 			
+			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 	
+			}			
 			capture confirm scalar r(fdr)
 			if !_rc mat `fdrisk'[`i',1] = r(fdr)
 				
@@ -482,7 +487,7 @@ end
 
 *Match coefficients and null-hypotheses in case of multiple null-hypotheses
 program define ParseNull, rclass
-	syntax [name(name=matrix)], coefficient(string asis)  nulllo(string) nullhi(string) coeforig(string asis) 
+	syntax [name(name=matrix)], coefficient(string asis)  nulllo(string) nullhi(string) [coeforig(string asis)] 
 	*Maybe use the input matrix get more information instead of the coefficient-option?
 	*Count number of coefficients and compare with number of null-hypotheses
 	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
@@ -490,6 +495,12 @@ program define ParseNull, rclass
 	local coefn =wordcount("`coefficient'")
 	local coeforign = wordcount("`coeforig'")
 	local nulln =wordcount("`nulllo'")
+	
+	// if `coeforign'==0 & `nulln'==1{ // Expand the bounds like sgpvalue would do it if the coefficient-option is not set and only one null-hypothesis is set
+		// return local nulllo = "`nulllo' " * `coefn'
+		// return local nullhi = "`nullhi' " * `coefn' 
+		// exit
+	// }
 
 	if `coefn'==`nulln'{ //Assuming case 1 & only single equation or 3 or no coefficients selected
 		return local nulllo `nulllo'
@@ -575,7 +586,7 @@ program define menu
 	 
 	 tempname fh
 	 file open `fh' using `profile' , write text `replace'
-	 
+	 file write `fh' `" window menu append submenu "stUserStatistics"  "SGPV" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Power Calculations (&sgpower)" "db sgpower" "' _n

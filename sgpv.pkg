@@ -39,6 +39,5 @@ f sgpv/sgpv.dlg
 f sgpv/leukstats.dta
 f sgpv/fdrisk-examples.do
 f sgpv/sgpv-leukemia-example.do
-f sgpv/sgpv-multiple-null-hypotheses-example.do
 f sgpv/sgpower-plot-example.do
 f sgpv/plotsgpv-leukemia-example.do

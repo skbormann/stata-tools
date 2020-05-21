@@ -4,7 +4,7 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses
 */
 /*
-sgpv dialog version 1.03, 21.05.2020, Sven-Kristjan Bormann
+sgpv dialog version 1.04, 21.05.2020, Sven-Kristjan Bormann
 for sgpv version 1.1
 
 To install in User Statistics menu via Stata commands:
@@ -20,7 +20,7 @@ To permanently install, place the commands in your -profile.do- file.
 
 VERSION 12.0
 POSITION . . 420 400
-INCLUDE _std_large
+INCLUDE _std_xlarge
 //INCLUDE _ht320
 //INCLUDE header
 OK ok1,      label("OK")
@@ -102,16 +102,21 @@ BEGIN
 	TEXT tx_coefficient 	@ 		_ss		@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP)
 	TEXT tx_coefficient2 	@ 		_vss 	@ 		., label(resource ESTIMATES_TABLE_OPT_TX_KEEP2)
 	TEXT tx_coefficient3    @		_ss		@		., label("Only one of these specifications can be used at the same time.")
+	CHECKBOX ck_noconstant  @		_ls 	@		., label(resource LBL_NOCONSTANT) option(noconstant) tooltip("Do not calculate SGPVs, delta-gaps and Fdrs for the constant term.")
 	//TEXT tx_coefficient3	@		_vss	@		., label("The variable name needs to be exactly the same as returned by estimation output in the matrix r(table). If you did not use factor-variable notation, then the names are identical to the variable names.  For example: 1.foreign ")
 	
-	GROUPBOX gb_null 		5 		_ls 	190 	80, label("Null-Hypothesis Interval")
-	TEXT tx_nulllo 			15 		_ss 	70 		., label("Lower Bound") 
-	EDIT ed_nulllo 			@ 		_ss		 60 	., option(nulllo) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
+	GROUPBOX gb_null 		5 		_ls 	410 	140, label("Null-Hypothesis Interval(s)")
+	TEXT tx_nulllo 			15 		_ss 	170 	., label("Lower Bound(s)") 
+	EDIT ed_nulllo 			@ 		_ss		 170 	 ., option(nulllo) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	//Add here infos about multiple null-hypotheses
 	
-	TEXT tx_nullhi 			+100 	-20 	70 		., label("Upper Bound") 
-	EDIT ed_nullhi 			@ 		_ss 	60 		., option(nullhi) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
+	TEXT tx_nullhi 			+220 	-20 	170 	., label("Upper Bound(s)") 
+	EDIT ed_nullhi 			@ 		_ss 	170 	., option(nullhi) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	
+	TEXT tx_null1			15		_ls		390		., label("To have an individual null-hypothesis for each coefficient,")
+	TEXT tx_null2			@		_vss	@		., label("you need to separate the lower and upper bounds with a space.")
+	TEXT tx_null3			@		_vss	@ 		., label("The number of bounds need to match the number of coefficient ")
+	TEXT tx_null4			@		_vss	@		., label("in the coefficient-option.")
 
 END
 
@@ -202,7 +207,7 @@ BEGIN
 END
 
 
-//Deactive display of fdrisk options if nobonus is set to all or fdrisk 
+//Deactive display of fdrisk options if bonus is set to none or deltagap 
 SCRIPT fdrisk_off
 BEGIN
 	fdrisk.ex_nullspace.disable
@@ -235,6 +240,7 @@ BEGIN
 		optionarg main.cb_matrix
 		optionarg main.cb_estimate
 		optionarg main.vl_coefficient
+		option 	  main.ck_noconstant
 		optionarg /hidedefault main.ed_nullhi
 		optionarg /hidedefault main.ed_nulllo
 		
@@ -255,7 +261,7 @@ BEGIN
 	endoptions
 END
 
-PROGRAM command // inspired by the structure use in bootstrap.dlg
+PROGRAM command // inspired by the structure used in bootstrap.dlg
 BEGIN
 	put /program sgpv_options
 	
