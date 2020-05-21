@@ -24,7 +24,6 @@
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:)
 	Internal changes (Mostly re-organising the code for shorter and easier maintained code):
 	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
-	- Change input type of options nulllo and nullhi from 'real' to 'string' to allow the same flexibility like the other commands -> allow a different null-hypothesis for each coefficient -> requires changes for the fdrisk option-parsing/generation & additional checks to avoid non-sensical input.
 	- Write a certification script which checks all possible errors (help cscript)
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	
@@ -69,7 +68,6 @@ if !_rc{
 local old_0 `0'
 gettoken subcmd 0:0, parse(" ,:")
 if inlist("`subcmd'","value","power","fdrisk","plot", "menu" ){ // Change the code to allow shorter subcommand names? Look at the code for estpost.ado for one way how to do it
-	*if !inlist("`subcmd'","value","power","fdrisk","plot", "menu" ) stop "Unknown subcommand `subcmd'. Allowed subcommands are value, power, fdrisk, plot and menu."
 	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
 
 	if ("`subcmd'"=="value"){
@@ -93,8 +91,7 @@ else{
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
- /*nulllo(real 0) nullhi(real 0)*/ /// null-hypotheses
- nulllo(string) nullhi(string)  /// null-hypotheses -> necessary change in the syntax command/diagram
+  nulllo(string) nullhi(string)  /// null-hypotheses 
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/  ] 
 
@@ -137,14 +134,8 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 			local inputmatrix `matrix'
 	  }
 	}
-	*Add here code to catch input errors when allowing multiple null-hypotheses
-	/* Which conditions need to be checked?
-	 -> one interval for all supplied coefficients (currently only allowed case)
-	 -> one individual interval for each individual coefficient (to be added case) 
-	 -> unequal number of coefficients and intervals except for case 1
-	 
-	 -> Initial code to check for multiple-null-hypotheses
-	 */
+	
+	*Catch input errors when using multiple null-hypotheses
 	if "`coefficient'"=="" & wordcount("`nulllo'")>1{ // Allow case no coefficient set, but number of null-hypotheses equals number of coefficients in estimation command? What about noconstant-option? -> Might be supported later 
 		disp as error " `=wordcount("`nulllo'")' lower null-bounds and `=wordcount("`nullhi'")' upper null-bounds found but coefficient-option is empty."
 		disp as error "You can use more than one null-hypothesis only if you set explicitly the coefficients with {it:coefficient}-option."
@@ -167,7 +158,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 
 
 	
-	**Process fdrisk options -> needs changes to allow multiple null intervals
+	**Process fdrisk options 
 	
 	if ustrregexm("`nulllo'","\.") stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
 	if ustrregexm("`nullhi'","\.") stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
@@ -250,6 +241,7 @@ if "`bonus'"=="all"{
 	local nodeltagap 
 }
 
+**Estimation command
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
 if "`cmd'"!=""{
  `quietly'	`cmd'
@@ -301,13 +293,14 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  }
   local rownames : colfullnames `input_new' //Save the variable names for later display
 
-*Needs modifications to allow multiple null-hypotheses 
+*Check and expand the lower and upper bounds if multiple null-hypotheses are used 
 if wordcount("`nullhi'")>1{
 	 ParseNull `input_new', coefficient(`rownames') coeforig(`coefficient') nulllo(`nulllo') nullhi(`nullhi')
 	local nulllo `r(nulllo)'
 	local nullhi `r(nullhi)'
 	}
-*Add here code to match coefficients with their assigned null-hypothesis in case of multiple null-hypotheses
+	
+*Calculate SGPVs
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
 if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
 
@@ -318,7 +311,7 @@ return add
 
 
 if "`fdrisk_stat'"=="fdrisk"{
-*False discovery risks 	-> needs changes to allow multiple null intervals -> in theory all options for fdrisk could be extended to have individual settings for each coefficient -> will be implemented only if ever somebody needs this feature
+*False discovery risks 	
 	mat `fdrisk' = J(`:word count `rownames'',1,.)
 	mat colnames  `fdrisk' = Fdr
 	forvalues i=1/`:word count `rownames''{
@@ -363,9 +356,6 @@ else{
 FormatDisplay `comp', format(`format')
 *Display the results and adjust the title based on the null-hypothesis
 *Modify display of results to allow multiple null-hypotheses -> Not sure if displaying the null-hypotheses is of great help or value
-/*Ideas:
- -> Add two columns containing the individual nulllo and nullhi values? -> requires transforming these locals into matrix columns  
-*/
 
 if wordcount("`nulllo'")>1{
 	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `matlistopt'
@@ -396,7 +386,7 @@ end
 
 *Parse the content of the coefficient-option
 program define ParseCoef, rclass
-	syntax name(name=matrix) [, coefficient(string asis)  noconstant ] // Add nocons-option to remove the constant if only equations are specified
+	syntax name(name=matrix) [, coefficient(string asis)  noconstant ] 
 	tempname coef_mat nocons_mat
 	if "`coefficient'"==""  & "`constant'"=="" {
 		return matrix coef_mat = `matrix'
@@ -442,8 +432,6 @@ program define ParseCoef, rclass
  }
  
  *Save specified case : 
- *local case =cond(`=wordcount("`eqcoefspec'")>0',"coefficient",cond(`=wordcount("`eqspec'")>0',"equation","variable"))
- 
  * looking for the equations only needed if case 1 and set to 0 for case 2 & 3
  if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
 	if wordcount("`coefficient'")==wordcount("`coefspec'"){ 

@@ -132,7 +132,7 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
 {opt replay} the default behaviour if no estimation command, matrix or stored estimate is set. 
 The replay-option is only available in the {dialog sgpv:dialog box}.
 {cmd:sgpv} behaves like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
-At the moment, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. 
+Currently, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. 
 Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
 To see the results from a previous run of {cmd:sgpv} without recalculation, you can run something like {stata matlist r(comparison)}.
 This works only if no other commands did run after {cmd:sgpv}.
@@ -246,7 +246,7 @@ The default value assumes that both hypotheses are equally likely.
 {opt perm:ament} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
 If no profile.do exists or can be found then a new profile.do is created in the current directory. 
-At the moment, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
+Currently, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
 Other possible places like the user's home folder are not accessed yet. 
 See {help profile} to get more information about how to setup the {cmd:profile.do}.
 Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. 
