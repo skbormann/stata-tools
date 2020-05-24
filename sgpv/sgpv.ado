@@ -1,6 +1,10 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1  20.05.2020 : Added initial support for multiple null-hypotheses (somewhat documented); added a noconstant-option to remove constant from list of coefficients; fixed an error in the perm-option of the "sgpv menu"-subcommand 
+*!Version 1.1  24.05.2020 : Added initial support for multiple null-hypotheses (somewhat documented); ///
+							added a noconstant-option to remove constant from list of coefficients; ///
+							fixed an error in the perm-option of the "sgpv menu"-subcommand; ///
+							fixed a confusion in the help-file about the nulllo and nullhi options ///
+							added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
 *!Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
 *!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
@@ -28,6 +32,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	
 	External changes (Mostly more features):
+	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0"
 	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set
 	- Make help-file easier to understand, especially what input the option require
 	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
@@ -91,7 +96,7 @@ else{
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
-  nulllo(string) nullhi(string)  /// null-hypotheses 
+  nulllo(string) nullhi(string) Null(string)  /// null-hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/  ] 
 
@@ -117,7 +122,6 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 		}
 	}
 
-
 	*Arbitrary matrix 
 	if "`matrix'"!=""{
 		capture confirm matrix `matrix'
@@ -135,33 +139,52 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	  }
 	}
 	
+	*Parse alternative new syntax for entering intervals -> add exclusivity check so that only one of the ways to enter an interval is used
+	*For now only parse new "null" option -> experimental change -> not sure which approach is better 
+	if "`null'"!="" & ("`nulllo'"!=""|"`nullhi'"!="") stop "Values for intervals found both in option 'null' and options 'nulllo' 'nullhi'. {break} Only one way of entering intervals allowed at the same time."	
+	if "`null'"!=""{
+	ParseInt ,interval(`null') optname(null)
+	local nulllo `r(lb)'
+	local nullhi `r(ub)'
+	}
+	
+	
+	
 	*Catch input errors when using multiple null-hypotheses
-	if "`coefficient'"=="" & wordcount("`nulllo'")>1{ // Allow case no coefficient set, but number of null-hypotheses equals number of coefficients in estimation command? What about noconstant-option? -> Might be supported later 
+	*Add checks for string input
+	if `"`coefficient'"'=="" & wordcount("`nulllo'")>1{ // Allow case no coefficient set, but number of null-hypotheses equals number of coefficients in estimation command? What about noconstant-option? -> Might be supported later 
 		disp as error " `=wordcount("`nulllo'")' lower null-bounds and `=wordcount("`nullhi'")' upper null-bounds found but coefficient-option is empty."
 		disp as error "You can use more than one null-hypothesis only if you set explicitly the coefficients with {it:coefficient}-option."
 		exit 198
 	} 
 	 
-	if "`coefficient'"!="" & "`nulllo'"!="" & "`nullhi'"!=""{
+	if `"`coefficient'"'!="" & "`nulllo'"!="" & "`nullhi'"!=""{
 		if wordcount("`nulllo'")!=wordcount("`nullhi'"){
 			stop "Number of lower and upper bounds for the null intervals (options 'nulllo' and 'nullhi') need to match. "
 		}
 		
-		if wordcount("`coefficient'") != wordcount("`nulllo'") & wordcount("`nulllo'")>1{
+		if wordcount(`"`coefficient'"') != wordcount("`nulllo'") & wordcount("`nulllo'")>1{
 			stop "Number of null interval hypotheses bounds need to match the number of the coefficients."
 		}
 	}
+	
+	*Check for strings in the input
+	forvalues i=1/`=wordcount("`nulllo'")'{
+		if real("`=word("`nulllo'",`i')'")==. stop "Option {cmd:nulllo} needs to have a number for the lower bound number `i'."
+		if real("`=word("`nullhi'",`i')'")==. stop "Option {cmd:nullhi} needs to have a number for the upper bound number `i'."	
+	}
+	
 	if "`nulllo'"=="" & "`nullhi'"==""{
 		local nulllo 0
 		local nullhi 0
 	}
 
-
-	
+	*Look for missing values since one-sided intervals are not allowed -> should be not anymore, because elsewhere already for missing values
+	*IsMissing, interval("`nulllo'") optname(nulllo)
+	*IsMissing, interval("`nullhi'") optname(nullhi)
 	**Process fdrisk options 
 	
-	if ustrregexm("`nulllo'","\.") stop "No missing value for option 'nulllo' allowed. One-sided intervals are not yet supported."
-	if ustrregexm("`nullhi'","\.") stop "No missing value for option 'nullhi' allowed. One-sided intervals are not yet supported."
+
 		
 	*Nullspace option
 	if "`nullspace'"!=""{
@@ -203,6 +226,8 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	*else if "`nullweights'"=="" & `:word count `nullspace''==2{ //Assuming that Uniform is good default nullweights for a nullspace with two values -> TruncNormal will be chosen only if explicitly set.
 		local nullweights "Uniform" 
 	} 
+	
+	*Altspace -> This option should be parsed but instead is generated from the estimated parameters -> should be removed from the syntax diagram and the help-file
 	
 	*Altweights
 	if "`altweights'"!="" & inlist("`altweights'", "Uniform", "TruncNormal"){
@@ -283,9 +308,9 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 *The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
 *Removing not estimated coefficients from the input matrix
  forvalues i=1/`coln'{
-	 if !mi(`:disp `input'[2,`i']') & !mi(`:disp `input'[4,`i']') { // Check here if the standard error or the p-value is missing and treat it is as indication for a variable to omit.
-		local esthi `esthi' `:disp `input'[6,`i']'
-		local estlo `estlo' `:disp `input'[5,`i']'
+	 if !mi(`=el(`input',2,`i')') & !mi(`=el(`input',4,`i')') { // Check here if the standard error or the p-value is missing and treat it is as indication for a variable to omit.
+		local esthi `esthi' `=el(`input',6,`i')'
+		local estlo `estlo' `=el(`input',5,`i')'
 		mat `pval' =(nullmat(`pval')\\`input'[4,`i'])
 		mat `input_new' = (nullmat(`input_new'), `input'[1..6,`i']) //Get new input matrix with only the elements for which results will be calculated
 
@@ -358,7 +383,7 @@ FormatDisplay `comp', format(`format')
 *Modify display of results to allow multiple null-hypotheses -> Not sure if displaying the null-hypotheses is of great help or value
 
 if wordcount("`nulllo'")>1{
-	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `matlistopt'
+	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `"`matlistopt'"'
 }
 
  if wordcount("`nulllo'")==1{
@@ -382,17 +407,59 @@ return matrix comparison =  `comp'
 end
 
 
-*Additional helper commands--------------------------------------------------------------
+*Additional helper commands (roughly ordered by appearance in the command)--------------------------------------------------------------
+
+capture program drop ParseInt
+program define ParseInt, rclass
+syntax ,INTerval(string) [optname(string)]
+
+*Basic loop to extract the bounds from input
+*Needs additional input checks but works in principal
+local i 0
+while "`interval'"!=""{
+	local ++i
+	
+	gettoken bracket interval:interval,parse("(")
+	if "`bracket'"!="(" stop "The interval `i' in option `optname' needs to start with a '('"
+	
+	gettoken lb interval:interval,parse(",")
+	if real("`=`lb''")==. stop "The interval `i' in option `optname' needs to have valid number or expression after the '('."
+	local lb_full `lb_full' `lb'
+	
+	gettoken colon interval:interval, parse(",")
+	if "`colon'"!="," stop "The interval `i' in option `optname' needs to have ',' to separate lower and upper bound."
+	
+	
+	gettoken ub interval:interval,parse(")")
+	if real("`=`ub''")==. stop "The interval `i' in option `optname' needs to have valid number or expression after the ',' to declare an upper bound."
+	local ub_full `ub_full' `ub'
+	
+	gettoken bracket interval:interval, parse(")")
+	if "`bracket'"!=")" stop "The interval `i' in option `optname' needs to end with a ')' after the upper bound."
+}
+
+return local lb `lb_full'
+return local ub `ub_full'
+end
+
+*Check if an interval contains missing value which are not allowed
+program define IsMissing, rclass
+syntax ,INTerval(string) [optname(string)]
+	forvalues i=1/`=wordcount("`interval'")'{
+		if real("`=word("`interval'",`i')'")==. stop "Missing value in interval `i' of option `optname' found. {break}No missing value for option `optname' allowed. One-sided intervals are not yet supported."
+	}
+
+end
 
 *Parse the content of the coefficient-option
 program define ParseCoef, rclass
 	syntax name(name=matrix) [, coefficient(string asis)  noconstant ] 
 	tempname coef_mat nocons_mat
-	if "`coefficient'"==""  & "`constant'"=="" {
+	if `"`coefficient'"'==""  & "`constant'"=="" {
 		return matrix coef_mat = `matrix'
 		exit
 	}
-	 else if "`coefficient'"=="" & "`constant'"=="noconstant"{
+	 else if `"`coefficient'"'=="" & "`constant'"=="noconstant"{
 		local coefficient : colfullnames `matrix'
 		foreach coef of local coefficient{
 			if !ustrregexm("`coef'","_cons"){
@@ -402,9 +469,7 @@ program define ParseCoef, rclass
 		return matrix coef_mat = `coef_mat'
 		exit
 	}
-	
-	
-	
+		
  /* Distinguish three cases:	1. variable name only
 								2. equation name only
 								3. equation and variable name together
@@ -434,7 +499,7 @@ program define ParseCoef, rclass
  *Save specified case : 
  * looking for the equations only needed if case 1 and set to 0 for case 2 & 3
  if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
-	if wordcount("`coefficient'")==wordcount("`coefspec'"){ 
+	if wordcount(`"`coefficient'"')==wordcount("`coefspec'"){ 
 		local coleq : coleq `matrix'
 		local coleq : list uniq coleq
 		if "`coleq'"=="_" local coleqnumb 0
@@ -480,7 +545,7 @@ program define ParseNull, rclass
 	*Count number of coefficients and compare with number of null-hypotheses
 	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
 
-	local coefn =wordcount("`coefficient'")
+	local coefn =wordcount(`"`coefficient'"')
 	local coeforign = wordcount("`coeforig'")
 	local nulln =wordcount("`nulllo'")
 	

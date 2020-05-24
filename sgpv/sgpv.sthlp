@@ -37,9 +37,9 @@
 {p_end}
 
 {syntab:Null hypothesis}
-{synopt:{opt nulllo(string)}}  change the upper limit of the null-hypothesis interval(s).
+{synopt:{opt nulllo(#)}}  change the lower bound(s) of the null-hypothesis interval(s).
 {p_end}
-{synopt:{opt nullhi(string)}}  change the lower limit of the null-hypothesis interval(s).
+{synopt:{opt nullhi(#)}}  change the upper bound(s) of the null-hypothesis interval(s).
 {p_end}
 
 {syntab:Display}
@@ -165,8 +165,9 @@ You can also select only an equation by using "eq:" or select a specific equatio
 
 {dlgtab:Null-Hypothesis}
 {phang}
-{opt nulllo(string)}  change the lower limit of the null-hypothesis interval. 
-The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+{opt nulllo(lower_bound(s))}  change the lower bound of the null-hypothesis interval. 
+The default is 0 (the same bound as for the usually reported p-values). 
+Missing values, strings and variable names are not allowed. 
 More than one null-hypothesis is also supported. Each lower bound must be separated with a space. 
 The number of lower bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
@@ -174,7 +175,8 @@ See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstra
 One-sided null-hypotheses are not supported yet.
 
 {phang}
-{opt nullhi(string)}  change the upper limit of the null-hypothesis interval. The default is 0 (the same limit as for the usually reported p-values). Missing values are not allowed. 
+{opt nullhi(upper_bound(s))}  change the upper bound of the null-hypothesis interval. 
+The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed. 
 More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
 The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 

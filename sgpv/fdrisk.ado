@@ -1,6 +1,7 @@
 *!False confirmatory/discovery risk calculations for Second Generation P-Values
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.03 24.05.2020 : Added more input checks 
 *!Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
 *Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
@@ -58,26 +59,39 @@ if "`inttype'"=="likelihood"{
 	local z = invnorm(1- 2*normal(-sqrt(2*log(1/`intlevel')))/2)
 }
 
-*Evaluate inputs to allow more flexible specifications of intervals, null & alt spaces; no further checks yet for non-sensical input
-local nullhi = `nullhi'
-local nulllo = `nulllo'
-if `: word count `nullspace''==1 local nullspace = `nullspace'
-if `: word count `nullspace''==2{
-	local nullspace1  `: word 1 of `nullspace''
-	local nullspace1 = `nullspace1'
-	local nullspace2  `: word 2 of `nullspace''
-	local nullspace2 = `nullspace2'
-	local nullspace `nullspace1' `nullspace2'
-} 
+*Evaluate inputs to allow more flexible specifications of intervals, null & alt spaces; no further checks yet for non-sensical input -> errors should be caught here by the expression parser -> the code will ignore more than two arguments, seems to be more robust than I initially thought 
+	if wordcount("`nullhi'")>1 stop "Option {cmd:nullhi} has more than one argument."
+	capture local nullhi = `nullhi'
+	isValid `nullhi' nullhi
 
-if `: word count `altspace''==1 local altspace = `altspace'
-if `: word count `altspace''==2{
-	local altspace1  `: word 1 of `altspace''
-	local altspace1 = `altspace1'
-	local altspace2  `: word 2 of `altspace''
-	local altspace2 = `altspace2'
-	local altspace `altspace1' `altspace2'
-} 
+	if wordcount("`nulllo'")>1 stop "Option {cmd:nullhi} has more than one argument."
+	capture local nulllo = `nulllo'
+	isValid `nulllo' nulllo
+
+	*if wordcount(`"`nullspace'"')>2 stop "Option {cmd:nullspace} can have at maximum two arguments."
+	if `: word count `nullspace''==1 local nullspace = `nullspace'
+	if `: word count `nullspace''==2{
+		local nullspace1  `: word 1 of `nullspace''
+		capture local nullspace1 = `nullspace1'
+		isValid `nullspace1' nullspace 1
+		
+		local nullspace2  `: word 2 of `nullspace''
+		capture local nullspace2 = `nullspace2'
+		isValid `nullspace2' nullspace 2
+		
+		local nullspace `nullspace1' `nullspace2'
+	} 
+
+	*if wordcount(`"`altspace'"')>2 stop "Option {cmd:altspace} can have at maximum two arguments.{break} You have provided `=wordcount(`"`altspace'"')' number of arguments." 
+	if `: word count `altspace''==1 local altspace = `altspace'
+	if `: word count `altspace''==2{
+		local altspace1  `: word 1 of `altspace''
+		capture local altspace1 = `altspace1'
+		local altspace2  `: word 2 of `altspace''
+		capture local altspace2 = `altspace2'
+		local altspace `altspace1' `altspace2'
+	} 
+
 
 
 *Power functions -> taken from sgpower.ado 
@@ -235,6 +249,8 @@ if `: word count `altspace''==2{
   if "`fcr'" !="" return scalar fcr = `fcr'  	
 end
 
+
+*Additional commands------------------------------------------------------------------------------------
 *Simulate the behaviour of the R-function with the same name 
 program define stop
  args text 
@@ -242,6 +258,20 @@ program define stop
  exit 198
 end
 
+*Check if the input is valid
+program define isValid
+args valid optname i
+if real("`=`valid''")==.{
+	if "`i'"!=.{
+		disp as error "`valid' in option {cmd:`optname'} on position `i'  is not a number nor . (missing value) nor empty."
+	}
+	else{
+		disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
+	} 
+	exit 198
+		}
+		
+end
 
 *Shortcut to the Stata integration command, same syntax as the user-provided integrate-command.
 program define nomataInt, rclass

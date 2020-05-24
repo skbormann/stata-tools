@@ -1,6 +1,7 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is still possible. 
+*!Version 1.03 24.05.2020 : Added further input checks(to be done)	
+*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is probably still possible. 
 *Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
@@ -14,7 +15,8 @@
 *Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
 *Still missing: Some Input error checks (which ones are missing?)
 *To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
-*			Add an option to format the output	
+*			Add an option to format the output -> exists already for the sgpv-command, could added if needed	
+*			Unify options nulllo and nullhi into one option named "null" and options estlo and esthi into "est" or "ALTernative" to make it easier for users to enter null-hypothesis and alternative hypothesis or estimated intervals -> requires rewriting the parsing of the input
 
 
 
@@ -25,6 +27,7 @@ syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
+*Could add here parsing of new syntax for intervals which unifies the options estlo and esthi into estint (or similar name), for nulllo and nullhi
 	if `:word count `esthi''==1{
 		capture confirm numeric variable `esthi'
 		if !_rc{
@@ -53,7 +56,7 @@ syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings 
 
 **Potential Errors
 * Not covered yet -> nullhi and nulllo are equal but less than esthi and estlo -> not sure how to handle it
-* Not all non-sensical inputs covered yet -> number of esthi less than nullhi;
+* Not all non-sensical inputs covered yet
 if `:word count `nullhi'' != `: word count `nulllo''{
 	disp as error `" Options "nullhi" and "nulllo" do not contain the same number of arguments."'
 	exit 198
@@ -121,29 +124,33 @@ else{	// Run if rows less than matsize -> the "original" approach
 	***Iterate over all intervalls to implement a parallel max and min function as in the R-code
 	forvalues i=1/`estint'{
 		*Parse interval -> Not the best names yet
-		local null_lo = `: word `i' of `nulllo''
-			isValid `null_lo'
+		local null_lo  `: word `i' of `nulllo''
+			capture local null_lo = `null_lo'
+			isValid `null_lo' nulllo
 			isInfinite `null_lo'
 			if (`r(infinite)' == `=c(maxdouble)'){
 			 local null_lo = `=c(mindouble)'
 			} 
 		
-		local null_hi = `: word `i' of `nullhi''
-			isValid `null_hi'
+		local null_hi  `: word `i' of `nullhi''
+			capture local null_hi = `null_hi'
+			isValid `null_hi' nullhi
 			isInfinite `null_hi'
 			local null_hi = `r(infinite)'
 		*Only required if no variables as input
 		if `varsfound'==0{
-		local est_lo = `: word `i' of `estlo''	
-			isValid `est_lo'
+		local est_lo  `: word `i' of `estlo''	
+			capture local est_lo = `est_lo'
+			isValid `est_lo' estlo
 			isInfinite `est_lo'
 			if (`r(infinite)' == `=c(maxdouble)'){
 			local est_lo = `=c(mindouble)'
 			}
 			
 
-		local est_hi = `: word `i' of `esthi''
-			isValid `est_hi'
+		local est_hi  `: word `i' of `esthi''
+			capture local `est_hi' =`est_hi'
+			isValid `est_hi' esthi
 			isInfinite `est_hi'
 			local est_hi =`r(infinite)'
 		}
@@ -262,9 +269,9 @@ end
 *Additional commands ----------------------------------------------------------------------------------------------
 *Check if the input is valid
 program define isValid
-args valid
-if `valid'!=.  & real("`valid'")==.{
-	disp as error "`valid'  is not a number nor . (missing value) nor empty."
+args valid optname
+if real("`=`valid''")==.{
+	disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
 	exit 198
 		}
 		

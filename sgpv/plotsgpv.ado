@@ -205,7 +205,7 @@ if `"`nullcol'"'==""{
 	local xlabel xlabel(0(`=10^(floor(log10(`xshow')))')`xshow')
 	
 	***Plot: Set up the twoway plot
-	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `twoway_opt'
+	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `"`twoway_opt'"'
 	
 	restore
 end
