@@ -71,6 +71,8 @@ General remarks if updates come in larger "packages".
   * Added initial support for multiple null-hypotheses (somewhat documented)
   * Added a noconstant-option to remove constant from list of coefficients 
   * Fixed an error in the perm-option of the "sgpv menu"-subcommand
+  * Fixed a confusion in the help-file about the nulllo and nullhi options 
+  *	Added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
 * Version 1.03a 17.05.2020 : 
   * Made the title of the displayed matrix adapt to the type of null-hypothesis
   * Fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset
