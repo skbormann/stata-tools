@@ -1,13 +1,16 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1  24.05.2020 : Added initial support for multiple null-hypotheses (somewhat documented); ///
+*!Version 1.1  09.06.2020 : Added (initial) support for multiple null-hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
-							fixed an error in the perm-option of the "sgpv menu"-subcommand; ///
+							fixed errors in the perm-option of the "sgpv menu"-subcommand; ///
 							fixed a confusion in the help-file about the nulllo and nullhi options ///
-							added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
-*!Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
-*!Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
-*!				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
+							added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " ///
+							should allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first ///
+							removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace
+							
+*Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
+*Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
+*				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 *Version 1.02 03.05.2020 : Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options; ///
 				removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented); ///
 				removed old dead code; enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying ; ///
@@ -32,9 +35,10 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	
 	External changes (Mostly more features):
-	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0"
+	- Allow a mixture of case 1 & 2 for the coefficient-option -> select only some equations and variables from a multi-equation estimation -> ex. coef(((q10: q50: q90:) (mpg weight foreign)) which will then be expanded to coef(q10:mpg q10:weight ... q90:weight q90:foreign) -> requires changes in how this option is parsed
+	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0" -> not sure which way to input intervals works best
 	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set
-	- Make help-file easier to understand, especially what input the option require
+	- Make help-file easier to understand, especially what kind of input each option requires
 	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
 	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
 	- support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
@@ -110,7 +114,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	stop "Setting both options 'estimate' and 'matrix' is not allowed."
 } 
 
-	*Saved Estimation
+	*Stored Estimation
 	if "`estimate'"!=""{
 		qui estimates dir
 		if regexm("`r(names)'","`estimate'"){
@@ -143,9 +147,9 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	*For now only parse new "null" option -> experimental change -> not sure which approach is better 
 	if "`null'"!="" & ("`nulllo'"!=""|"`nullhi'"!="") stop "Values for intervals found both in option 'null' and options 'nulllo' 'nullhi'. {break} Only one way of entering intervals allowed at the same time."	
 	if "`null'"!=""{
-	ParseInt ,interval(`null') optname(null)
-	local nulllo `r(lb)'
-	local nullhi `r(ub)'
+		ParseInt ,interval(`null') optname(null)
+		local nulllo `r(lb)'
+		local nullhi `r(ub)'
 	}
 	
 	
@@ -170,8 +174,8 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 	*Check for strings in the input
 	forvalues i=1/`=wordcount("`nulllo'")'{
-		if real("`=word("`nulllo'",`i')'")==. stop "Option {cmd:nulllo} needs to have a number for the lower bound number `i'."
-		if real("`=word("`nullhi'",`i')'")==. stop "Option {cmd:nullhi} needs to have a number for the upper bound number `i'."	
+		if real("`=`=word("`nulllo'",`i')''")==. stop "Option {cmd:nulllo} needs to have a number for the lower bound number `i'."
+		if real("`=`=word("`nullhi'",`i')''")==. stop "Option {cmd:nullhi} needs to have a number for the upper bound number `i'."	
 	}
 	
 	if "`nulllo'"=="" & "`nullhi'"==""{
@@ -179,13 +183,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 		local nullhi 0
 	}
 
-	*Look for missing values since one-sided intervals are not allowed -> should be not anymore, because elsewhere already for missing values
-	*IsMissing, interval("`nulllo'") optname(nulllo)
-	*IsMissing, interval("`nullhi'") optname(nullhi)
-	**Process fdrisk options 
-	
-
-		
+	**Process fdrisk options 	
 	*Nullspace option
 	if "`nullspace'"!=""{
 		local nullspace `nullspace'
@@ -223,11 +221,8 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 		local nullweights "Point"
 	}
 	else if "`nullweights'"=="" & mod(`=wordcount("`nullspace'")',2)==0{ //Assuming that Uniform is good default nullweights for a nullspace with two values -> TruncNormal will be chosen only if explicitly set.	
-	*else if "`nullweights'"=="" & `:word count `nullspace''==2{ //Assuming that Uniform is good default nullweights for a nullspace with two values -> TruncNormal will be chosen only if explicitly set.
 		local nullweights "Uniform" 
 	} 
-	
-	*Altspace -> This option should be parsed but instead is generated from the estimated parameters -> should be removed from the syntax diagram and the help-file
 	
 	*Altweights
 	if "`altweights'"!="" & inlist("`altweights'", "Uniform", "TruncNormal"){
@@ -246,7 +241,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 **Parse bonus option
 *Changed the default behaviour so that the option is now a bit confusing
 if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
-	stop `"bonus option incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
+	stop `"Option 'bonus' is incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
 }
 if "`bonus'"=="" | "`bonus'"=="none"{ 	
 	local nodeltagap nodeltagap
@@ -276,7 +271,6 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 }
  
  
- 
 * disp "Start calculating SGPV"
  *Create input vectors
   tempname input  input_new sgpv pval comp rest fdrisk 
@@ -302,9 +296,9 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  local case `r(case)'
  local coln =colsof(`input')
 
-* Hard coded values for the rows from which necessary numbers are extracted
+*Hard coded values for the rows from which necessary numbers are extracted
 *The rows could be addressed by name, but then at least Stata 14 returns a matrix
-* which requires additional steps to come to the same results as with hardcoded row numbers. Unless some one complains, I won't change this restriction.
+*which requires additional steps to come to the same results as with hardcoded row numbers. Unless some one complains, I won't change this restriction.
 *The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
 *Removing not estimated coefficients from the input matrix
  forvalues i=1/`coln'{
@@ -320,7 +314,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 
 *Check and expand the lower and upper bounds if multiple null-hypotheses are used 
 if wordcount("`nullhi'")>1{
-	 ParseNull `input_new', coefficient(`rownames') coeforig(`coefficient') nulllo(`nulllo') nullhi(`nullhi')
+	ParseNull `input_new', coefficient(`rownames') coeforig(`coefficient') nulllo(`nulllo') nullhi(`nullhi')
 	local nulllo `r(nulllo)'
 	local nullhi `r(nullhi)'
 	}
@@ -329,11 +323,8 @@ if wordcount("`nullhi'")>1{
 qui sgpvalue, esthi(`esthi') estlo(`estlo') nullhi(`nullhi') nulllo(`nulllo') nowarnings `nodeltagap' 
 if "`debug'"=="debug" disp "Finished SGPV calculations. Starting now bonus Fdr calculations."
 
-
 mat `comp'=r(results)
-return add
- mat colnames `pval' = "P-Value"
-
+mat colnames `pval' = "P-Value"
 
 if "`fdrisk_stat'"=="fdrisk"{
 *False discovery risks 	
@@ -383,7 +374,7 @@ FormatDisplay `comp', format(`format')
 *Modify display of results to allow multiple null-hypotheses -> Not sure if displaying the null-hypotheses is of great help or value
 
 if wordcount("`nulllo'")>1{
-	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `"`matlistopt'"'
+	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `matlistopt'
 }
 
  if wordcount("`nulllo'")==1{
@@ -393,14 +384,14 @@ if wordcount("`nulllo'")>1{
  }
 
 
-if "`nonullwarnings'"=="" & (`nulllo'==0 & `nullhi'==0){
+if "`nonullwarnings'"=="" & ("`nulllo'"=="0" & "`nullhi'"=="0"){
 	disp _n "Warning:"
 	disp "You used the default point 0 null-hypothesis for calculating the SGPVs."
 	disp "This is allowed but you are strongly encouraged to set a more reasonable interval null-hypothesis."
 	disp "The default point 0 null-hypothesis will result in having SGPVs of either 0 or 0.5."	
 }
 
-return add
+*return add
 *Return results
 return matrix comparison =  `comp'
 
@@ -409,34 +400,37 @@ end
 
 *Additional helper commands (roughly ordered by appearance in the command)--------------------------------------------------------------
 
+/*Parse a new syntax for the defining the hypotheses intervals
+New syntax could be:"(lower_bound1,upper_bound1) (lower_bound2,upper_bound2)..."
+Not sure which syntax use exactly if any... maybe ("lower_bound1","upper_bound1") to allow spaces in expressions
+*/
 capture program drop ParseInt
 program define ParseInt, rclass
 syntax ,INTerval(string) [optname(string)]
 
 *Basic loop to extract the bounds from input
 *Needs additional input checks but works in principal
+*Does not work if input string contains a "(" -> no expressions allowed at the moment -> less powerful than existing syntax
 local i 0
+
 while "`interval'"!=""{
-	local ++i
+	local ++i	
+	capture gettoken left interval:interval,match(parens)
+	if _rc==132 stop "Number of left and right parentheses do not match. You may have forgotten a parenthesis somewhere. "
+	if "`parens'"!="(" stop "The interval `i' in option `optname' needs to start with a '('"
 	
-	gettoken bracket interval:interval,parse("(")
-	if "`bracket'"!="(" stop "The interval `i' in option `optname' needs to start with a '('"
-	
-	gettoken lb interval:interval,parse(",")
+	gettoken lb ub:left,parse(" ,")
 	if real("`=`lb''")==. stop "The interval `i' in option `optname' needs to have valid number or expression after the '('."
 	local lb_full `lb_full' `lb'
 	
-	gettoken colon interval:interval, parse(",")
+	gettoken colon ub:ub, parse(" ,")
 	if "`colon'"!="," stop "The interval `i' in option `optname' needs to have ',' to separate lower and upper bound."
-	
-	
-	gettoken ub interval:interval,parse(")")
+		
 	if real("`=`ub''")==. stop "The interval `i' in option `optname' needs to have valid number or expression after the ',' to declare an upper bound."
 	local ub_full `ub_full' `ub'
 	
-	gettoken bracket interval:interval, parse(")")
-	if "`bracket'"!=")" stop "The interval `i' in option `optname' needs to end with a ')' after the upper bound."
 }
+
 
 return local lb `lb_full'
 return local ub `ub_full'
@@ -507,7 +501,7 @@ program define ParseCoef, rclass
 	}
 	
 	local coefnumb : word count `coefficient'
-	if `coleqnumb'==0{ // No equations found or only fully specified coefficient names given (eq:var) Case 3 & Case 2 (eq:) -> how remove constant from case 2?
+	if `coleqnumb'==0{ // No equations found or only fully specified coefficient names given (eq:var) Case 3 & Case 2 (eq:) 
 		forvalues i=1/`coefnumb'{
 			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`: word `i' of `coefficient''"])
 			if _rc{
@@ -544,24 +538,16 @@ program define ParseNull, rclass
 	*Maybe use the input matrix get more information instead of the coefficient-option?
 	*Count number of coefficients and compare with number of null-hypotheses
 	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
-
 	local coefn =wordcount(`"`coefficient'"')
 	local coeforign = wordcount("`coeforig'")
-	local nulln =wordcount("`nulllo'")
-	
-	// if `coeforign'==0 & `nulln'==1{ // Expand the bounds like sgpvalue would do it if the coefficient-option is not set and only one null-hypothesis is set
-		// return local nulllo = "`nulllo' " * `coefn'
-		// return local nullhi = "`nullhi' " * `coefn' 
-		// exit
-	// }
+	local nulln =wordcount("`nulllo'")	
 
 	if `coefn'==`nulln'{ //Assuming case 1 & only single equation or 3 or no coefficients selected
 		return local nulllo `nulllo'
 		return local nullhi `nullhi'
 		exit
 	}
-	else if `coefn'!=`nulln'{ //Assuming case 2 or omitted coefficients or case 1 with multiple equations
-		
+	else if `coefn'!=`nulln'{ //Assuming case 2 or omitted coefficients or case 1 with multiple equations		
 		foreach coef of local coefficient{ //There should be a more efficient solution than looping over two lists, but it should work for now to match coefficients with null-hypotheses -> maybe use ":list uniq `="
 			forvalues i=1/`coeforign'{
 				if ustrregexm("`coef'","`=word("`coeforig'",`i')'"){
@@ -629,6 +615,8 @@ program define menu
 			local replace replace
 			disp "profile.do not found."
 			disp "profile.do will be created in the current folder."
+			disp "Move the file profile.do to a folder where Stata can find it the next time it starts."
+			disp "See {help profile} for more information about where to place the profile.do"
 			local profile profile.do
 		}
 		else{
@@ -638,7 +626,7 @@ program define menu
 		}
 	 
 	 tempname fh
-	 file open `fh' using `profile' , write text `replace'
+	 file open `fh' using `"`profile'"' , write text `replace'
 	 file write `fh' `" window menu append submenu "stUserStatistics"  "SGPV" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv" "' _n
 	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue" "' _n
@@ -659,5 +647,6 @@ program define menu
 	window menu append item "SGPV" "SGPV Plot Interval Estimates (p&lotsgpv)" "db plotsgpv"
 
 	window menu refresh
+	disp "Menu entries succesfully created. Go to User->Statistics->SGPV to access the dialog boxes for this package."
 	
 end

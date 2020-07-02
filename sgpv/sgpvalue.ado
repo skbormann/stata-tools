@@ -1,7 +1,9 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.03 24.05.2020 : Added further input checks(to be done)	
-*!Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is probably still possible. 
+*!Version 1.04  01.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". -> Examples yet in the help file
+*Version 1.03a 23.06.2020: Removed unnecessary input checks
+*Version 1.03 24.05.2020 : Added further input checks	
+*Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is probably still possible. 
 *Version 1.01 28.03.2020 : Fixed the nodeltagap-optin -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the computing algorithm.	
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.98a: Fixed an incorrect comparison -> now the correct version of the SGPV algorithm should be chosen if c(matsize) is smaller than the input matrix; added more examples from the original R-code to the help-file.
@@ -13,76 +15,96 @@
 *				Added alternative approach to use variables for the calculations instead if variables are the input -> Mata is relatively slow compared to using only variables for calculations.
 *Version 0.90  : Initial release to Github 
 *Handling of infinite values depends on whether variables or "vectors" are used as input. But it should not matter for calculations.  
-*Still missing: Some Input error checks (which ones are missing?)
 *To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
 *			Add an option to format the output -> exists already for the sgpv-command, could added if needed	
-*			Unify options nulllo and nullhi into one option named "null" and options estlo and esthi into "est" or "ALTernative" to make it easier for users to enter null-hypothesis and alternative hypothesis or estimated intervals -> requires rewriting the parsing of the input
+*			Unify options nulllo and nullhi into one option named "null" and options estlo and esthi into "est" or "ALTernative" to make it easier for users to enter null-hypothesis and alternative hypothesis or estimated intervals
+*			Allow matrices as input for the intervals?
 
 
 
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax,  estlo(string) esthi(string)  nulllo(string) nullhi(string) [nowarnings INFcorrection(real 1e-5) nodeltagap nomata noshow replace ] 
+syntax, estlo(string) esthi(string)  [nulllo(string) nullhi(string) nowarnings INFcorrection(real 1e-5) nodeltagap nomata noshow replace h0(string asis) h1(string asis) /*two additional options for a new syntax to enter intervals */ ] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
 *Could add here parsing of new syntax for intervals which unifies the options estlo and esthi into estint (or similar name), for nulllo and nullhi
-	if `:word count `esthi''==1{
-		capture confirm numeric variable `esthi'
-		if !_rc{
-			local var_esthi 1
-		}
-	}
 
-	if `:word count `estlo''==1{
-		capture confirm numeric variable `estlo'
+	if `"`h0'"'!="" & ("`nulllo'"!=""|"`nullhi'"!="") stop "Values for intervals found both in option 'h0' and options 'nulllo' 'nullhi'. {break} Only one way of entering intervals allowed at the same time."
+	if `"`h1'"'!="" & ("`estlo'"!=""|"`esthi'"!="") stop "Values for intervals found both in option 'h1' and options 'estlo' 'esthi'. {break} Only one way of entering intervals allowed at the same time."		
+	if `"`h0'"'!=""{
+	ParseInt ,interval(`"`h0'"') optname(h0)
+	local nulllo `r(lb)'
+	local nullhi `r(ub)'
+	}
+	
+	if `"`h1'"'!=""{
+	ParseInt ,interval(`"`h1'"') optname(h1)
+	local estlo `r(lb)'
+	local esthi `r(ub)'
+	}
+	
+	
+	*Check if input is matrix or variable and convert matrix into local macro
+	foreach name in esthi estlo{
+		capture confirm numeric variable ``name''
 		if !_rc{
-			local var_estlo 1
+			local variable_`name' 1
+		}
+		else{
+			capture confirm matrix ``name''
+			if !_rc{
+				local matrix_`name' 1
+			}
 		}
 	}
 	
-	if "`var_esthi'" == "1" & "`var_estlo'" =="1"{
-		local varsfound 1
+	local variablefound 0 
+	local matrixfound 0
+	foreach type in variable matrix{
+		if ("``type'_esthi'"=="1" & "``type'_estlo'"=="1"){
+			local `type'found 1
+
+		} 
+		else if "``type'_esthi'"!="``type'_estlo'"{
+			disp as error "Either `esthi' or `estlo' is not a `type'. Both options need to be a `type' if you want to use `type' as inputs."
+			exit 198
+		}
 	}
-	else if "`var_esthi'"!="`var_estlo'" {
-		disp as error "Either `esthi' or `estlo' is not a numeric variable. Both options need to be numeric variables if you want to use variables as inputs."
-		exit 198
-	}
-	else if "`var_esthi'"=="" & "`var_estlo'"==""{
-		local varsfound 0
+	if `matrixfound'==1{
+		foreach mat in esthi estlo{
+			convertMatrix ``mat'' `mat'
+			local `mat' `r(`mat')'
+		}
 	}
 
+	
 
 **Potential Errors
-* Not covered yet -> nullhi and nulllo are equal but less than esthi and estlo -> not sure how to handle it
 * Not all non-sensical inputs covered yet
 if `:word count `nullhi'' != `: word count `nulllo''{
-	disp as error `" Options "nullhi" and "nulllo" do not contain the same number of arguments."'
+	disp as error `"Options 'nullhi' and 'nulllo' do not contain the same number of arguments."'
 	exit 198
 }
 
 if `:word count `esthi'' != `: word count `estlo''{
-	disp as error `" Options "esthi" and "estlo" do not contain the same number of arguments. "'
+	disp as error `"Options 'esthi' and 'estlo' do not contain the same number of arguments."'
 	exit 198
 }
 
-if wordcount("`nulllo'") < wordcount("`estlo'") & wordcount("`nulllo'")>1{
-	disp as error "Options 'nulllo' and 'nullhi' must only have one argument or exactly as many arguments as options 'esthi' and 'estlo' "
-	disp as error "Options 'nulllo' and 'nullhi miss " `=wordcount("`esthi'")-wordcount("`nullhi'")' " number of arguments."
+if wordcount("`nulllo'") != wordcount("`estlo'") & wordcount("`nulllo'")>1{
+	disp as error `"Options 'nulllo' and 'nullhi' must only have one argument or exactly as many arguments as options 'esthi' and 'estlo'."'
 	exit 198
 }
 
-if wordcount("`nulllo'") > wordcount("`estlo'"){
-	stop "Options 'nulllo' and 'nullhi' cannot have more arguments than options 'esthi' and 'estlo'. "
-}
 
   if `:word count `nulllo''==1 {
    local nulllo = "`nulllo' " * `: word count `estlo''  
    local nullhi = "`nullhi' " * `: word count `esthi'' 
   }
 
-	if `varsfound'{
+	if "`variablefound'"=="1"{
 		local estint =_N
 	}
 	else{
@@ -93,7 +115,7 @@ if wordcount("`nulllo'") > wordcount("`estlo'"){
 if `estint'>c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize).
 	*An alternative based on variables if inputs are variables.
 	local nodeltagap `deltagap'
-	if "`mata'"=="nomata" & `varsfound'==1{
+	if "`mata'"=="nomata" & `variablefound'==1{
 		local nulllo = real(trim("`nulllo'"))
 		local nullhi = real(trim("`nullhi'"))
 		if wordcount("`nulllo'") >1 | wordcount("`nullhi'") > 1{
@@ -128,7 +150,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 			capture local null_lo = `null_lo'
 			isValid `null_lo' nulllo
 			isInfinite `null_lo'
-			if (`r(infinite)' == `=c(maxdouble)'){
+			if (`s(infinite)' == `=c(maxdouble)'){
 			 local null_lo = `=c(mindouble)'
 			} 
 		
@@ -136,14 +158,14 @@ else{	// Run if rows less than matsize -> the "original" approach
 			capture local null_hi = `null_hi'
 			isValid `null_hi' nullhi
 			isInfinite `null_hi'
-			local null_hi = `r(infinite)'
+			local null_hi = `s(infinite)'
 		*Only required if no variables as input
-		if `varsfound'==0{
+		if `variablefound'==0{
 		local est_lo  `: word `i' of `estlo''	
 			capture local est_lo = `est_lo'
 			isValid `est_lo' estlo
 			isInfinite `est_lo'
-			if (`r(infinite)' == `=c(maxdouble)'){
+			if (`s(infinite)' == `=c(maxdouble)'){
 			local est_lo = `=c(mindouble)'
 			}
 			
@@ -152,7 +174,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 			capture local `est_hi' =`est_hi'
 			isValid `est_hi' esthi
 			isInfinite `est_hi'
-			local est_hi =`r(infinite)'
+			local est_hi =`s(infinite)'
 		}
 		else{
 			local est_lo = `estlo'[`i']
@@ -169,32 +191,28 @@ else{	// Run if rows less than matsize -> the "original" approach
 				if (`est_len'<0  ) & (`null_len'<0){
 					disp "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
 				}
-				*if isinfinite(abs(`est_len')+abs(`null_len')){ disp as error "The `i' th interval has infinite length"} // Not sure how to implement the is.infinite function from R
 				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
 					disp "The `i'th interval has infinite length."
-				}
-				
+				}				
 				if (`est_len'==0 | `null_len'==0 ) {
 					disp "The `i'th interval has a zero length. Consider using an interval hypothesis instead of a point hypothesis."
 				}
 		}
 		
 		*SGPV computation--------------------------------------------------
-		*Esthi and estlo are vectors
-		
-			local overlap = min(`est_hi',`null_hi') - max(`est_lo',`null_lo')
-			local overlap = max(`overlap',0)
-			local bottom =	min(2*`null_len',`est_len')
-			local pdelta = `overlap'/`bottom'
-		
+		*Esthi and estlo are vectors		
+		local overlap = min(`est_hi',`null_hi') - max(`est_lo',`null_lo')
+		local overlap = max(`overlap',0)
+		local bottom =	min(2*`null_len',`est_len')
+		local pdelta = `overlap'/`bottom'
 		
 		***** Zero-length & Infinite-length intervals **** 
-		** Overwrite NA and NaN due to bottom = Inf
+		** Overwrite missing values due to bottom = Inf
 		if `overlap'==0 {
 			local pdelta 0
 		}
 		
-		/** Overlap finite & non-zero but bottom = Inf*/
+		*Overlap finite & non-zero but bottom = Inf
 		if `overlap'!=0 & `overlap'!=c(maxdouble) & `bottom'>=(c(maxdouble)/2){
 		local pdelta `infcorrection'
 		}
@@ -226,7 +244,6 @@ else{	// Run if rows less than matsize -> the "original" approach
 		if `est_len'>0 & `null_len'==0 & `est_lo'<=`null_lo' & `est_hi'>=`null_hi' {
 			local pdelta 0.5
 		}
-
 		
 		** Return Missing value for nonsense intervals
 		if `est_lo'>`est_hi' | `null_lo'>`null_hi'{
@@ -267,6 +284,80 @@ end
 
 
 *Additional commands ----------------------------------------------------------------------------------------------
+
+/*Parse a new syntax for the defining the hypotheses intervals
+New syntax could be:"(lower_bound1,upper_bound1) (lower_bound2,upper_bound2)..."
+-> change syntax to ("lower_bound1","upper_bound1") for easier parsing of expressions which contain brackets?
+*/
+capture program drop ParseInt
+program define ParseInt, rclass
+syntax ,INTerval(string asis) [optname(string)]
+
+*Basic loop to extract the bounds from input
+*Needs additional input checks but works in principal
+*Does not work if input string contains a "(" -> no expressions allowed at the moment
+* -> less powerful than existing syntax -> requires evaluation with the expression parser before -> existing examples need changes
+local i 0
+while "`interval'"!=""{
+	local ++i	
+	gettoken bracket interval:interval,parse (" (") 
+	if "`bracket'"!="(" stop "The interval `i' in option `optname' needs to start with a '('"
+	
+
+	gettoken lb interval:interval,parse(" ,")
+	if "`lb'"=="" stop "The interval `i' in option `optname' needs to have valid number or expression or variable name after the '('."
+	local lb_full `lb_full' `lb'
+	
+	gettoken colon interval:interval, parse(" ,")
+	if "`colon'"!="," stop "The interval `i' in option `optname' needs to have ',' to separate lower and upper bound."
+	*gettoken quote interval:interval,parse(`"""')
+	
+	gettoken ub interval:interval,parse(" )")
+	if "`ub'"=="" stop "The interval `i' in option `optname' needs to have valid number or expression or variable name after the ',' to declare an upper bound."
+	local ub_full `ub_full' `ub'
+	
+	gettoken bracket interval:interval, parse(" )")
+	if "`bracket'"!=")" stop "The interval `i' in option `optname' needs to end with a ')' after the upper bound."
+}
+
+return local lb `lb_full'
+return local ub `ub_full'
+end
+
+
+program define convertMatrix, rclass
+*Convert a matrix into a local macro
+args matname macroname 
+*Check if matrix contains only one row or one column
+	if rowsof(`matname')>1 & colsof(`matname')>1{
+		disp as error "Matrix `matname' can be only either a column or a row vector."
+		exit 198
+		}
+
+	local rowvec 0
+	local colvec 0
+	if rowsof(`matname')>1{
+		local cnt = rowsof(`matname')
+		local colvec  1
+	} 
+
+	if colsof(`matname')>1{
+		local cnt = colsof(`matname')
+		local rowvec 1
+	} 
+
+	forvalues i=1/`cnt'{
+			if `colvec'==1{
+				local matmacro `matmacro' `=el(`matname',`i',1)'
+			}
+			else if `rowvec'==1{
+				local matmacro `matmacro' `=el(`matname',1,`i')'
+			}
+	}	
+
+return local `macroname' `matmacro'
+end
+
 *Check if the input is valid
 program define isValid
 args valid optname
@@ -278,13 +369,13 @@ if real("`=`valid''")==.{
 end
 
 *Check if input is infinite
-program define isInfinite, rclass
+program define isInfinite, sclass
 args infinite
 	if `infinite'==.{
-		return local infinite = c(maxdouble) // Using c(maxdouble) as a proxy for a true infinite value
+		sreturn local infinite = c(maxdouble) // Using c(maxdouble) as a proxy for a true infinite value
 	}
 	else{
-		return local infinite = `infinite'
+		sreturn local infinite = `infinite'
 	}
 end
 
@@ -357,11 +448,27 @@ end
 mata:
 version 12.0
 void function sgpv(string varlist, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection ,| string scalar nodeltagap){ 
-// void function sgpv(string varlist, string scalar sgpvmat, real rowvector nulllo, real scalar rowvector, real scalar infcorrection ,| string scalar nodeltagap){ 
-
+// void function sgpv(string list, string scalar sgpvmat, real rowvector nulllo, real scalar rowvector, string scalar type, real scalar infcorrection ,| string scalar nodeltagap){ 
+/*How to extend the function so that it accepts macros, matrices and variables as inputs and how to handle multiple null-hypotheses*/
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta-Gaps if the desired matrix size is too large for Stata
 Might have to change the way missing values are handled -> For now they are treated as meaning infinite.
+*/
+
+/*
+	V = tokens(list)
+if (type =="macro"){
+	Data = (st_local(V[1]), st_local(V[2]))
+}
+
+if (type=="matrix"){
+	Data=(st_matrix(V[1]), st_matrix(V[2]))
+}
+
+if (type=="variable"){
+    Data = J(1,1,0)
+    st_view(Data,.,V)
+}
 */
 	real matrix Sgpv
 	V = st_varindex(tokens(varlist))
@@ -369,8 +476,7 @@ Might have to change the way missing values are handled -> For now they are trea
     st_view(Data,.,V)
 	Sgpv = J(rows(Data),2,.)	
 	null_len = nullhi - nulllo
-	n = rows(Data) // new for optimisation
-	//for(i=1; i<=rows(Data);i++) {
+	n = rows(Data) 
 	for(i=1; i<=n;i++) {
 		 est_lo = Data[i,1]
 		 est_hi = Data[i,2]
@@ -424,10 +530,8 @@ Might have to change the way missing values are handled -> For now they are trea
 				 dg = .
 			}
 			Sgpv[i,2] = dg
-		}
-		
-		 Sgpv[i,1] = pdelta
-		 
+		}		
+		 Sgpv[i,1] = pdelta		 
 	}	
 	st_matrix(sgpvmat,Sgpv)
 }
@@ -438,7 +542,7 @@ real scalar function min_s(real scalar x, real scalar y){
 }
 
 real scalar function max_s(real scalar x, real scalar y){
-	return(x>y?x:y)
+	return(x > y ? x : y)
 }
 
 end

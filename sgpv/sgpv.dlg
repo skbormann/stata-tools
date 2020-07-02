@@ -1,7 +1,7 @@
 /*
-To-Do/Further improvements: 	Add additional input checks for nullweights and altweighs to allow only certain inputs for nullspace and altspace
+To-Do/Further improvements: 	Add additional input checks for nullweights and altweights to allow only certain inputs for nullspace.
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
-								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses
+								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses.
 */
 /*
 sgpv dialog version 1.04, 21.05.2020, Sven-Kristjan Bormann
@@ -136,7 +136,7 @@ BEGIN
 														onselchangelist(bonus_action) 
 	TEXT     tx_format    	_lft    +35     _iwd    .,   label(resource LBL_FORMAT) 
 	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
-													 tooltip("specifies the format for displaying the individual elements of the result matrix.   This option is NOT identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via matlistopt() overrides the setting here and also changes the format of the column names.")
+													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via matlistopt() overrides the setting here and also changes the format of the column names.")
 	BUTTON   bu_format    340  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
 
 END
@@ -150,10 +150,10 @@ BEGIN
 	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
 													tooltip("The probability distribution for the null parameter space.")
 	
-	TEXT tx_altspace     	10   _ls      200    ., label("Alternative hypothesis parameter space:")
-	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution")
+	//TEXT tx_altspace     	10   _ls      200    ., label("Alternative hypothesis parameter space:")
+	//EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution")
 	
-	TEXT tx_altweights      @   _ls      200    ., label("Alternative hypothesis distribution:")
+	TEXT tx_altweights      10   _ls      200    ., label("Alternative hypothesis distribution:")
 	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
 												tooltip("Probability distribution for the alternative parameter space")
 	
@@ -211,7 +211,7 @@ END
 SCRIPT fdrisk_off
 BEGIN
 	fdrisk.ex_nullspace.disable
-	fdrisk.ex_altspace.disable
+	*fdrisk.ex_altspace.disable
 	fdrisk.cb_altweights.disable
 	fdrisk.cb_nullweights.disable
 	fdrisk.cb_inttype.disable
@@ -222,7 +222,7 @@ END
 SCRIPT fdrisk_on
 BEGIN
 	fdrisk.ex_nullspace.enable
-	fdrisk.ex_altspace.enable
+	*fdrisk.ex_altspace.enable
 	fdrisk.cb_altweights.enable
 	fdrisk.cb_nullweights.enable
 	fdrisk.cb_inttype.enable

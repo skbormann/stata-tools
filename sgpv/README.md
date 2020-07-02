@@ -31,6 +31,7 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 1.03 24.05.2020 : Added more input checks 
 * Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
 * Version 1.01 : Removed unused code for Generalized Beta distribution 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
@@ -42,12 +43,15 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
+* Version 1.04 02.07.2020 : Fixed/improved the support for matrices as input for options "esthi" and "estlo".
+* Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
+* Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
 * Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
   * The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
   *	Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
-  * Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
+  * Now a line is only drawn if set, before it was set to 0 as the default and always drawn.	
   *	Changed the default behaviour of xtitle() option -> now a default title is shown if not set.
   * Added do-file to make running the example in the help-file easier.
 * Version 0.98 : 
@@ -67,12 +71,14 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
-* Version 1.1  20.05.2020 : 
-  * Added initial support for multiple null-hypotheses (somewhat documented)
+* Version 1.1  28.05.2020 : 
+  * Added initial support for multiple null-hypotheses 
   * Added a noconstant-option to remove constant from list of coefficients 
   * Fixed an error in the perm-option of the "sgpv menu"-subcommand
   * Fixed a confusion in the help-file about the nulllo and nullhi options 
   *	Added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
+  * Ahould allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first
+  * Removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace
 * Version 1.03a 17.05.2020 : 
   * Made the title of the displayed matrix adapt to the type of null-hypothesis
   * Fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset
@@ -105,6 +111,9 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.04  01.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". 
+* Version 1.03a 23.06.2020: Removed unnecessary input checks
+* Version 1.03 24.05.2020 : Added further input checks	
 * Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi
 * Version 1.01 28.03.2020 : Fixed the nodeltagap-option -> now it works in all scenarios, previously it was missing in the Mata version and ignored in the variable version of the SGPV algorithm.	
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.

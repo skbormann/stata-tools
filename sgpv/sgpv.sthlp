@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.03  16 May 2020}{...}
+{* *! version 1.1  28 May 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -56,8 +56,6 @@
 
 {syntab:Fdrisk}
 {synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
-{p_end}
-{synopt:{opt alts:pace(string)}}  support for the alternative probability distribution.
 {p_end}
 {synopt:{opt nulls:pace(string)}}  support of the null probability distribution.
 {p_end}
@@ -121,7 +119,7 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
 {marker subcmd}{...}
 {title:Subcommands}
     It is possible to call the other commands of the sgpv-package with the {cmd:sgpv}-command. 
-    This is mostly a convience feature so that the help-files for the individual commands should be consulted for the options of these commands.
+    This is mostly a convenience feature so that the help-files for the individual commands should be consulted for the options of these commands.
     Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
     Two examples how to use the subcommands are given {help sgpv##subcmds_example:here}.
 
@@ -211,17 +209,13 @@ Setting the format option via {cmd:matlistopt()} overrides the setting here and 
 
 {phang}
 {opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal". The default is "Uniform".
-
-{phang}
-{opt alts:pace(string)}  support for the alternative probability distribution.  
-If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space. 
-These numbers can be also formulas which must be enclosed in " ".
+The alternative parameter space is automatically set as the lower and upper bound of the estimated confidence interval.
 
 {phang}
 {opt nulls:pace(string)}  support of the null probability distribution. 
 If "nullweights" is "Point", then "nullspace" is a single number. 
 If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" contains two numbers separated by a space. 
-These numbers can be also formulas which must be  enclosed in " ".
+These numbers can be also formulas which must be  enclosed in " ". The default is to use the lower and upper bounds of the given null-hypothesis as the support of the null probability distribution.
 
 {phang}
 {opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
@@ -344,8 +338,9 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   
   {title:Setting a different null-hypothesis}
   {marker alternative_null-hypothesis}
-  Set an alternative null-hypothesis: 1% of the mean value of the price variable (-62, 62)  
-	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly: regress price mpg weight foreign"}
+  Set an alternative null-hypothesis -> 1% of the mean value of the price variable (-62, 62) 
+  and remove the constant from the calculations  
+	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly noconstant: regress price mpg weight foreign"}
 	
     Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {-62,62}
     
@@ -354,20 +349,19 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
              mpg |     .7693         .5          .          . 
           weight |         0          1          .          . 
          foreign |         0          0    36.2405      .0394 
-           _cons |     .0874         .5          .          . 
 
-	The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
-	The example illustrates the need to set a scientifically reasonable null-hypothesis. For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
+    The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
+    The example illustrates the need to set a scientifically reasonable null-hypothesis. 
+    For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
-	{* Remove or change this part after implementing support for multiple null-hypotheses}
   {title:Setting an individual null-hypotheses for each coefficient}
   {marker multiple-null-hypotheses-example}
   To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null-hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.
-	. sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign
+	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}
 	
   The same null-hypotheses but this time one null-hypothesis for each selected equation or quantile
-	. sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)
+	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}
 	
   {title:Selecting coefficients}	
   {marker multiple-equations-example}
@@ -376,9 +370,9 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	Select only the foreign coefficient for sgpv calculation
 	{stata . sgpv, coefficient(foreign) }
         Select only the 10%, 50% and 90% quantile equation for sgpv calculation
-	  sgpv, coefficient(q10: q50: q90:)  
+	 {stata ". sgpv, coefficient(q10: q50: q90:)"}  
         Select only the 50% quantile equation and foreign coefficient for sgpv calculation
-	  sgpv, coefficient(q50:foreign) 
+	  {stata ". sgpv, coefficient(q50:foreign)"} 
 
 
   {title:Calculating SGPVs for a large dataset of estimation or t-test results}
@@ -399,7 +393,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   {marker subcmds_example}
   The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
 	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
-	{stata . sgpv power,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
  
 {marker menuInstall}{...}
   Install the dialog boxes permanently in the User menubar: User -> Statistics 

@@ -83,11 +83,11 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 
 {phang}
 {opt intt:ype(string)}     class of interval estimate used for calculating the SGPV. 
-Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).
+Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval.
 
 {phang}
 {opt intl:evel(#)}     level of interval estimate. If "inttype" is "confidence", the level is α. 
-				If "inttype" is "likelihood", the level is 1/k (not k). 
+If "inttype" is "likelihood", the level is 1/k (not k). 
 				
 {pstd}
 {p_end}
@@ -127,7 +127,7 @@ Plot the power curve examples (view the {view sgpower-plot-example.do:code} if i
 {synopt:{cmd:r(minI)}}  is the minimum type I error over the range ({cmd:"nulllo"}, {cmd:"nullhi"}), which occurs at the midpoint of ({cmd:"nulllo"}, {cmd:"nullhi"}). {p_end}
 {synopt:{cmd:r(maxI)}}  is the maximum type I error over the range ({cmd:"nulllo"}, {cmd:"nullhi"}), which occurs at the boundaries of the null hypothesis, {cmd:"nulllo"} and {cmd:"nullhi"}.  {p_end}
 {synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:"nulllo"}, {cmd:"nullhi"}). 
-If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error calculated assuming the true parameter value θ is equal to 0. {p_end}
+If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error is calculated assuming the true parameter value θ is equal to 0. {p_end}
 
 
 {title:References}

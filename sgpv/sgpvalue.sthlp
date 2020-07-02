@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.02  06 Apr 2020}{...}
+{* *! version 1.04  01 Jul 2020}{...}
 {viewerdialog sgpvalue "dialog sgpvalue"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -74,20 +74,19 @@ A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
 {opt estlo(string)}  lower bound of interval estimate. Values may be finite or infinite.
  To specify that the lower limit is -infinity, just specify the missing value . in this option. 
  Multiple lower bounds can be entered. 
- The number of upper bounds must match the number of lower bounds specified in option {it:esthi}.
+ The number of lower bounds must match the number of upper bounds specified in option {it:esthi}.
  They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
- {help exp:Expressions}/formulas are also allowed as input.
 Typically the lower bound of a confidence interval can be used. 
-A variable containing the lower bounds can be also used, but then a variable containing the upper bounds must be used for option {it:esthi}.
-
+A variable/ matrix containing the lower bounds can be also used, but then a variable/matrix containing the upper bounds must be also used for option {it:esthi}.
 
 {phang}
 {opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
 To specify that the upper limit is +infinity, just specify the missing value . in this option. 
 The number of upper bounds must match the number of lower bounds specified in option {it:estlo}.
-Multiple upper bounds can be entered. They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
+Multiple upper bounds can be entered. 
+They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
 Typically the upper bound of a confidence interval is used. 
-A variable containing the upper bounds can be also used, but then a variable containing the lower bounds must be used for option {it:estlo}.
+A variable/matrix containing the upper bounds can be also used, but then a variable/matrix containing the lower bounds must be also used for option {it:estlo}.
 
 {phang}
 {opt nulllo(string)} lower bound of null interval. Values may be finite or infinite.
@@ -97,7 +96,6 @@ A variable containing the upper bounds can be also used, but then a variable con
  The number of lower bounds must always the number of upper bounds in option {it:nullhi}.
  They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
  
-
 {phang}
 {opt nullhi(string)}     upper bound of null interval. Values may be finite or infinite.
 To specify that the upper limit is +infinity, just specify the missing value . in this option. 
@@ -143,11 +141,10 @@ The following examples are based on the original documentation for the R-code, b
  {bf:Simple example for three estimated log odds ratios but the same null interval} (To run this example copy the following lines into Stata and hit return.){p_end}
 		 . local lb log(1.05) log(1.3) log(0.97)	
 		 . local ub log(1.8) log(1.8) log(1.02)	
-		 . sgpvalue , estlo(`lb') esthi(`ub') nulllo(log(1/1.1)) nullhi(log(1.1))
-		 
+		 . sgpvalue, estlo(`lb') esthi(`ub') nulllo(log(1/1.1)) nullhi(log(1.1))		 
 	{pstd}{bf:One sided intervals/infinite interval bounds:}{p_end}
-	{stata . sgpvalue, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
-	{stata . sgpvalue, estlo(`=log(1.05)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
+		{stata . sgpvalue, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
+		{stata . sgpvalue, estlo(`=log(1.05)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
 	
 	 {bf:Example t-test with simulated data:}  (To run this example copy the following lines into Stata and hit return.)
 		. preserve
@@ -182,12 +179,12 @@ The following examples are based on the original documentation for the R-code, b
 		. local x1 = rbinomial(30,0.15)
 		. local x2 = rbinomial(30,0.5)
 		. * On the difference in proportions
-		. qui prtesti	30 `x1' 30 `x2',count
+		. qui prtesti 30 `x1' 30 `x2',count
 		. local ci1 = (`r(P_1)'-`r(P_2)') - 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
 		. local ci2 = (`r(P_1)'-`r(P_2)') + 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
 		. noisily sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-0.2) nullhi(0.2)
 
-		*On the log odds ratio scale
+		On the log odds ratio scale
 		. local a `x1'
 		. local b `x2'
 		. local c = 30-`x1'
@@ -196,22 +193,24 @@ The following examples are based on the original documentation for the R-code, b
 		. local cior2 = log(`a'*`d'/(`b'*`c')) + 1.96*sqrt(1/`a'+1/`b'+1/`c'+1/`d') // Delta-method SE for log odds ratio
 		. noisily sgpvalue, estlo(`cior1') esthi(`cior2') nulllo(`=log(1/1.5)') nullhi(`=log(1.5)')
 		. restore 
-	 
-		
+	 		
 	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}{p_end}	
 		{stata . sysuse auto, clear}
-		{stata . regress price mpg}
+		{stata . regress price mpg foreign weight}
 		{stata . mat table = r(table)}  //Copies the regression results into a new matrix for the next calculations
+		{stata . mat ub = table[6,1..3]} //Copy the upper bounds of the confidence interval into a separate matrix
+		{stata . mat lb = table[5,1..3]} //Copy the lower bounds of the confidence interval into a separate matrix
 		
-	The numbers for the options could be also copied by hand, we use here directly the matrix.
-		{stata . sgpvalue, esthi(table[6,1]) estlo(table[5,1]) nullhi(0) nulllo(0)} 
+		
+	The numbers for the options could be also copied by hand, we use here directly the matrices.
+		{stata . sgpvalue, esthi(ub) estlo(lb) nullhi(0) nulllo(0)} 
 		 
 
 {title:Stored results}
 
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Matrices}{p_end}
-{synopt:{cmd:r(results)}}  matrix with the results {p_end}
+{synopt:{cmd:r(results)}}  matrix with the resulting the SGPVs and delta-gaps. {p_end}
 
 {marker formulas}{...}
 {title:Remarks & Formulas}

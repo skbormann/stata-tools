@@ -10,6 +10,7 @@
 *The standard error has to be a number and cannot be an expression like in the R-code
 *Not possible to plot directly the power function yet, an example how to plot the power function is located in the file sgpower_plot_example.do
 *The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
+*Allow default values for inttype and intlevel
 
 capture program drop sgpower
 program define sgpower, rclass

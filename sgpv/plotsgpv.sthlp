@@ -87,18 +87,18 @@
 Plot the second-generation {it:p}-value (SGPV), as introduced in Blume et al. (2018), for user supplied interval estimates (support intervals, confidence intervals, credible intervals, etc.) according to its associated second-generation {it:p}-value ranking.
 This command and its companions commands  ({cmd:sgpvalue}, {cmd:sgpower}, {cmd:fdrisk}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
 A {dialog plotsgpv:dialog box} for easier usage is available.
+The command works best if dataset is used which contains the estimation or test results similar to the example leukstats-dataset.
 
 {marker options}{...}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt estlo(string)}  lower bound of interval estimate. The lower limit is -infinity just specify the missing value . in this option. Multiple lower bounds can be entered. They must be separated by spaces. Typically the lower bound of a confidence interval can be used. A variable containing the lower bound can be also used.
+{opt estlo(name)}  lower bound of interval estimate. 
+Typically the lower bound of a confidence interval can be used. A variable or matrix containing the lower bound can be also used, but then a variable/matrix containing the upper bounds must be also used for option {it:esthi}.
 
 {phang}
-{opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
-To specify that the upper limit is +infinity just specify the missing value . in this option. Must be of same length as in the option {it:estlo}. 
-Multiple upper bounds can be entered. They must be separated by spaces.
- Typically the upper bound of a confidence interval can be used. A variable containing the upper bound can be also used.
+{opt esthi(name)}  upper bound of interval estimate. Values may be finite 
+ Typically the upper bound of a confidence interval can be used. A variable or matrix containing the upper bound can be also used but then a variable/matrix containing the lower bounds must be also used for option {it:estlo}.
 
 {phang}
 {opt nulllo(string)}     lower bound of null interval.

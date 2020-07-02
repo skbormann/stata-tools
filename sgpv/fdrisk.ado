@@ -15,6 +15,7 @@
 *		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 *		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box -> make options nullspace_lower and nullspace_upper and the same for altspace available.
 * 		Make error messages more descriptive and give hints how resolve the problems.
+*		Set reasonable default values based on the values for the sgpv-command to make using this command easier.
 
 
 capture program drop fdrisk
@@ -32,8 +33,7 @@ if !inlist(`sgpval',0,1){
 }
 
 if !inlist("`inttype'", "confidence","likelihood"){
-	stop "Option 'inttype' must be one of the following: confidence or likelihood "
-	
+	stop "Option 'inttype' must be one of the following: confidence or likelihood."	
 }
 
 if !inlist("`nullweights'", "Point", "Uniform", "TruncNormal"){
@@ -63,7 +63,6 @@ if "`inttype'"=="likelihood"{
 	if wordcount("`nullhi'")>1 stop "Option {cmd:nullhi} has more than one argument."
 	capture local nullhi = `nullhi'
 	isValid `nullhi' nullhi
-
 	if wordcount("`nulllo'")>1 stop "Option {cmd:nullhi} has more than one argument."
 	capture local nulllo = `nulllo'
 	isValid `nulllo' nulllo
@@ -73,12 +72,10 @@ if "`inttype'"=="likelihood"{
 	if `: word count `nullspace''==2{
 		local nullspace1  `: word 1 of `nullspace''
 		capture local nullspace1 = `nullspace1'
-		isValid `nullspace1' nullspace 1
-		
+		isValid `nullspace1' nullspace 1		
 		local nullspace2  `: word 2 of `nullspace''
 		capture local nullspace2 = `nullspace2'
-		isValid `nullspace2' nullspace 2
-		
+		isValid `nullspace2' nullspace 2	
 		local nullspace `nullspace1' `nullspace2'
 	} 
 
@@ -93,16 +90,13 @@ if "`inttype'"=="likelihood"{
 	} 
 
 
-
 *Power functions -> taken from sgpower.ado 
 	if `sgpval'==0{
-		local powerx normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z')
-		
+		local powerx normal(`nulllo'/`stderr' - x/`stderr' -`z') + normal(-`nullhi'/`stderr' + x/`stderr' - `z')		
 	}
 	if `sgpval'==1{
 		if (`nullhi'-`nulllo')>= 2*`z'*`stderr' {
-		local powerx normal(`nullhi'/`stderr' - x/`stderr' - `z') - normal(`nulllo'/`stderr' - x/`stderr' + `z')
-		
+		local powerx normal(`nullhi'/`stderr' - x/`stderr' - `z') - normal(`nulllo'/`stderr' - x/`stderr' + `z')	
 		}
 		if (`nullhi'-`nulllo') < 2*`z'*`stderr'{
 		local powerx = 0 
@@ -118,16 +112,13 @@ if "`inttype'"=="likelihood"{
 
 
 *** calculate P.sgpv.H0
-
     * point null
 	   * * interval null
      if(`nulllo' != `nullhi')  {
-
      * * P.sgpv.H0 @ point (=type I error at null.space)
       if("`nullweights'" == "Point")  {
         if(`:word count `nullspace''!=1){
 			stop "Option 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
-			
 		} 
 		local powerxnullint : subinstr local powerx "x" "`nullspace'", all
 		local PsgpvH0 = `powerxnullint' 
@@ -136,7 +127,6 @@ if "`inttype'"=="likelihood"{
 	 if inlist("`nullweights'","Uniform","TruncNormal"){
 		if `:word count `nullspace''<2{
 			stop "Option 'nullspace' must not be a single number to use averaging methods. Set nullweights(Point) instead."
-			
 		}
 		if `:word count `nullspace''==2{
 			if max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')>`nullhi' | min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')<`nulllo'{
@@ -159,15 +149,12 @@ if "`inttype'"=="likelihood"{
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
 
-
-	       *P.sgpv.H0 averaged using truncated normal as weighting distribution function
+	   *P.sgpv.H0 averaged using truncated normal as weighting distribution function
       if("`nullweights'" == "TruncNormal") {
-
         * default: mean of Normal distr at midpoint of null.space // I assume that nullspace can have only two elements: upper and lower bound
         local truncNormmu = (`:word 1 of `nullspace'' + `:word 2 of `nullspace'')/2
         * default: std. dev of Normal distr same as assumed for estimator
         local truncNormsd  `stderr'
-
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
         qui `integrate', f(`integrand') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 `r(integral)'
@@ -175,22 +162,19 @@ if "`inttype'"=="likelihood"{
       }
 	 } 
 	 *** calculate P.sgpv.H1
-
     * P.sgpv.H1 @ point
     if("`altweights'" == "Point")  {
       if(`:word count `altspace''!=1){
-	    stop "Option 'altspace' must be a one number or expression when using a point alternative probability distribution."
-		
+	    stop "Option 'altspace' must be a one number or expression when using a point alternative probability distribution."	
 	  }	  
       if inrange(`altspace',`nulllo',`nullhi') {
-		stop "Option 'altspace' must be outside of the originally specified indifference zone by options 'nulllo' and 'nullhi'."
-	  
+		stop "Option 'altspace' must be outside of the originally specified indifference zone by options 'nulllo' and 'nullhi'."	  
 	  } 
 	  local powerxaltpoint : subinstr local powerx "x" "`altspace'", all
       local PsgpvH1 = `powerxaltpoint' 
     }
 
-    * P.sgpv.H1 averaged: check ``altspace'` input
+    * P.sgpv.H1 averaged: check `altspace' input
     if inlist("`altweights'" ,"Uniform", "TruncNormal") {
       if( `:word count `altspace''<2)  stop "Option 'altspace' must not be a point to use averaging methods."
       if `:word count `altspace''==2  {
@@ -214,20 +198,14 @@ if "`inttype'"=="likelihood"{
 
     * P.sgpv.H1 averaged using truncated normal as weighting distribution function
     if("`altweights'" == "TruncNormal") {
-
       * default: mean of Normal distr at midpoint of `altspace'
       local truncNormmu = (`:word 1 of `altspace'' + `:word 2 of `altspace'')/2
       * default: std. dev of Normal distr same as assumed for estimator
       local truncNormsd = `stderr'
-
-     
 	  if !real("`truncNormmu'") | !real("`truncNormsd'") stop "Both elements of the option 'altspace' must be numeric or be expressions which evaluate to a number."
-
         local integrand `powerx' * ( normalden(x, `truncNormmu', `truncNormsd') * (normal((`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `truncNormmu')/`truncNormsd') - normal((`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')'- `truncNormmu')/ `truncNormsd'))^(-1) ) 
-        qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') 
-      
+        qui `integrate', f(`integrand') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')')      
       local PsgpvH1 = `r(integral)'
-
     }
 	
  * Calculate FDR or FCR
@@ -244,7 +222,6 @@ if "`inttype'"=="likelihood"{
   if "`fcr'"!="" | !mi(real("`fcr'")){
 	disp _n "The false confirmation rate (fcr) is: " %9.0g `fcr'
   }
-
   if "`fdr'" !="" return scalar fdr = `fdr'
   if "`fcr'" !="" return scalar fcr = `fcr'  	
 end

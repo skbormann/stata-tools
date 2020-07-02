@@ -1,11 +1,14 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.04 02.07.2020 : Fixed/improved the support for matrices as input for options "esthi" and "estlo".
+*!Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
+*!Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
 *!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
 *				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
-*				 Now a line is only drawn if set, before it was to 0 as a default and always drawn.	
+*				 Now a line is only drawn if set, before it was set to 0 as the default and always drawn.	
 *				 Changed the default behaviour of xtitle() option -> now a default title is shown if not set
 *				 Added do-file to make running the example in the help-file easier.
 *Version 0.98 : Fixed nolegend-option -> disables now the legend as expected; minor updates to the help file and additional abbreviations for options
@@ -20,10 +23,10 @@
 
 program define plotsgpv, sortpreserve
 version 12.0
-syntax [if] [in] ,  estlo(string) esthi(string) nulllo(string) nullhi(string)  /// 
+syntax [if] [in] ,  estlo(name) esthi(name) nulllo(string) nullhi(string)  /// 
 [SETOrder(string) Xshow(string) NULLCol(string asis) intcol1(string asis) intcol2(string asis) intcol3(string asis)	 ///
 	 noPLOTY_axis noPLOTX_axis	nullpt(string) noOUTlinezone Title(string) /// 
-	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) ] 
+	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) /* h0(string) h1(string) alternative experimental syntax */ ] 
 
 
 ***Some default values : Color settings -> translated R-colors into RGB for Stata -> Not sure how to install the colours in Stata for easier referencing.
@@ -41,7 +44,7 @@ if `:word count `nullhi'' != `: word count `nulllo''{
 	exit 198
 }
 
-if `:word count `esthi'' != `: word count `estlo''{
+if `:word count `esthi'' != `: word count `estlo''{ // -> does not work for matrices 
 	disp as error `" Options "esthi"' and "estlo" are of different length. "'
 	exit 198
 }
@@ -50,19 +53,44 @@ if `:word count `nullhi'' !=  1 |`: word count `nulllo'' !=1{
 	disp as error `" Options "nulllo" and "nullhi" must be only one number or expression. "'
 	exit 198
 }
-***Further input parsing
-*Not sure how to parse matrices as input for esthi and estlo
 
+if real("`nullhi'")==. | real("`nulllo'")==.{
+	disp as error `"No missing values or expressions that evaluated to a missing value are allowed for options "nullhi" and "nulllo". "'
+	exit 198
+}
+
+***Further input parsing
+*Not sure how to parse matrices as input for esthi and estlo -> further parsing will be added if necessary
 if `:word count `esthi''==1{
 	capture confirm numeric variable `esthi' `estlo'
 	if !_rc{
+		qui count if missing(`esthi' ,`estlo')
+		if r(N)>0{
+			disp as error `"Variables provided in options "esthi", "estlo" have missing values which are not allowed."'
+			disp as error `"Run either "count if missing(`esthi')" or "count if missing(`estlo')" to find out which variable contains missing values."'
+			exit 198
+		}
 		local varsfound 1
+		local matrixfound 0
 	}
 	else{
+		capture confirm matrix `esthi' `estlo'
+		if _rc{
+			disp as error `"No valid matrix or variable name found in options "esthi" and "estlo". {break} Both options need to contain either matrix names or variables names. No mixture is (yet) allowed. "'
+			exit 198
+		}
+		if matmissing(`esthi')==1 | matmissing(`estlo')==1{
+			disp as error `"Matrices provided in options "esthi", "estlo" have missing values which are not allowed."'
+			disp as error `"Run either "disp matmissing(`esthi')" or "disp matmissing(`estlo')" to find out which matrix contains missing values."'
+			exit 198
+		}
+		local matrixfound 1
 		local varsfound 0
 	}
 
 }
+
+
 *Set order of results -> Default behaviour: No ordering if nothing set
 if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	capture confirm variable `setorder'
@@ -73,49 +101,66 @@ if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	else local setorder_var `setorder' // Indicate that variable for sorting got found -> currently needed due to somewhat confusing handling of the setorder option
 }
 
-*How much to show
-if "`xshow'"!=""{ 
-	local xshow = real("`xshow'")
-}
-else local xshow = _N
+*Create variable for x-axis
+	tempvar x
+	if `varsfound'==1{
+		gen `x'=_n
+	} 
+	if `matrixfound'==1{
+		egen `x' = seq(), from(1) to(`=rowsof(`esthi')')
+	}
 
-if "`if'"!=""{
-	local if  `if' & \`x'<=`xshow'   //Don't expand x because the variable will be defined only later -> maybe place this macro somewhere else
-}
-else local if if \`x'<=`xshow'
+*How much to show
+	if "`xshow'"!=""{ 
+		local xshow = real("`xshow'")
+	}
+	else if `matrixfound' == 1{
+		local xshow = rowsof(`esthi')
+	}
+	else if `matrixfound' == 0 {
+		local xshow = _N
+	} 
+	
+	if `matrixfound' == 1 & `xshow'>rowsof(`esthi'){
+		local xshow = rowsof(`esthi')
+		disp as error `"Option "xshow" reset to `=rowsof(`esthi')' because "xshow" was larger than the number of rows of the matrix in option "esthi". "'
+	}
+
+*Set further restrictions
+	if "`if'"!=""{
+		local if  `if' & `x'<=`xshow' 
+	}
+	else local if if `x'<=`xshow'
 
 **Other graphing options
-
 *Color settings
-
 *Change of the color logic compared to R-code
-if `"`intcol1'"'==""{ // firebrick3 for SGPV = 0
-	local intcol1 `firebrick3' 
-}
-if `"`intcol2'"'==""{ // cornflowerblue for 0 < SGPV < 1
-	local intcol2 `cornflowerblue' 
-}
+	if `"`intcol1'"'==""{ // firebrick3 for SGPV = 0
+		local intcol1 `firebrick3' 
+	}
+	if `"`intcol2'"'==""{ // cornflowerblue for 0 < SGPV < 1
+		local intcol2 `cornflowerblue' 
+	}
 
-if `"`intcol3'"'==""{ // darkslateblue for SGPV = 1
-	local intcol3 `darkslateblue'
-}
+	if `"`intcol3'"'==""{ // darkslateblue for SGPV = 1
+		local intcol3 `darkslateblue'
+	}
 
-
-if `"`nullcol'"'==""{
-	local nullcol `nullcoldefault'
-}
+	if `"`nullcol'"'==""{
+		local nullcol `nullcoldefault'
+	}
 	
 	**** Compute SGPVs for plotting
 	tempname sgpvs sgpvcombo
-	tempvar sgpvcomb x nlo nhi
+	tempvar sgpvcomb nlo nhi // esthi estlo
 	if `varsfound'==1{
-		sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') nomata `replace' `noshow'
+		qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' `noshow' //Previously nomata-option was set by default -> variables were always created
 		if ("`setorder'"=="sgpv") gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
 	}
 	else if `varsfound'==0{ // Not correct yet
-			sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) < rows of esthi or estlo -> how test these cases?
+			qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) < rows of esthi or estlo -> how test these cases?
 			mat `sgpvs' = r(results)
-			if ("`sortorder'"=="sgpv"){
+			if ("`setorder'"=="sgpv"){
 				if `=rowsof(`sgpvs')'<=c(matsize){				
 					mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) 
 					mat colnames `sgpvcombo' = "sgpvcombo"
@@ -130,8 +175,6 @@ if `"`nullcol'"'==""{
 					}
 				}
 				else if `=rowsof(`sgpvs')'>c(matsize){ //Not tested yet -> need test case
-					*capture findfile lmoremata.mlib
-					*if _rc qui ssc install moremata, replace
 					mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
 					mata: sgpvcombo = J(rows(sgpv),1.)
 					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond as a shortcut
@@ -144,25 +187,46 @@ if `"`nullcol'"'==""{
 	*Convert matrix to variables -> directly plotting of matrices not possible
 	preserve
 	*Prepare matrix for conversion
-	if (`varsfound'==0 & "`setorder'"=="sgpv") svmat `sgpvcombo' ,names(col)
+	if (`varsfound'==0 & "`setorder'"=="sgpv"){
+		capture confirm variable sgpvcombo // What if a variable named "sgpvcombo" already exists in the dataset?
+		if !_rc{
+			local randn = runiform(1,65536) // Add an arbitrary random number and hope that no variable with this name exists
+			mat colnames `sgpvcombo' = "sgpvcombo`randn'"
+
+		}
+		svmat `sgpvcombo' ,names(col)
+	} 
 	
 	*Sort dataset
 	if "`setorder'"=="sgpv"{ 
-		if `varsfound'==0 local order sgpvcombo
+		if `varsfound'==0 local order sgpvcombo`randn'
 		if `varsfound'==1 local order \`sgpvcomb'
 	
 	}
 	if "`order'"!="" sort `order'
 	else if "`setorder_var'"!="" sort `setorder_var'
-	gen `x'=_n
+	
+
 	*Define default title of x-axis
 	if "`setorder'"!="" local xtitlevar `"`setorder'"'
 	else if "`setorder_var'"!="" local xtitlevar `"`setorder_var'"'
-	else if	("`setorder'"=="" & "`setorder_var'"=="") local xtitlevar original ordering
-	
+	else if	("`setorder'"=="" & "`setorder_var'"=="") local xtitlevar original ordering	
 	label variable `x' "Ranking according to `xtitlevar'"
+	*Set up variables for plotting -> add here conversion of matrices into variables for plotting -> converted matrices should be addressed by the existing macros for esthi and estlo -> otherwise the lines below need further modification
 	gen `nhi' = `nullhi'
 	gen `nlo' = `nulllo'
+
+	if `matrixfound' == 1{
+		capture drop  esthi1
+		capture drop  estlo1
+		svmat `esthi', names(esthi)
+		svmat `estlo', names(estlo)
+		local esthi esthi1 //Name of the variable which contains the converted matrix
+		local estlo estlo1
+	}
+
+
+	
 	***Set up graphs
 
 	*Null interval
@@ -170,11 +234,9 @@ if `"`nullcol'"'==""{
 	
 	* Intervals where SGPV==0
 	local sgpv0  (rbar `estlo' `esthi' `x' if pdelta==0 & dg!=., sort lcolor("`intcol1'") fcolor("`intcol1'"))
-	
-	
+		
 	* Intervals where 0<SGPV<1
 	local sgpv01 (rbar `estlo' `esthi' `x' if pdelta<1 & dg==., sort lcolor("`intcol2'") fcolor("`intcol2'"))
-
 	
 	* Intervals where SGPV==1
 	local sgpv1 (rbar `estlo' `esthi' `x' if pdelta==1 & dg==., sort lcolor("`intcol3'") fcolor("`intcol3'"))
@@ -184,7 +246,6 @@ if `"`nullcol'"'==""{
 		local ynullpt yline(`=real("`nullpt'")', lpattern(dash))
 	}
 	
-
 	if "`outlinezone'"!="nooutlinezone"{
 		local ynulllo yline(`nulllo', lcolor(white))
 		local ynullhi yline(`nullhi', lcolor(white))
@@ -195,7 +256,7 @@ if `"`nullcol'"'==""{
 	
 	*Legend
 	if "`legend'"!="nolegend"{
-	 local sgpvlegend	legend(on order(1 "Interval Null" 2 "0 < p <1"  3 "p = 1"  4 "p = 0")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) // Not all settings in R-code are possible in Stata
+	 local sgpvlegend	legend(on order(1 "Interval Null"  4 "p = 0"   2 "0 < p <1" 3 "p = 1")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) // Not all settings in R-code are possible in Stata
 	}
 	else if "`legend'"=="nolegend"{
 		local sgpvlegend legend(off)
@@ -205,10 +266,11 @@ if `"`nullcol'"'==""{
 	local xlabel xlabel(0(`=10^(floor(log10(`xshow')))')`xshow')
 	
 	***Plot: Set up the twoway plot
-	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `"`twoway_opt'"'
+	twoway `nullint' `sgpv01' `sgpv1' `sgpv0' `if'  `in'  , title(`title') xtitle(`xtitle') ytitle(`ytitle') `ynullhi' `ynulllo' `ynullpt' `sgpvlegend' `xaxis' `yaxis' `xlabel'  `twoway_opt'
 	
 	restore
 end
+
 
 * Included this code to remove the requirement for having the moremata package installed
 *! mm_cond.mata
