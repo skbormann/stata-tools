@@ -43,7 +43,11 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
-* Version 1.04 02.07.2020 : Fixed/improved the support for matrices as input for options "esthi" and "estlo".
+* Version 1.04 02.07.2020 : 
+	* Fixed/improved the support for matrices as input for options "esthi" and "estlo".
+	* Removed noshow-option because it was never needed. The results of the sgpv-calculations were never shown even without this option set. 
+	* Fixed non working combinations of variables as inputs and the nomata-option.
+	* Changed legend slightly to be more in line with R-code.
 * Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
 * Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
 * Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
@@ -72,13 +76,13 @@ General remarks if updates come in larger "packages".
 
 ### sgpv
 * Version 1.1  28.05.2020 : 
-  * Added initial support for multiple null-hypotheses 
+  * Added support for multiple null-hypotheses 
   * Added a noconstant-option to remove constant from list of coefficients 
   * Fixed an error in the perm-option of the "sgpv menu"-subcommand
   * Fixed a confusion in the help-file about the nulllo and nullhi options 
   *	Added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
-  * Ahould allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first
-  * Removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace
+  * Should allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first.
+  * Removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace.
 * Version 1.03a 17.05.2020 : 
   * Made the title of the displayed matrix adapt to the type of null-hypothesis
   * Fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset
@@ -111,7 +115,9 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
-* Version 1.04  01.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". 
+* Version 1.04  01.07.2020: 
+	* Added/improved support matrices as inputs for options "esthi" and "estlo".
+	* Noshow-option now works expected.  
 * Version 1.03a 23.06.2020: Removed unnecessary input checks
 * Version 1.03 24.05.2020 : Added further input checks	
 * Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi

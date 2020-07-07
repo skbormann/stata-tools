@@ -1,6 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1  09.06.2020 : Added (initial) support for multiple null-hypotheses; ///
+*!Version 1.1  09.06.2020 : Added support for multiple null-hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
 							fixed errors in the perm-option of the "sgpv menu"-subcommand; ///
 							fixed a confusion in the help-file about the nulllo and nullhi options ///
@@ -30,6 +30,7 @@
 /*
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:)
 	Internal changes (Mostly re-organising the code for shorter and easier maintained code):
+	- Change the code which handles the inputmatrix to make use of the newly added ability of sgpvalue to use matrices as inputs -> should allow with larger than c(matsize) matrices -> requires modification of all code/commands which create new matrices like the various parsing commands for coefficients, p-values, etc.
 	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
 	- Write a certification script which checks all possible errors (help cscript)
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
@@ -37,9 +38,9 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	External changes (Mostly more features):
 	- Allow a mixture of case 1 & 2 for the coefficient-option -> select only some equations and variables from a multi-equation estimation -> ex. coef(((q10: q50: q90:) (mpg weight foreign)) which will then be expanded to coef(q10:mpg q10:weight ... q90:weight q90:foreign) -> requires changes in how this option is parsed
 	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0" -> not sure which way to input intervals works best
-	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set
-	- Make help-file easier to understand, especially what kind of input each option requires
-	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
+	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set.
+	- Make help-file easier to understand, especially what kind of input each option requires.
+	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis.
 	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
 	- support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
 	- Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
@@ -140,6 +141,13 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 			stop "The matrix `matrix' does not have the required format. See the {help sgpv##matrix_opt:help file} for the required format and make sure that the rows of the matrix are labelled correctly."
 			}
 			local inputmatrix `matrix'
+			*Check size of inputmatrix -> A Matrix larger than c(matsize) is not yet supported.
+			if `=colsof(`matrix')'>`=c(matsize)' | `=rowsof(`matrix')'>`=c(matsize)'{
+				disp as error "Matrix `matrix' is larger than the maximum allowed matrix size `c(matsize)'."
+				disp as error "A  Matrix larger than `=c(matsize)' is not yet supported."
+				disp as error "See {view sgpv-leukemia-example.do} for an example how to deal with such kind of matrices at the moment."
+				exit 198
+			}
 	  }
 	}
 	
@@ -299,7 +307,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 *Hard coded values for the rows from which necessary numbers are extracted
 *The rows could be addressed by name, but then at least Stata 14 returns a matrix
 *which requires additional steps to come to the same results as with hardcoded row numbers. Unless some one complains, I won't change this restriction.
-*The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed 
+*The macros for esthi and estlo could be become too large, will fix/rewrite the logic if needed. 
 *Removing not estimated coefficients from the input matrix
  forvalues i=1/`coln'{
 	 if !mi(`=el(`input',2,`i')') & !mi(`=el(`input',4,`i')') { // Check here if the standard error or the p-value is missing and treat it is as indication for a variable to omit.
@@ -454,8 +462,8 @@ program define ParseCoef, rclass
 		exit
 	}
 	 else if `"`coefficient'"'=="" & "`constant'"=="noconstant"{
-		local coefficient : colfullnames `matrix'
-		foreach coef of local coefficient{
+		local coefficients : colfullnames `matrix'
+		foreach coef of local coefficients{
 			if !ustrregexm("`coef'","_cons"){
 			mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`coef'"])
 			} 
@@ -538,9 +546,9 @@ program define ParseNull, rclass
 	*Maybe use the input matrix get more information instead of the coefficient-option?
 	*Count number of coefficients and compare with number of null-hypotheses
 	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
-	local coefn =wordcount(`"`coefficient'"')
+	local coefn = wordcount(`"`coefficient'"')
 	local coeforign = wordcount("`coeforig'")
-	local nulln =wordcount("`nulllo'")	
+	local nulln = wordcount("`nulllo'")	
 
 	if `coefn'==`nulln'{ //Assuming case 1 & only single equation or 3 or no coefficients selected
 		return local nulllo `nulllo'
@@ -647,6 +655,6 @@ program define menu
 	window menu append item "SGPV" "SGPV Plot Interval Estimates (p&lotsgpv)" "db plotsgpv"
 
 	window menu refresh
-	disp "Menu entries succesfully created. Go to User->Statistics->SGPV to access the dialog boxes for this package."
+	disp "Menu entries succesfully created.{break} Go to User->Statistics->SGPV to access the dialog boxes for this package."
 	
 end

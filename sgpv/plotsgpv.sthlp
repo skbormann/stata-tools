@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.00  20 Mar 2020}{...}
+{* *! version 1.04  05 Jul 2020}{...}
 {viewerdialog plotsgpv "dialog plotsgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -71,8 +71,6 @@
 {synopt:{opt nullpt(#)}} a number representing a point null hypothesis. {p_end}
 {synopt:{opt nomata}}  do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.
 {p_end}
-{synopt:{opt noshow}}  do not show the outcome of the SGPV calculations. Useful for larger calculations.
-{p_end}
 {synopt:{opt replace}}  replace existing variables in case the nomata-option was used.
 {p_end}
 {synopt:{opt two:way_opt(string asis)}}  any additional options for the plotting go here. 
@@ -87,7 +85,7 @@
 Plot the second-generation {it:p}-value (SGPV), as introduced in Blume et al. (2018), for user supplied interval estimates (support intervals, confidence intervals, credible intervals, etc.) according to its associated second-generation {it:p}-value ranking.
 This command and its companions commands  ({cmd:sgpvalue}, {cmd:sgpower}, {cmd:fdrisk}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
 A {dialog plotsgpv:dialog box} for easier usage is available.
-The command works best if dataset is used which contains the estimation or test results similar to the example leukstats-dataset.
+The command works best if a dataset is used which contains the estimation or test results similar to the example leukstats-dataset.
 
 {marker options}{...}
 {title:Options}
@@ -108,7 +106,6 @@ Typically the lower bound of a confidence interval can be used. A variable or ma
 
 {marker colors}
 {dlgtab:Colors}
-
 {phang}
 {opt nullc:ol(string asis)}  coloring of the null interval (indifference zone). Default is the R-color "Hawkes Blue". You can see the color before plotting via 
 {stata palette color 208 216 232 }.
@@ -135,12 +132,11 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 {opt intcol3(string asis)}  color of the interval with the R-color "firebrick3" as the default for SGPV = {it:1}
 
 {dlgtab:Title options}
-
 {phang}
 {opt t:itle(string)}     title of the plot.
 
 {phang}
-{opt xt:itle(string)}     label of the x-axis. Default is "Ranking according to <order>" where <order> can refer to the option {it:setorder()} or the original  sorting of the input. 
+{opt xt:itle(string)}     label of the x-axis. Default is "Ranking according to <order>" where <order> can refer to the value of the option {it:setorder()} or the original sorting of the input. 
 
 {phang}
 {opt yt:itle(string)}     label of the y-axis.
@@ -169,31 +165,33 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 {opt nullpt(#)} 	a number representing a point null hypothesis. If set, the command will draw a horizontal dashed red line at this location.
 
 {phang}
-{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with large matrices or variables. If this option is set, an approach based on variables is used. Using variables instead of Mata will be faster, but new variables containing the results are created. If you don't want to create new variables and time is not an issue then don't set this option. Stata might become unresponsive when using Mata because it takes time to return a large matrix.
-
-{phang}
-{opt noshow}     do not show the outcome of the SGPV calculations. Useful for larger calculations.
+{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with matrices larger than {cmd:c(matsize)} or variables. If this option is set, an approach based on variables is used. 
+Using variables instead of Mata will be faster, but new variables containing the results are created. 
+If you don't want to create new variables and time is not an issue then don't set this option. 
+Stata might become unresponsive when using Mata because it takes time to return a large matrix.
 
 {phang}
 {opt replace}    replace existing variables in case the nomata-option was used.
 
 {phang}
-{opt two:way_opt(string asis)}     any additional options for the plotting go here. See {help twoway} for more information about the possible options. Options set here may override the values set in other options before.
+{opt two:way_opt(string asis)} any additional options for the plotting go here. 
+See {help twoway} for more information about the possible options. 
+Options set here may override the values set in other options before.
 {p_end}
 
 
 {marker examples}{...}
 {title:Examples}
 {* pstd}
-{bf:Replicate the example plot from the R-code with the example dataset provided with this command:}
-(If you did not already install the example dataset, then you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here} together with the file {it:plotsgpv-leukemia-example.do} which helps you run the example in Stata. )
+{bf:Replicate the example plot from the R-code with the example dataset provided with this command:} (If you did not already install the example dataset,
+ then you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here} together with the file {it:plotsgpv-leukemia-example.do} which helps you run the example in Stata. )
 Run following the lines with the help of {stata do plotsgpv-leukemia-example.do}
 
 	. sysuse leukstats ,clear 
 	. plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) setorder(p_value) xshow(7000) title("Leukemia Example") ///
-	xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") nullpt(0) nomata replace noshow  ///
-	twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' ///
-	"2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000")) 
+		xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") nullpt(0) nomata replace   ///
+		twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' ///
+		"2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000")) 
 	
 	The last option in twoway_opt(...) changes the labeling of the y-axis (See {help axis_label_options} for more information).
 	

@@ -33,7 +33,7 @@
 {p_end}
 {synopt:{opt c:oefficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
-{synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term
+{synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term.
 {p_end}
 
 {syntab:Null hypothesis}
@@ -111,10 +111,10 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
 
 
     The sgpv-package consists of: sgpv       - a wrapper around the other commands, {help sgpvalue} and {help fdrisk}, to be used after estimations commands
-    				  {help sgpvalue}   - calculate the SGPVs
-    				  {help sgpower}    - power functions for the SGPVs
-    				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs
-    				  {help plotsgpv}   - plot the SGPVs
+    				  {help sgpvalue}   - calculate the SGPVs.
+    				  {help sgpower}    - power functions for the SGPVs.
+    				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs.
+    				  {help plotsgpv}   - plot interval estimates according to SGPV rankings.
 
 {marker subcmd}{...}
 {title:Subcommands}
@@ -170,7 +170,7 @@ More than one null-hypothesis is also supported. Each lower bound must be separa
 The number of lower bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration.
-One-sided null-hypotheses are not supported yet.
+
 
 {phang}
 {opt nullhi(upper_bound(s))}  change the upper bound of the null-hypothesis interval. 
@@ -179,7 +179,7 @@ More than one null-hypothesis is also supported. Each upper bound must be separa
 The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. 
-One-sided null-hypotheses are not supported yet.  
+
 
 {pstd}
 The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 

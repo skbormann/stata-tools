@@ -1,8 +1,8 @@
 *!False confirmatory/discovery risk calculations for Second Generation P-Values
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.03 24.05.2020 : Added more input checks 
-*!Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
+*!Version 1.03 24.05.2020 : Added more input checks. 
+*Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises.
 *Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.97a: Made error messages hopefully more understandable.
@@ -26,7 +26,7 @@ syntax, nulllo(string) nullhi(string) STDerr(real) INTType(string) INTLevel(stri
 		NULLSpace(string asis) NULLWeights(string) ALTSpace(string asis) ALTWeights(string) ///
 		[SGPVal(integer 0) Pi0(real 0.5)]
 *Syntax parsing
-local integrate nomataInt
+local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
 if !inlist(`sgpval',0,1){
 	stop "Only values 0 and 1 allowed for the option 'sgpval'"	
@@ -111,11 +111,11 @@ if "`inttype'"=="likelihood"{
 	} 
 
 
-*** calculate P.sgpv.H0
+*** calculate PsgpvH0
     * point null
-	   * * interval null
+	   *interval null
      if(`nulllo' != `nullhi')  {
-     * * P.sgpv.H0 @ point (=type I error at null.space)
+     *PsgpvH0 @ point (=type I error at nullspace)
       if("`nullweights'" == "Point")  {
         if(`:word count `nullspace''!=1){
 			stop "Option 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
@@ -123,7 +123,7 @@ if "`inttype'"=="likelihood"{
 		local powerxnullint : subinstr local powerx "x" "`nullspace'", all
 		local PsgpvH0 = `powerxnullint' 
       }
-	 * P.sgpv.H0 averaged: check `null.space` input
+	 * PsgpvH0 averaged: check 'nullspace' input
 	 if inlist("`nullweights'","Uniform","TruncNormal"){
 		if `:word count `nullspace''<2{
 			stop "Option 'nullspace' must not be a single number to use averaging methods. Set nullweights(Point) instead."
@@ -143,13 +143,13 @@ if "`inttype'"=="likelihood"{
 			}
 		}
 	 }
- * P.sgpv.H0 averaged uniformly
+ * PsgpvH0 averaged uniformly
       if("`nullweights'" == "Uniform") { // two steps instead of one are needed because results from one command cannot be used directly as the input of another command -> works in Stata only for functions
 		qui `integrate' ,f(`powerx') l(`=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') u(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') 
         local PsgpvH0 = 1/(`=max(`:word 1 of `nullspace'', `:word 2 of `nullspace'')' - `=min(`:word 1 of `nullspace'', `:word 2 of `nullspace'')') * `r(integral)' 
       }
 
-	   *P.sgpv.H0 averaged using truncated normal as weighting distribution function
+	   *PsgpvH0 averaged using truncated normal as weighting distribution function
       if("`nullweights'" == "TruncNormal") {
         * default: mean of Normal distr at midpoint of null.space // I assume that nullspace can have only two elements: upper and lower bound
         local truncNormmu = (`:word 1 of `nullspace'' + `:word 2 of `nullspace'')/2
@@ -161,8 +161,8 @@ if "`inttype'"=="likelihood"{
 
       }
 	 } 
-	 *** calculate P.sgpv.H1
-    * P.sgpv.H1 @ point
+	 *** calculate PsgpvH1
+    * PsgpvH1 @ point
     if("`altweights'" == "Point")  {
       if(`:word count `altspace''!=1){
 	    stop "Option 'altspace' must be a one number or expression when using a point alternative probability distribution."	
@@ -174,7 +174,7 @@ if "`inttype'"=="likelihood"{
       local PsgpvH1 = `powerxaltpoint' 
     }
 
-    * P.sgpv.H1 averaged: check `altspace' input
+    * PsgpvH1 averaged: check `altspace' input
     if inlist("`altweights'" ,"Uniform", "TruncNormal") {
       if( `:word count `altspace''<2)  stop "Option 'altspace' must not be a point to use averaging methods."
       if `:word count `altspace''==2  {
@@ -189,14 +189,14 @@ if "`inttype'"=="likelihood"{
       }
     }
 
-    * P.sgpv.H1 averaged uniformly
+    * PsgpvH1 averaged uniformly
     if("`altweights'" == "Uniform") {
 	 qui `integrate', f(`powerx') l(`=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') u(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')') 
       local PsgpvH1 = 1/(`=max(`:word 1 of `altspace'', `:word 2 of `altspace'')' - `=min(`:word 1 of `altspace'', `:word 2 of `altspace'')') * `r(integral)'
     }
 
 
-    * P.sgpv.H1 averaged using truncated normal as weighting distribution function
+    * PsgpvH1 averaged using truncated normal as weighting distribution function
     if("`altweights'" == "TruncNormal") {
       * default: mean of Normal distr at midpoint of `altspace'
       local truncNormmu = (`:word 1 of `altspace'' + `:word 2 of `altspace'')/2

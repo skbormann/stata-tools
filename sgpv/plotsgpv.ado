@@ -1,10 +1,10 @@
 *!Plot interval estimates according to Second-Generation p-value rankings
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for plotsgpv.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.04 02.07.2020 : Fixed/improved the support for matrices as input for options "esthi" and "estlo".
-*!Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
-*!Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
-*!Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
+*!Version 1.04 02.07.2020 : Fixed/improved the support for matrices as input for options "esthi" and "estlo". Removed noshow-option because it was never needed. The results of the sgpv-calculations were never shown even without this option set. Fixed non working combinations of variables as inputs and the nomata-option. Changed legend slightly to be more in line with R-code.
+*Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
+*Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
+*Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 *Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 *Version 0.98a: The option xshow() has now the same effect as in the R-code -> it sets correctly the limit of the x-axis.
 *				 Changed the default behaviour of the nullpt-option to be the same as in the R-code. 
@@ -26,7 +26,7 @@ version 12.0
 syntax [if] [in] ,  estlo(name) esthi(name) nulllo(string) nullhi(string)  /// 
 [SETOrder(string) Xshow(string) NULLCol(string asis) intcol1(string asis) intcol2(string asis) intcol3(string asis)	 ///
 	 noPLOTY_axis noPLOTX_axis	nullpt(string) noOUTlinezone Title(string) /// 
-	XTitle(string) YTitle(string) noLEGend nomata noshow replace TWOway_opt(string asis) /* h0(string) h1(string) alternative experimental syntax */ ] 
+	XTitle(string) YTitle(string) noLEGend nomata replace TWOway_opt(string asis) /* h0(string) h1(string) alternative experimental syntax */ ] 
 
 
 ***Some default values : Color settings -> translated R-colors into RGB for Stata -> Not sure how to install the colours in Stata for easier referencing.
@@ -95,20 +95,14 @@ if `:word count `esthi''==1{
 if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	capture confirm variable `setorder'
 	if _rc{
-		disp as error `"No variables found in option 'setorder'. Only variable names or "sgpv" are allowed values. "'
+		disp as error `"No variables found in option 'setorder'. Only variable names or "sgpv" are allowed values."'
 		exit 198
 	}
 	else local setorder_var `setorder' // Indicate that variable for sorting got found -> currently needed due to somewhat confusing handling of the setorder option
 }
 
 *Create variable for x-axis
-	tempvar x
-	if `varsfound'==1{
-		gen `x'=_n
-	} 
-	if `matrixfound'==1{
-		egen `x' = seq(), from(1) to(`=rowsof(`esthi')')
-	}
+
 
 *How much to show
 	if "`xshow'"!=""{ 
@@ -121,16 +115,18 @@ if "`setorder'"!="" & "`setorder'"!="sgpv"{
 		local xshow = _N
 	} 
 	
-	if `matrixfound' == 1 & `xshow'>rowsof(`esthi'){
+	if `matrixfound' == 1{
+		if `xshow'>rowsof(`esthi'){
 		local xshow = rowsof(`esthi')
 		disp as error `"Option "xshow" reset to `=rowsof(`esthi')' because "xshow" was larger than the number of rows of the matrix in option "esthi". "'
+		}
 	}
 
 *Set further restrictions
 	if "`if'"!=""{
-		local if  `if' & `x'<=`xshow' 
+		local if  `if' & \`x'<=`xshow' 
 	}
-	else local if if `x'<=`xshow'
+	else local if if \`x'<=`xshow'
 
 **Other graphing options
 *Color settings
@@ -152,60 +148,113 @@ if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	
 	**** Compute SGPVs for plotting
 	tempname sgpvs sgpvcombo
-	tempvar sgpvcomb nlo nhi // esthi estlo
+	tempvar sgpvcomb nlo nhi x // esthi estlo
 	if `varsfound'==1{
-		qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' `noshow' //Previously nomata-option was set by default -> variables were always created
-		if ("`setorder'"=="sgpv") gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
+		qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `mata' `replace' //Previously nomata-option was set by default -> variables were always created
+		// if ("`setorder'"=="sgpv") & "`mata'"==""{
+			// gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
+		// } 
 	}
 	else if `varsfound'==0{ // Not correct yet
-			qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `nomata' `replace' //Nomata option may not be useful, will fail if nomata and c(matsize) < rows of esthi or estlo -> how test these cases?
-			mat `sgpvs' = r(results)
-			if ("`setorder'"=="sgpv"){
-				if `=rowsof(`sgpvs')'<=c(matsize){				
-					mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) 
-					mat colnames `sgpvcombo' = "sgpvcombo"
-					forvalues i=1/`=rowsof(`sgpvs')'{ // Only needed if sorting is set to sgpv
-						if `sgpvs'[`i',1]==0{
-							mat `sgpvcombo'[`i',1]=-`=`sgpvs'[`i',2]'
-						}
-						else{
-							mat `sgpvcombo'[`i',1]=`=`sgpvs'[`i',1]'
-						}
-					
+			qui sgpvalue, estlo(`estlo') esthi(`esthi') nulllo(`nulllo') nullhi(`nullhi') `mata' `replace'  //Nomata option may not be useful, will fail if nomata and c(matsize) < rows of esthi or estlo -> how test these cases?
+			}
+	*A matrix with the results will be returned if the nomata is not set even when variables are used as inputs.
+	capture confirm matrix r(results)
+	if !_rc{
+		 mat `sgpvs' = r(results) 
+		 mat colnames `sgpvs' = pdelta dg
+		 local sgpvmatexist 1 // A marker that results were returned as a matrix and as variables
+	}
+	else local sgpvmatexist 0
+	*Get the correct setorder if sorted by SGPVs -> sorting depends whether variables or a matrix was returned and the size of the returned matrix
+	if ("`setorder'"=="sgpv"){
+		if "`sgpvmatexist'"=="0"{
+			gen `sgpvcomb' = cond(pdelta==0,-dg,pdelta )
+		}
+		else if "`sgpvmatexist'"=="1"{
+			if `=rowsof(`sgpvs')'<= `=c(matsize)'{				
+				mat `sgpvcombo' = J(`=rowsof(`sgpvs')',1,.) 
+				mat colnames `sgpvcombo' = "sgpvcombo"
+				forvalues i=1/`=rowsof(`sgpvs')'{ // Only needed if sorting is set to sgpv
+					if `sgpvs'[`i',1]==0{
+						mat `sgpvcombo'[`i',1]=-`=`sgpvs'[`i',2]'
 					}
-				}
-				else if `=rowsof(`sgpvs')'>c(matsize){ //Not tested yet -> need test case
-					mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
-					mata: sgpvcombo = J(rows(sgpv),1.)
-					mata: sgpvcombo = mm_cond(sgpv:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond as a shortcut
-					mata: st_matrix("`sgpvcombo'",sgpvcombo)
-					mat colnames `sgpvcombo' = "sgpvcombo"
+					else{
+						mat `sgpvcombo'[`i',1]=`=`sgpvs'[`i',1]'
+					}
+				
 				}
 			}
+			else if `=rowsof(`sgpvs')'> `=c(matsize)' & "`mata'"==""{ //Not tested yet -> need test case
+				mata: sgpv = st_matrix("`sgpvs'") //Transfer matrix to mata
+				mata: sgpvcombo = J(rows(sgpv),1,.)
+				mata: sgpvcombo = mm_cond(sgpv[.,1]:==0,-sgpv[.,2],sgpv[.,1]) // Use Ben Jann's mm_cond as a shortcut
+				mata: sgpvcombo = sgpvcombo[1...,1]
+				mata: st_matrix("`sgpvcombo'",sgpvcombo)
+				mat colnames `sgpvcombo' = "sgpvcombo"
+			}
+		}
 	}
 
 	*Convert matrix to variables -> directly plotting of matrices not possible
+	local pdelta pdelta
+	local dg dg
 	preserve
 	*Prepare matrix for conversion
-	if (`varsfound'==0 & "`setorder'"=="sgpv"){
+	if "`sgpvmatexist'"=="1" & "`setorder'"=="sgpv"{
 		capture confirm variable sgpvcombo // What if a variable named "sgpvcombo" already exists in the dataset?
 		if !_rc{
-			local randn = runiform(1,65536) // Add an arbitrary random number and hope that no variable with this name exists
+			local randn = floor(runiform(1,65536)) // Add an arbitrary random number and hope that no variable with this name exists
 			mat colnames `sgpvcombo' = "sgpvcombo`randn'"
-
 		}
 		svmat `sgpvcombo' ,names(col)
 	} 
 	
-	*Sort dataset
-	if "`setorder'"=="sgpv"{ 
-		if `varsfound'==0 local order sgpvcombo`randn'
-		if `varsfound'==1 local order \`sgpvcomb'
+	if `varsfound'==0{
+		capture confirm matrix `sgpvs'
+		if _rc{	
+			local pdelta pdelta
+			local dg dg
+		} 
+		else{
+			capture confirm variable pdelta dg
+			if !_rc{ //Get a "predictable" variable name in case pdelta and dg already exist
+				local randpdelta = floor(runiform(1,65536))
+				local randdg = floor(runiform(1,65536))
+				mat colnames `sgpvs' = pdelta`randpdelta' dg`randdg'
+			}
+			
+			svmat sgpvs, names( col ) 
+			local pdelta pdelta`randpdelta'
+			local dg dg`randdg'
+		}
 	
 	}
-	if "`order'"!="" sort `order'
-	else if "`setorder_var'"!="" sort `setorder_var'
 	
+	*Sort dataset
+	if "`setorder'"=="sgpv"{ 
+		if "`sgpvmatexist'"=="1"{ 
+			local order sgpvcombo`randn'
+		}
+		else if "`sgpvmatexist'"=="0"{
+			local order \`sgpvcomb'
+		} 	
+	}
+	
+	if "`order'"!=""{
+		sort `order'
+	} 
+	else if "`setorder_var'"!=""{
+		sort `setorder_var'
+	} 
+	
+	*Define values for the x-axis
+	if `varsfound'==1{
+		gen `x'=_n
+	} 
+	if `matrixfound'==1{
+		egen `x' = seq(), from(1) to(`=rowsof(`esthi')')
+	}
 
 	*Define default title of x-axis
 	if "`setorder'"!="" local xtitlevar `"`setorder'"'
@@ -227,19 +276,19 @@ if "`setorder'"!="" & "`setorder'"!="sgpv"{
 
 
 	
-	***Set up graphs
+	***Set up graphs -> works currently only when variables are there
 
 	*Null interval
 	local nullint (rarea `nlo' `nhi' `x', sort lcolor("`nullcol'") fcolor("`nullcol'"))
 	
 	* Intervals where SGPV==0
-	local sgpv0  (rbar `estlo' `esthi' `x' if pdelta==0 & dg!=., sort lcolor("`intcol1'") fcolor("`intcol1'"))
+	local sgpv0  (rbar `estlo' `esthi' `x' if `pdelta'==0 & `dg'!=., sort lcolor("`intcol1'") fcolor("`intcol1'"))
 		
 	* Intervals where 0<SGPV<1
-	local sgpv01 (rbar `estlo' `esthi' `x' if pdelta<1 & dg==., sort lcolor("`intcol2'") fcolor("`intcol2'"))
+	local sgpv01 (rbar `estlo' `esthi' `x' if `pdelta'<1 & `dg'==., sort lcolor("`intcol2'") fcolor("`intcol2'"))
 	
 	* Intervals where SGPV==1
-	local sgpv1 (rbar `estlo' `esthi' `x' if pdelta==1 & dg==., sort lcolor("`intcol3'") fcolor("`intcol3'"))
+	local sgpv1 (rbar `estlo' `esthi' `x' if `pdelta'==1 & `dg'==., sort lcolor("`intcol3'") fcolor("`intcol3'"))
 
 	*Detail indifference zone
 	if "`nullpt'"!=""{
@@ -256,7 +305,7 @@ if "`setorder'"!="" & "`setorder'"!="sgpv"{
 	
 	*Legend
 	if "`legend'"!="nolegend"{
-	 local sgpvlegend	legend(on order(1 "Interval Null"  4 "p = 0"   2 "0 < p <1" 3 "p = 1")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) // Not all settings in R-code are possible in Stata
+	 local sgpvlegend	legend(on order(1 "Interval Null"  4 "p{sub:{&delta}} = 0"   2 "0 < p{sub:{&delta}} <1" 3 "p{sub:{&delta}} = 1")  position(1) ring(0) cols(1) symy(*0.25) region(lpattern(blank))) // Not all settings in R-code are possible in Stata
 	}
 	else if "`legend'"=="nolegend"{
 		local sgpvlegend legend(off)

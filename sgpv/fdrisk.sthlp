@@ -83,21 +83,23 @@ although they may be implemented in future versions.{p_end}
 
 {phang}
 {opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. 
-Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval ("credible" not yet supported).
+Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval.
 
 {phang}
 {opt intl:evel(string)}     level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
 
 {phang}
-{opt nulls:pace(string asis)}  support of the null probability distribution. If "nullweights" is "Point", then "nullspace" is one number. 
-If "nullweights" is "Uniform", then "nullspace" are two numbers separated by a space. These numbers can be also formulas which must enclosed in " ".
+{opt nulls:pace(string asis)}  support of the null probability distribution. If "nullweights" is set to "Point", then "nullspace" is one number. 
+If "nullweights" is set to "Uniform" or "TruncNormal", then "nullspace" are two numbers separated by a space. 
+These numbers can be also formulas which must enclosed in " ".
 
 {phang}
 {opt nullw:eights(string)}     probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
 
 {phang}
 {opt alts:pace(string asis)}  support for the alternative probability distribution. 
-If "altweights" is "Point", then "altspace" is one number. If "altweights" is "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space.
+If "altweights" is set to "Point", then "altspace" is one number. 
+If "altweights" is set to "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space.
 These numbers can be also formulas which must enclosed in " ".
 
 {phang}

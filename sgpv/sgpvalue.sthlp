@@ -71,21 +71,21 @@ A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt estlo(string)}  lower bound of interval estimate. Values may be finite or infinite.
+{opt estlo(string)} lower bound of interval estimate. Values may be finite or infinite.
  To specify that the lower limit is -infinity, just specify the missing value . in this option. 
  Multiple lower bounds can be entered. 
  The number of lower bounds must match the number of upper bounds specified in option {it:esthi}.
  They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
-Typically the lower bound of a confidence interval can be used. 
-A variable/ matrix containing the lower bounds can be also used, but then a variable/matrix containing the upper bounds must be also used for option {it:esthi}.
+Typically, the lower bound of a confidence interval can be used. 
+A variable/matrix containing the lower bounds can be also used, but then a variable/matrix containing the upper bounds must be also used for option {it:esthi}.
 
 {phang}
-{opt esthi(string)}  upper bound of interval estimate. Values may be finite or infinite.
+{opt esthi(string)} upper bound of interval estimate. Values may be finite or infinite.
 To specify that the upper limit is +infinity, just specify the missing value . in this option. 
 The number of upper bounds must match the number of lower bounds specified in option {it:estlo}.
 Multiple upper bounds can be entered. 
 They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
-Typically the upper bound of a confidence interval is used. 
+Typically, the upper bound of a confidence interval is used. 
 A variable/matrix containing the upper bounds can be also used, but then a variable/matrix containing the lower bounds must be also used for option {it:estlo}.
 
 {phang}
@@ -93,16 +93,16 @@ A variable/matrix containing the upper bounds can be also used, but then a varia
  To specify that the lower limit is -infinity, just specify the missing value . in this option. 
  Multiple lower bounds can be entered. 
  In this case, the number of lower bounds must match the number of lower bounds specified in option {it:estlo}.
- The number of lower bounds must always the number of upper bounds in option {it:nullhi}.
+ The number of lower bounds must always match the number of upper bounds in option {it:nullhi}.
  They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input. 
  
 {phang}
-{opt nullhi(string)}     upper bound of null interval. Values may be finite or infinite.
-To specify that the upper limit is +infinity, just specify the missing value . in this option. 
-Multiple upper bounds can be entered. 
+{opt nullhi(string)} upper bound of null interval. Values may be finite or infinite.
+ To specify that the upper limit is +infinity, just specify the missing value . in this option. 
+ Multiple upper bounds can be entered. 
  In this case, the number of upper bounds must match the number of upper bounds specified in option {it:esthi}.
- The number of lower bounds must always the number of upper bounds in option {it:nulllo}.
-They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
+ The number of lower bounds must always match the number of upper bounds in option {it:nulllo}.
+ They must be separated by spaces. {help exp:Expressions}/formulas are also allowed as input.
 
 
 {dlgtab:Display}

@@ -1,5 +1,5 @@
 /*
-plotsgpv dialog version 1.03, 01.07.2020, Sven-Kristjan Bormann
+plotsgpv dialog version 1.04, 01.07.2020, Sven-Kristjan Bormann
 for plotsgpv version 1.03
 
 To install in User Statistics menu via Stata commands:
@@ -44,12 +44,8 @@ BEGIN
         colors.cl_intcol3.hide
 END
 
-LIST setorder_list
-BEGIN
-	sgpv
-END
 
-DIALOG main, label("Plotsgpv 1.00 - Plotting SGPVs") tabtitle("Main")
+DIALOG main, label("Plotsgpv 1.04 - Plotting SGPVs") tabtitle("Main")
 BEGIN
 	GROUPBOX gb_est	 	_lft  _top  400    110, label("Estimated Interval") 
 	TEXT tx_estlo 		+10   _ss   80      ., label("Lower Bound") 
@@ -114,35 +110,32 @@ END
 
 DIALOG options, tabtitle("Further options")
 BEGIN
-	GROUPBOX gb_noplot  _lft 	_top	200		80 ,label("No plotting of ...")
-	CHECKBOX ck_noy 	+10 	+15 	80 	.,label("... Y-axis") option(noploty_axis) tooltip("Deactive showing the y-axis")
-	CHECKBOX ck_nox		+110 	@ 		80 	.,label("... X-axis") option(noplotx_axis) tooltip("Deactive showing the x-axis")
+	GROUPBOX gb_noplot  _lft 	_top	200		80,label("No plotting of ...")
+	CHECKBOX ck_noy 	+10 	+15 	80 		.,label("... Y-axis") option(noploty_axis) tooltip("Deactive showing the y-axis")
+	CHECKBOX ck_nox		+110 	@ 		80 		.,label("... X-axis") option(noplotx_axis) tooltip("Deactive showing the x-axis")
 	CHECKBOX ck_noout	20 		_ls 	100 	.,label("... outline zone") option(nooutlinezone) ///
-												tooltip("Deactivate drawing a slim white outline around the null zone")
-	CHECKBOX ck_nol		+110 	@ 		80 	.,label("... legend") option(nolegend)
+													tooltip("Deactivate drawing a slim white outline around the null zone")
+	CHECKBOX ck_nol		+110 	@ 		80 		.,label("... legend") option(nolegend)
 	
 	
-	CHECKBOX ck_nomata  +100   	20     @        ., label("No Mata") option(nomata) ///
+	CHECKBOX ck_nomata  +100   	25     @        ., label("No Mata") option(nomata) ///
 												tooltip("Do not use the Mata routines for large input matrices and instead use variables for the calculations.")
-	CHECKBOX ck_replace @   	_ss     @        ., label("Replace") option(replace) ///
-												tooltip("Replace existings variables if 'No Mata' option is set or variables are used as inputs for the estimated interval bounderies.")
-	CHECKBOX ck_noshow @   		_ss      @        ., label("No Show") option(noshow) ///
-												tooltip("Do not show the calculated results which can be useful for large amount of calculated SGPVs and delta-gaps.")
-												
-	TEXT 	tx_seto		20		_xls	@	.,label("Setorder:")
-	VARNAME vn_seto		+100	@		@	.,default("sgpv") option(setorder) ///
-											tooltip("a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.")
+	CHECKBOX ck_replace @   	_ls     @        ., label("Replace") option(replace) ///
+												tooltip("Replace existings variables if 'No Mata' option is set or variables are used as inputs for the estimated interval bounderies.")												
+	TEXT 	tx_seto		20		_xxxls	@		.,label("Setorder:")
+	VARNAME vn_seto		+100	@		@		.,default("sgpv") option(setorder) ///
+												tooltip("a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.")
 											
-	TEXT 	tx_xshow	20		_ls		120	.,label("Maximum ranking:")
-	EDIT 	ed_xshow 	+100	@		100	.,option(xshow) numonly ///
-											tooltip("A number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.")	
-	TEXT	tx_nullpt	20		_ls		80	.,label("Null point:")
-	EDIT 	ed_nullpt 	+100	@		40	.,option(nullpt) numonly ///
-											tooltip("A number representing a point null hypothesis. If set, the command will draw a horizontal dashed red line at this location.")
+	TEXT 	tx_xshow	20		_ls		120		.,label("Maximum ranking:")
+	EDIT 	ed_xshow 	+100	@		100		.,option(xshow) numonly ///
+												tooltip("A number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.")	
+	TEXT	tx_nullpt	20		_ls		80		.,label("Null point:")
+	EDIT 	ed_nullpt 	+100	@		40		.,option(nullpt) numonly ///
+												tooltip("A number representing a point null hypothesis. If set, the command will draw a horizontal dashed red line at this location.")
 	
 	TEXT 	tx_twoway 	20 		_ls		100		.,label("Additional plotting options:")
 	EDIT 	ed_twoway 	+100 	@		250		.,option(twoway_opt) tooltip("Any additional options for the plotting. Any option set here may override the default options")
-	BUTTON  bu_twoway   +255	@  		40 	.,label("Help") onpush("view help twoway")
+	BUTTON  bu_twoway   +255	@  		40 		.,label("Help") onpush("view help twoway")
 	
 		
 END
@@ -229,7 +222,6 @@ BEGIN
 		
 		option options.ck_nomata
 		option options.ck_replace
-		option options.ck_noshow
 		
 		put " " /program setorder_output
 		optionarg /oquoted options.ed_xshow
@@ -239,51 +231,4 @@ BEGIN
 	endoptions 
 END
 
-/*
-PROGRAM command2
-BEGIN
-	put "plotsgpv "
-	INCLUDE _ifin_pr
-	beginoptions
-		require main.ex_estlo
-		optionarg main.ex_estlo
-		
-		require main.ex_esthi
-		optionarg main.ex_esthi
-		
-		require main.ex_nulllo
-		optionarg main.ex_nulllo
-		
-		require main.ex_nullhi
-		optionarg main.ex_nullhi
-		
-		*Title options
-		optionarg /oquoted titles.ed_title
-		optionarg /oquoted titles.ed_xtitle
-		optionarg /oquoted titles.ed_ytitle
-		
-		*Color options
-		put " " /program nullcol_output
-		put " " /program intcol_output
-		
-		
-		*Further options
-		option options.ck_nox
-		option options.ck_noy
-		option options.ck_nol
-		option options.ck_noout
-		
-		option options.ck_nomata
-		option options.ck_replace
-		option options.ck_noshow
-		
-		put " " /program setorder_output
-		optionarg options.ed_xshow
-		optionarg options.ed_nullpt
-		optionarg /asis options.ed_twoway
-		
-		
-	endoptions 
-END
-*/
 

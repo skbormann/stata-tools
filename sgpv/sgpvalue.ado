@@ -1,6 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.04  01.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". -> Examples yet in the help file
+*!Version 1.04  05.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". Noshow-option now works expected. 
 *Version 1.03a 23.06.2020: Removed unnecessary input checks
 *Version 1.03 24.05.2020 : Added further input checks	
 *Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is probably still possible. 
@@ -18,14 +18,14 @@
 *To-do: 	At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used.
 *			Add an option to format the output -> exists already for the sgpv-command, could added if needed	
 *			Unify options nulllo and nullhi into one option named "null" and options estlo and esthi into "est" or "ALTernative" to make it easier for users to enter null-hypothesis and alternative hypothesis or estimated intervals
-*			Allow matrices as input for the intervals?
+*			Allow matrices as input for the (null-)intervals?
 
 
 
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax, estlo(string) esthi(string)  [nulllo(string) nullhi(string) nowarnings INFcorrection(real 1e-5) nodeltagap nomata noshow replace h0(string asis) h1(string asis) /*two additional options for a new syntax to enter intervals */ ] 
+syntax, estlo(string) esthi(string)  nulllo(string) nullhi(string) [NOWARNings INFcorrection(real 1e-5) nodeltagap nomata noshow replace h0(string asis) h1(string asis) /*two additional options for a new syntax to enter intervals */ ] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
@@ -44,8 +44,7 @@ syntax, estlo(string) esthi(string)  [nulllo(string) nullhi(string) nowarnings I
 	local estlo `r(lb)'
 	local esthi `r(ub)'
 	}
-	
-	
+		
 	*Check if input is matrix or variable and convert matrix into local macro
 	foreach name in esthi estlo{
 		capture confirm numeric variable ``name''
@@ -80,7 +79,6 @@ syntax, estlo(string) esthi(string)  [nulllo(string) nullhi(string) nowarnings I
 	}
 
 	
-
 **Potential Errors
 * Not all non-sensical inputs covered yet
 if `:word count `nullhi'' != `: word count `nulllo''{
@@ -98,11 +96,12 @@ if wordcount("`nulllo'") != wordcount("`estlo'") & wordcount("`nulllo'")>1{
 	exit 198
 }
 
-
+*Expand null-interval to match the number of estimated intervals
   if `:word count `nulllo''==1 {
    local nulllo = "`nulllo' " * `: word count `estlo''  
    local nullhi = "`nullhi' " * `: word count `esthi'' 
   }
+
 
 	if "`variablefound'"=="1"{
 		local estint =_N
@@ -169,7 +168,6 @@ else{	// Run if rows less than matsize -> the "original" approach
 			local est_lo = `=c(mindouble)'
 			}
 			
-
 		local est_hi  `: word `i' of `esthi''
 			capture local `est_hi' =`est_hi'
 			isValid `est_hi' esthi
@@ -250,8 +248,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 			local pdelta .
 			if "`warnings'"!="nowarnings" disp "The `i'th interval limits are likely reversed."
 		}
-		
-		
+				
 		** Calculate delta-gap
 		if "`deltagap'"!="nodeltagap"{
 			local gap = max(`est_lo', `null_lo') - min(`null_hi', `est_hi')
@@ -277,7 +274,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 	if "`deltagap'"=="nodeltagap"{
 	mat `results'=`results'[1...,1]
 	} 
-	matlist `results' ,names(columns) title(Second Generation P-Values)
+	if "`show'"!="noshow" matlist `results' ,names(columns) title(Second Generation P-Values)
 	return matrix results = `results'
 }	 
 end 
@@ -356,6 +353,17 @@ args matname macroname
 	}	
 
 return local `macroname' `matmacro'
+end
+
+*Convert a local macro into a matrix -> needed if I want to remove the approach based on macros to calculate sgpvs and only use Mata-approach
+program define convertMacro, rclass
+	args macroname matname
+	tempname macromat
+	forvalues i=1/`=wordcount("`macroname'")' {
+	mat `macromat' = (nullmat(`macromat') \ `=`=word("`macroname'",`i')'')
+	}
+	
+	return matrix `matname' = `macromat'
 end
 
 *Check if the input is valid
@@ -457,11 +465,8 @@ Might have to change the way missing values are handled -> For now they are trea
 
 /*
 	V = tokens(list)
-if (type =="macro"){
-	Data = (st_local(V[1]), st_local(V[2]))
-}
 
-if (type=="matrix"){
+if (type =="macro") | (type=="matrix"){
 	Data=(st_matrix(V[1]), st_matrix(V[2]))
 }
 

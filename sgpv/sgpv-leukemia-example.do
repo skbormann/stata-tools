@@ -27,3 +27,5 @@ matlist `final' ,title("Comparison of ordinary P-Values and Second Generation P-
 mat leukemia_result = `final'
 restore
 
+
+

@@ -1,6 +1,6 @@
 /*
-sgpvalue dialog version 1.02, 06.04.2020, Sven-Kristjan Bormann
-for sgpvalue version 1.02
+sgpvalue dialog version 1.04, 06.04.2020, Sven-Kristjan Bormann
+for sgpvalue version 1.04
 
 To install in the User Statistics menu via Stata commands:
   
@@ -21,7 +21,7 @@ HELP hlp1,   view("help sgpvalue")
 RESET res1
 
 
-DIALOG main, label("Sgpvalue 1.02 - SGPV Value Calculations") tabtitle("Main")
+DIALOG main, label("Sgpvalue 1.04 - SGPV Value Calculations") tabtitle("Main")
 BEGIN
 	GROUPBOX gb_est	 	_lft  _top  360    110, label("Estimated Interval") 
 	TEXT tx_estlo 		+10   _ss   80      ., label("Lower Bound") 
