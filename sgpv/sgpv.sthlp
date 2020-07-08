@@ -257,7 +257,7 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{help sgpv##exporting_results:Exporting results}
     	{help sgpv##stored_estimations:Using stored estimations}
     	{help sgpv##alternative_null-hypothesis:Setting a different null-hypothesis}
-    	{help sgpv##multiple-null-hypotheses-example:Setting an individual null-hypotheses for each coefficient}
+    	{help sgpv##multiple-null-hypotheses-example:Setting an individual null hypotheses for each coefficient}
     	{help sgpv##multiple-equations-example:Selecting coefficients}
 	{help sgpv##leukemia-example:Calculating SGPVs for a large dataset of estimation or t-test results}
     	{help sgpv##subcmds_example:Using subcommands} 
@@ -354,13 +354,13 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
     The example illustrates the need to set a scientifically reasonable null-hypothesis. 
     For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
-  {title:Setting an individual null-hypotheses for each coefficient}
+  {title:Setting an individual null hypotheses for each coefficient}
   {marker multiple-null-hypotheses-example}
-  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null-hypotheses  with a space. 
+  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.
 	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}
 	
-  The same null-hypotheses but this time one null-hypothesis for each selected equation or quantile
+  The same null hypotheses but this time one null-hypothesis for each selected equation or quantile
 	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}
 	
   {title:Selecting coefficients}	

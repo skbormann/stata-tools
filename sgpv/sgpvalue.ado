@@ -19,6 +19,7 @@
 *			Add an option to format the output -> exists already for the sgpv-command, could added if needed	
 *			Unify options nulllo and nullhi into one option named "null" and options estlo and esthi into "est" or "ALTernative" to make it easier for users to enter null-hypothesis and alternative hypothesis or estimated intervals
 *			Allow matrices as input for the (null-)intervals?
+*			Rename variables created by sgpv_var from "pdelta" and "dg" to "_pdelta" and "_dg" to decrease the risk having user created variables with the same names.
 
 
 

@@ -3,7 +3,7 @@
 Second Generation P-Values (SGPV) based on the R-code by  Jeffrey D. Blume and Valerie F. Welty available [here](https://github.com/weltybiostat/sgpv)
 
 ## Changelog
-The changelog is taken from the ado-files.
+The changelog is taken from the ado-files and slightly modified.
 
 ### General
 General remarks if updates come in larger "packages".
@@ -47,7 +47,7 @@ General remarks if updates come in larger "packages".
 	* Fixed/improved the support for matrices as input for options "esthi" and "estlo".
 	* Removed noshow-option because it was never needed. The results of the sgpv-calculations were never shown even without this option set. 
 	* Fixed non working combinations of variables as inputs and the nomata-option.
-	* Changed legend slightly to be more in line with R-code.
+	* Changed the legend slightly to be more in line with R-code.
 * Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
 * Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
 * Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
@@ -76,10 +76,10 @@ General remarks if updates come in larger "packages".
 
 ### sgpv
 * Version 1.1  28.05.2020 : 
-  * Added support for multiple null-hypotheses 
-  * Added a noconstant-option to remove constant from list of coefficients 
-  * Fixed an error in the perm-option of the "sgpv menu"-subcommand
-  * Fixed a confusion in the help-file about the nulllo and nullhi options 
+  * Added support for multiple null hypotheses. 
+  * Added a noconstant-option to remove the constant from the list of coefficients. 
+  * Fixed an error in the perm-option of the "sgpv menu"-subcommand.
+  * Fixed a confusion in the help-file about the nulllo and nullhi options .
   *	Added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
   * Should allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first.
   * Removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace.
@@ -117,7 +117,7 @@ General remarks if updates come in larger "packages".
 ### sgpvalue
 * Version 1.04  01.07.2020: 
 	* Added/improved support matrices as inputs for options "esthi" and "estlo".
-	* Noshow-option now works expected.  
+	* Noshow-option now works as expected.  
 * Version 1.03a 23.06.2020: Removed unnecessary input checks
 * Version 1.03 24.05.2020 : Added further input checks	
 * Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi
@@ -143,34 +143,29 @@ A collection of things that I want to do at some point + some limitations of the
 
 ### plotsgpv
 
-
 ### sgpower
-* Works only on one interval and one true value at the moment; 
-* The standard error has to be a number and cannot be an expression like in the R-code
+* Works only on one interval and one true value at the moment. 
+* The standard error has to be a number and cannot be an expression like in the R-code.
 * Not possible to plot directly the power function yet, an example how to plot the power function is located in the file sgpower_plot_example.do
 * The displayed results could be labeled better and explain more but for now they are the same as in the original R-code.
 
 ### sgpv
 #### Internal changes (Mostly re-organising the code for shorter and easier maintained code):
 * Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
-* Change input type of options nulllo and nullhi from 'real' to 'string' to allow the same flexibility like the other commands -> allow a different null-hypothesis for each coefficient -> requires changes for the fdrisk option-parsing/generation & additional checks to avoid non-sensical input.
 * Write a certification script which checks all possible errors (help cscript)
-* change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 
 #### External changes (Mostly more features):
-* Add support for multiple null-hypotheses -> allow a different null-hypothesis for each coefficient
 * Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis
 * Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
-* support for more commands which do not report their results in a matrix named "r(table)". (Which would be the relevant commands?)
-* Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers; allow calculations for more than one stored estimate
-* Return more infos (Which infos are needed for further processing?)
+* support for more commands which do not report their results in a matrix named "r(table)".
+* Make matrix parsing more flexible and rely on the names of the rows for identifiying the necessary numbers
+* Return more infos which might be needed for further processing.
 * Allow plotting of the resulting SGPVs against the normal p-values directly after the calculations -> use user-provided command plotmatrix instead?	
-* improve the speed of fdrisk.ado -> the integration part takes too long. -> switch over to Mata integration functions provided by moremata-package
-* add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
+* Improve the speed of fdrisk.ado -> the integration part takes too long. -> switch over to Mata integration functions provided by moremata-package
+* Add an immidiate version of sgpvalue similar like ttesti-command; allow two sample t-test equivalent -> currently the required numbers need be calculated or extracted from these commands.
 
 ### sgpvalue
 * At some point rewrite the code to use only Mata for a more compact code -> currently three different versions of the same algorithm are used. 
-* Some input error checks are still missing
 
 
 

@@ -1,13 +1,12 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1  09.06.2020 : Added support for multiple null-hypotheses; ///
+*!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
 							fixed errors in the perm-option of the "sgpv menu"-subcommand; ///
 							fixed a confusion in the help-file about the nulllo and nullhi options ///
 							added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " ///
 							should allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first ///
-							removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace
-							
+							removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace							
 *Version 1.03a 17.05.2020 : Made the title of the displayed matrix adapt to the type of null-hypothesis; fixed a wrong file name in the sgpv-leukemia-example.do -> should now load the dataset; minor improvements in the example section of the help file ; added a new example showing how to apply a different null-hypothesis for each coefficient; added an example how to export results by using estout from Ben Jann
 *Version 1.03 14.05.2020 : added better visible warnings against using the default point 0 null-hypothesis after the displayed results -> warnings can be disabled by an option; added some more warnings in the description of the options 
 *				Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
@@ -38,7 +37,7 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	External changes (Mostly more features):
 	- Allow a mixture of case 1 & 2 for the coefficient-option -> select only some equations and variables from a multi-equation estimation -> ex. coef(((q10: q50: q90:) (mpg weight foreign)) which will then be expanded to coef(q10:mpg q10:weight ... q90:weight q90:foreign) -> requires changes in how this option is parsed
 	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0" -> not sure which way to input intervals works best
-	- Add an option to not display the individual null-hypothesis if multiple null-hypotheses are set.
+	- Add an option to not display the individual null-hypothesis if multiple null hypotheses are set.
 	- Make help-file easier to understand, especially what kind of input each option requires.
 	- Consider dropping the default value for the null-hypothesis and require an explicit setting to the null-hypothesis.
 	- Make error messages more descriptive and give hints how to resolve the problems. (somewhat done hopefully)
@@ -55,7 +54,6 @@ program define sgpv, rclass
 version 12.0
 *Parse the initial input 
 capture  _on_colon_parse `0'
-
 
 *Check if anything to calculate is given
 if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist("`: word 1 of `0''","value","power","fdrisk","plot", "menu" ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
@@ -101,7 +99,7 @@ else{
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
-  nulllo(string) nullhi(string) Null(string)  /// null-hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
+  nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/  ] 
 
@@ -162,9 +160,9 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 	
 	
-	*Catch input errors when using multiple null-hypotheses
+	*Catch input errors when using multiple null hypotheses
 	*Add checks for string input
-	if `"`coefficient'"'=="" & wordcount("`nulllo'")>1{ // Allow case no coefficient set, but number of null-hypotheses equals number of coefficients in estimation command? What about noconstant-option? -> Might be supported later 
+	if `"`coefficient'"'=="" & wordcount("`nulllo'")>1{ // Allow case no coefficient set, but number of null hypotheses equals number of coefficients in estimation command? What about noconstant-option? -> Might be supported later 
 		disp as error " `=wordcount("`nulllo'")' lower null-bounds and `=wordcount("`nullhi'")' upper null-bounds found but coefficient-option is empty."
 		disp as error "You can use more than one null-hypothesis only if you set explicitly the coefficients with {it:coefficient}-option."
 		exit 198
@@ -320,7 +318,7 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  }
   local rownames : colfullnames `input_new' //Save the variable names for later display
 
-*Check and expand the lower and upper bounds if multiple null-hypotheses are used 
+*Check and expand the lower and upper bounds if multiple null hypotheses are used 
 if wordcount("`nullhi'")>1{
 	ParseNull `input_new', coefficient(`rownames') coeforig(`coefficient') nulllo(`nulllo') nullhi(`nullhi')
 	local nulllo `r(nulllo)'
@@ -379,7 +377,7 @@ else{
 *Change the format of the displayed matrix
 FormatDisplay `comp', format(`format')
 *Display the results and adjust the title based on the null-hypothesis
-*Modify display of results to allow multiple null-hypotheses -> Not sure if displaying the null-hypotheses is of great help or value
+*Modify display of results to allow multiple null hypotheses -> Not sure if displaying the null hypotheses is of great help or value
 
 if wordcount("`nulllo'")>1{
 	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values with an individual null-hypothesis for each `case' "') rowtitle(Variables) `matlistopt'
@@ -438,7 +436,6 @@ while "`interval'"!=""{
 	local ub_full `ub_full' `ub'
 	
 }
-
 
 return local lb `lb_full'
 return local ub `ub_full'
@@ -514,12 +511,10 @@ program define ParseCoef, rclass
 			capture mat `coef_mat' = (nullmat(`coef_mat'), `matrix'[1...,"`: word `i' of `coefficient''"])
 			if _rc{
 				stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
-			}
-			
+			}			
 			if "`constant'"=="noconstant" & wordcount("`eqspec'")>0 { // removing constant makes only sense for case 2
 				mat `coef_mat' = `coef_mat'[1...,`=colnumb(`coef_mat',"_cons")-1']
 			}
-		
 			
 		}
 	}
@@ -531,21 +526,20 @@ program define ParseCoef, rclass
 					stop "Coefficient `:word `i' of `coefficient'' not found or incorrectly written."
 				}
 			}
-		}
-	
+		}	
 	}
 	
 	return mat coef_mat=`coef_mat'
-	return local case = cond(`=wordcount("`eqcoefspec'")>0',"coefficient",cond(`=wordcount("`eqspec'")>0',"equation","variable")) // Return case for later processing in title in case of multiple null-hypotheses
+	return local case = cond(`=wordcount("`eqcoefspec'")>0',"coefficient",cond(`=wordcount("`eqspec'")>0',"equation","variable")) // Return case for later processing in title in case of multiple null hypotheses
 	
 end
 
-*Match coefficients and null-hypotheses in case of multiple null-hypotheses
+*Match coefficients and null hypotheses in case of multiple null hypotheses
 program define ParseNull, rclass
 	syntax [name(name=matrix)], coefficient(string asis)  nulllo(string) nullhi(string) [coeforig(string asis)] 
 	*Maybe use the input matrix get more information instead of the coefficient-option?
-	*Count number of coefficients and compare with number of null-hypotheses
-	*If number of null-hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
+	*Count number of coefficients and compare with number of null hypotheses
+	*If number of null hypotheses is not a multiple of number of coefficients, then coefficients were dropped 
 	local coefn = wordcount(`"`coefficient'"')
 	local coeforign = wordcount("`coeforig'")
 	local nulln = wordcount("`nulllo'")	
@@ -556,7 +550,7 @@ program define ParseNull, rclass
 		exit
 	}
 	else if `coefn'!=`nulln'{ //Assuming case 2 or omitted coefficients or case 1 with multiple equations		
-		foreach coef of local coefficient{ //There should be a more efficient solution than looping over two lists, but it should work for now to match coefficients with null-hypotheses -> maybe use ":list uniq `="
+		foreach coef of local coefficient{ //There should be a more efficient solution than looping over two lists, but it should work for now to match coefficients with null hypotheses -> maybe use ":list uniq `="
 			forvalues i=1/`coeforign'{
 				if ustrregexm("`coef'","`=word("`coeforig'",`i')'"){
 					local nulllofull `nulllofull' `=word("`nulllo'",`i')'
