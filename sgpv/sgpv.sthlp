@@ -120,7 +120,7 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
 {title:Subcommands}
     It is possible to call the other commands of the sgpv-package with the {cmd:sgpv}-command. 
     This is mostly a convenience feature so that the help-files for the individual commands should be consulted for the options of these commands.
-    Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
+    Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk:risk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
     Two examples how to use the subcommands are given {help sgpv##subcmds_example:here}.
 
 {marker options}{...}
@@ -166,6 +166,7 @@ You can also select only an equation by using "eq:" or select a specific equatio
 {opt nulllo(lower_bound(s))}  change the lower bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). 
 Missing values, strings and variable names are not allowed. 
+{help exp:Expressions}/formulas are also allowed as input.
 More than one null-hypothesis is also supported. Each lower bound must be separated with a space. 
 The number of lower bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
@@ -174,7 +175,8 @@ See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstra
 
 {phang}
 {opt nullhi(upper_bound(s))}  change the upper bound of the null-hypothesis interval. 
-The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed. 
+The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed.
+{help exp:Expressions}/formulas are also allowed as input. 
 More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
 The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 

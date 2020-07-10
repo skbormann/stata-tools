@@ -63,7 +63,7 @@ If {it:"TruncNormal"} is used for {it:"nullweights"}, then the distribution used
 and standard deviation equal to {it:"stderr"}, truncated to the support of {it:"nullspace"}. 
 If {it:"TruncNormal"} is used for {it:"altweights"}, then the distribution used is a truncated Normal distribution with mean equal to the midpoint of {it:"altspace"}, 
 and standard deviation equal to {it:"stderr"}, truncated to the support of {it:"altspace"}. 
-Further customization of these parameters for the truncated Normal distribution are currently not possible, 
+Further customization of these parameters for the truncated Normal distribution are not possible, 
 although they may be implemented in future versions.{p_end}
 
 {marker options}{...}
@@ -94,7 +94,7 @@ If "nullweights" is set to "Uniform" or "TruncNormal", then "nullspace" are two 
 These numbers can be also formulas which must enclosed in " ".
 
 {phang}
-{opt nullw:eights(string)}     probability distribution for the null parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
+{opt nullw:eights(string)}     probability distribution for the null parameter space. Options are  "Point", "Uniform", and "TruncNormal".
 
 {phang}
 {opt alts:pace(string asis)}  support for the alternative probability distribution. 
@@ -103,7 +103,7 @@ If "altweights" is set to "Uniform" or "TruncNormal", then "altspace" contains t
 These numbers can be also formulas which must enclosed in " ".
 
 {phang}
-{opt altw:eights(string)}     probability distribution for the alternative parameter space. Options are currently "Point", "Uniform", and "TruncNormal".
+{opt altw:eights(string)}     probability distribution for the alternative parameter space. Options are  "Point", "Uniform", and "TruncNormal".
 
 {phang}
 {opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 

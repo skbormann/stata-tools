@@ -67,8 +67,9 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpower
-* Version 1.01  14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
-* Version 1.00 : Initial SSC release, no changes compared to the last Github version.
+* Version 1.02 10.07.2020 : Fixed a missing bonus statistic ('at 0') in the help-file and the code.
+* Version 1.01 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
+* Version 1.00  : Initial SSC release, no changes compared to the last Github version.
 * Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 * Version 0.91a	: Fixed some issues in the documentation.
 * Version 0.91 	: Removed dependency on user-provided integrate-command. 

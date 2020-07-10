@@ -1,5 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
 							fixed errors in the perm-option of the "sgpv menu"-subcommand; ///
@@ -27,6 +28,10 @@
 *Version 0.90 : Initial Github release
 
 /*
+To-Do for next update (Version 1.1a?) to be released after the submission to Stata Journal:
+	- Mention in help file the possibility to use formulas/expressions for options nulllo and nullhi. -> Add corresponding examples
+	- Add another input check to prevent the usage of variables for options  nulllo and nullhi. -> Most likely using variables leads to non-desired output -> unless somebody saves their null bounds in variables. 
+
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:)
 	Internal changes (Mostly re-organising the code for shorter and easier maintained code):
 	- Change the code which handles the inputmatrix to make use of the newly added ability of sgpvalue to use matrices as inputs -> should allow with larger than c(matsize) matrices -> requires modification of all code/commands which create new matrices like the various parsing commands for coefficients, p-values, etc.
@@ -56,7 +61,7 @@ version 12.0
 capture  _on_colon_parse `0'
 
 *Check if anything to calculate is given
-if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist("`: word 1 of `0''","value","power","fdrisk","plot", "menu" ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist("`: word 1 of `0''","value","power","risk","plot", "menu" ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
 	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
 	disp as error "No subcommand found either."
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
@@ -75,7 +80,7 @@ if !_rc{
 * Potential subcommands: value, power, fdrisk, plot, menu
 local old_0 `0'
 gettoken subcmd 0:0, parse(" ,:")
-if inlist("`subcmd'","value","power","fdrisk","plot", "menu" ){ // Change the code to allow shorter subcommand names? Look at the code for estpost.ado for one way how to do it
+if inlist("`subcmd'","value","power","risk","plot", "menu" ){ // Change the code to allow shorter subcommand names? Look at the code for estpost.ado for one way how to do it
 	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
 
 	if ("`subcmd'"=="value"){
@@ -87,6 +92,9 @@ if inlist("`subcmd'","value","power","fdrisk","plot", "menu" ){ // Change the co
 	if ("`subcmd'"=="plot"){
 		local subcmd `subcmd'sgpv
 	} 
+	if ("`subcmd'"=="risk"){
+		local subcmd fdrisk
+	}
 	`subcmd' `0'
 	exit	
 	
@@ -385,7 +393,7 @@ if wordcount("`nulllo'")>1{
 
  if wordcount("`nulllo'")==1{
 	local interval_name = cond(`nullhi'==`nulllo',"point","interval")
-	local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","{`nulllo',`nullhi'}")
+	local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","[`nulllo',`nullhi']")
 	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' "') rowtitle(Variables) `matlistopt'
  }
 

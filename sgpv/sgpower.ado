@@ -1,8 +1,9 @@
 *!Power function calculations for Second Generation P-Values
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for sgpower.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.01  14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
-*Version 1.00  : Initial SSC release, no changes compared to the last Github version.
+*!Version 1.02 10.07.2020 : Fixed a missing bonus statistic ('at 0') in the help-file and the code
+*!Version 1.01 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
+*Version 1.00   : Initial SSC release, no changes compared to the last Github version.
 *Version 0.92	: Fixed some issues in the documentation, changed the renamed the returned results to be the same as in the original R-code.
 *Version 0.91 	: Removed dependency on user-provided integrate-command. 
 *Version 0.90 	: Initial Github Release
@@ -84,10 +85,10 @@ if "`bonus'"!=""{
   local avgI = 1/(`nullhi'-`nulllo')*`intres'
   local pow00 = normal(`nulllo'/`stderr' - 0/`stderr' -`z') + normal(-`nullhi'/`stderr' + 0/`stderr' - `z')
   disp "type I error summaries"
-  if `nulllo>0' & `nullhi'>0{
+  if !(`nulllo'<=0 & 0<=`nullhi'){
   disp "Min: " round(`minI',0.000001) _skip(10) "Max: " round(`maxI',0.000001) _skip(10) "Mean :" round(`avgI',0.000001)
   }
-  else if `nulllo'<=0 & `nullhi'<=0 {
+  else if (`nulllo'<=0 & 0<=`nullhi'){
 	  disp "at 0: " round(`pow00',0.000001) _skip(10) "Min: " round(`minI',0.000001) _skip(10) "Max: " round(`maxI',0.000001) _skip(10) "Mean :" round(`avgI',0.000001)
 
   }
@@ -97,6 +98,7 @@ return scalar poweralt = `power0'
 return scalar powernull = `power1'
 return scalar powerinc = `powerinc'
 if "`bonus'"!=""{
+return scalar pow0 = `pow00'
 return scalar minI = `minI'
 return scalar maxI = `maxI'
 return scalar avgI = `avgI'

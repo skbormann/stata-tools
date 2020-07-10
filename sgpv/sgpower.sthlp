@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.00  19 Mar 2020}{...}
+{* *! version 1.02  10 Jul 2020}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -128,8 +128,10 @@ Plot the power curve examples (view the {view sgpower-plot-example.do:code} if i
 The next three scalars are only returned if the bonus-option was used.
 {synopt:{cmd:r(minI)}}  is the minimum type I error over the range ({cmd:nulllo}, {cmd:nullhi}), which occurs at the midpoint of ({cmd:nulllo}, {cmd:nullhi}). {p_end}
 {synopt:{cmd:r(maxI)}}  is the maximum type I error over the range ({cmd:nulllo}, {cmd:nullhi}), which occurs at the boundaries of the null hypothesis, {cmd:nulllo} and {cmd:nullhi}.  {p_end}
-{synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:nulllo}, {cmd:nullhi}). 
-If 0 is included in the null hypothesis region, then "type I error summaries" also contains at 0, the type I error is calculated assuming the true parameter value θ is equal to 0. {p_end}
+{synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:nulllo}, {cmd:nullhi}). {p_end}
+
+If 0 is included in the null hypothesis region, then "type I error summaries" also contains "at 0":
+{synopt:{cmd:r(pow0)}}  is the type I error assuming the true parameter value θ is equal to 0. {p_end}
 
 
 {title:References}

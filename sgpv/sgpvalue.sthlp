@@ -210,7 +210,7 @@ The following examples are based on the original documentation for the R-code, b
 
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Matrices}{p_end}
-{synopt:{cmd:r(results)}}  matrix with the resulting the SGPVs and delta-gaps. {p_end}
+{synopt:{cmd:r(results)}}  matrix with the resulting the SGPVs in the first column and delta-gaps in the second column. {p_end}
 
 {marker formulas}{...}
 {title:Remarks & Formulas}
