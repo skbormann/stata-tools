@@ -130,7 +130,7 @@ Stata might become unresponsive when using Mata because it takes time to return 
 {dlgtab:Further options}
 {phang}
 {opt inf:correction(#)}  a small number to denote a positive but infinitesimally small SGPV. Default is 1e-5. SGPVs that are infinitesimally close to 1 are assigned 1-infcorrection. 
-This option can only be invoked when one of the intervals has infinite length.{p_end}
+This option has an effect only if one of the intervals has infinite length.{p_end}
 
 {marker examples}{...}
 {title:Examples}

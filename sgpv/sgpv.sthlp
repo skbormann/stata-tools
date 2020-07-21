@@ -138,7 +138,7 @@ This works only if no other commands did run after {cmd:sgpv}.
 {phang} ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
 
 {phang}
-{opt e:stimate(name)}     takes the name of a previously stored estimation.
+{opt e:stimate(name)} takes the name of a previously stored estimation.
 
 {phang}
 {marker matrix_opt}
