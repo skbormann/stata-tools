@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1  28 May 2020}{...}
+{* *! version 1.1b  14 October 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -69,7 +69,7 @@
 {p_end}
 
 {syntab:menu}
-{synopt:{opt perm:ament}} install permanently the dialog boxes into the User menubar.
+{synopt:{opt perm:anent}} install permanently the dialog boxes into the User menubar.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -110,7 +110,7 @@ An example of how to interpret the result from {cmd:sgpv} can be found in the {h
 The formulas for the Second-Generation P-Values can be found {help sgpv##formulas:here}.{p_end}
 
 
-    The sgpv-package consists of: sgpv       - a wrapper around the other commands, {help sgpvalue} and {help fdrisk}, to be used after estimations commands
+    The sgpv-package consists of: sgpv       - the main command to calculate SGPVs, {help sgpvalue} and {help fdrisk}, to be used after estimations commands
     				  {help sgpvalue}   - calculate the SGPVs.
     				  {help sgpower}    - power functions for the SGPVs.
     				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs.
@@ -132,8 +132,8 @@ The replay-option is only available in the {dialog sgpv:dialog box}.
 {cmd:sgpv} behaves like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
 Currently, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. 
 Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
-To see the results from a previous run of {cmd:sgpv} without recalculation, you can run something like {stata matlist r(comparison)}.
-This works only if no other commands did run after {cmd:sgpv}.
+To see the results from a previous run of {cmd:sgpv} without recalculation with the command {stata matlist r(comparison)} 
+if no other commands were run after {cmd:sgpv}.
 
 {phang} ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
 
@@ -204,7 +204,9 @@ This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but
 Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
 {phang}
-{opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. You should disable these warning messages only when you are certain that using the default point 0 null-hypothesis is what you want to use and understand the consequences of doing so.
+{opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. 
+You should disable these warning messages only if using the default point 0 null-hypothesis is 
+what you want to do and you understand the consequences of doing so.
 
 {dlgtab:Fdrisk}
 {pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end}
@@ -241,7 +243,7 @@ The default value assumes that both hypotheses are equally likely.
 
 {dlgtab:menu}
 {phang}
-{opt perm:ament} install permanently the dialog boxes into the User menubar. 
+{opt perm:anent} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
 If no profile.do exists or can be found then a new profile.do is created in the current directory. 
 Currently, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
@@ -416,7 +418,7 @@ An example about how to interpret the results is given in the {help sgpv##interp
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
 {col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
-	{col 10}				    = 1/2*|I ∩ H_0|/|I| 	when |I|> 2|H_0| 
+	{col 10}				    = 1/2*|I ∩ H_0|/|H_0| 	when |I|> 2|H_0| 
 		{col 10}		      with I = {θ_l,θ_u} and |I|= θ_u - θ_l.  
 								 
 {pstd}								 

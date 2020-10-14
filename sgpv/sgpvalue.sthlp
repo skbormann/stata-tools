@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.04  01 Jul 2020}{...}
+{* *! version 1.04  22 Jul 2020}{...}
 {viewerdialog sgpvalue "dialog sgpvalue"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
@@ -194,7 +194,7 @@ The following examples are based on the original documentation for the R-code, b
 		. noisily sgpvalue, estlo(`cior1') esthi(`cior2') nulllo(`=log(1/1.5)') nullhi(`=log(1.5)')
 		. restore 
 	 		
-	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}{p_end}	
+	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}	
 		{stata . sysuse auto, clear}
 		{stata . regress price mpg foreign weight}
 		{stata . mat table = r(table)}  //Copies the regression results into a new matrix for the next calculations
@@ -220,7 +220,7 @@ If {it:"nullhi"} is not of length 1, its length must match that of {it:"esthi"}.
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
 {col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 
-	{col 10}				    = 1/2*|I ∩ H_0|/|I| 	when |I|> 2|H_0| 
+	{col 10}				    = 1/2*|I ∩ H_0|/|H_0| 	when |I|> 2|H_0| 
 		{col 10}			  with I = {θ_l,θ_u} and |I|= θ_u - θ_l.  
 								 
 {pstd}								 

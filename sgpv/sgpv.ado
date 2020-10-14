@@ -1,5 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permanent (spelling mistake) as reported by reviewer for the SJ article 
 *!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -34,12 +35,15 @@ To-Do for next update (Version 1.1a?) to be released after the submission to Sta
 
 To-Do(Things that I wish to implement at some point or that I think that might be interesting to have:)
 	Internal changes (Mostly re-organising the code for shorter and easier maintained code):
+	- Add more paths to search the profile.do file.
+	- Add code which removes the requirement of having the r(table) matrix existing after an estimation command -> Using only e(b) and e(V) requires a lot more manual calculations of the p-value and lower and upper bounds.
 	- Change the code which handles the inputmatrix to make use of the newly added ability of sgpvalue to use matrices as inputs -> should allow with larger than c(matsize) matrices -> requires modification of all code/commands which create new matrices like the various parsing commands for coefficients, p-values, etc.
 	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
 	- Write a certification script which checks all possible errors (help cscript)
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
 	
 	External changes (Mostly more features):
+	- Add a clear option for the menu subcommand to allow an uninstall of the menubar entries.
 	- Allow a mixture of case 1 & 2 for the coefficient-option -> select only some equations and variables from a multi-equation estimation -> ex. coef(((q10: q50: q90:) (mpg weight foreign)) which will then be expanded to coef(q10:mpg q10:weight ... q90:weight q90:foreign) -> requires changes in how this option is parsed
 	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0" -> not sure which way to input intervals works best
 	- Add an option to not display the individual null-hypothesis if multiple null hypotheses are set.
@@ -618,8 +622,15 @@ end
 
 *Make the dialog boxes accessible from the User-menu
 program define menu
- syntax [, PERMament] 
- if "`permament'"=="permament"{
+ syntax [, PERManent clear] 
+ *Error checking
+ if "`permanent'"=="permanent" & "`clear'"=="clear"{
+		stop `"Only one option 'permanent' or 'clear' can be set at the same time."'
+		
+	}
+ 
+ *Permanent option
+ if "`permanent'"=="permanent"{
 		capture findfile profile.do, path(STATA;.)
 		if _rc{
 			local replace replace
@@ -646,8 +657,35 @@ program define menu
 	 file write `fh' `" window menu refresh "' _n
 	 file close `fh'
 
+ }
+ 
+ *Clear option -> Read in the profile.do and write all entries which were not written by the permanent-option
+ if "`clear'"=="clear"{
+		capture findfile profile.do, path(STATA;.)
+		if _rc==601{
+			disp as error "profile.do not found. Menu entries cannot be deleted."
+			exit 198
+		}
+	if !_rc{
+			local replace replace
+			local profile `"`r(fn)'"'
+			disp "Deleting menu entries created by permanent-option from your profile.do"
+			tempname fh
+			file open `fh' using `"`profile'"' , read write text `replace'
+			file read `fh' line
+			while r(eof)!=0{
+				if "`line'"==`" window menu append submenu "stUserStatistics"  "SGPV" "'{
+				
+				}
+				
+				file read `fh' line
+			}
+			file close `fh'
+	}
  
  }
+ 
+ *Menu adding for one Stata session
 	window menu clear // Assuming that no one else installs dialog boxes into the menubar. If this assumption is wrong then the code will be changed.
 	window menu append submenu "stUserStatistics"  "SGPV"
 	window menu append item "SGPV" "SGPV (Main command) (&sgpv)" "db sgpv" 
