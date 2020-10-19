@@ -1,6 +1,6 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permanent (spelling mistake) as reported by reviewer for the SJ article 
+*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permdialog  as suggested by reviewer for the SJ article to clarify the meaning of the option.
 *!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -622,15 +622,15 @@ end
 
 *Make the dialog boxes accessible from the User-menu
 program define menu
- syntax [, PERManent clear] 
+ syntax [, PERMdialog clear] 
  *Error checking
- if "`permanent'"=="permanent" & "`clear'"=="clear"{
+ if "`permdialog'"=="permdialog" & "`clear'"=="clear"{
 		stop `"Only one option 'permanent' or 'clear' can be set at the same time."'
 		
 	}
  
  *Permanent option
- if "`permanent'"=="permanent"{
+ if "`permdialog'"=="permdialog"{
 		capture findfile profile.do, path(STATA;.)
 		if _rc{
 			local replace replace
@@ -669,7 +669,7 @@ program define menu
 	if !_rc{
 			local replace replace
 			local profile `"`r(fn)'"'
-			disp "Deleting menu entries created by permanent-option from your profile.do"
+			disp "Deleting menu entries created by permdialog-option from your profile.do"
 			tempname fh
 			file open `fh' using `"`profile'"' , read write text `replace'
 			file read `fh' line

@@ -69,7 +69,7 @@
 {p_end}
 
 {syntab:menu}
-{synopt:{opt perm:anent}} install permanently the dialog boxes into the User menubar.
+{synopt:{opt perm:dialog}} install permanently the dialog boxes into the User menubar.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -243,7 +243,7 @@ The default value assumes that both hypotheses are equally likely.
 
 {dlgtab:menu}
 {phang}
-{opt perm:anent} install permanently the dialog boxes into the User menubar. 
+{opt perm:dialog} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
 If no profile.do exists or can be found then a new profile.do is created in the current directory. 
 Currently, a {cmd:profile.do} will be only be found in the current directory and in the Stata installation base folder.
@@ -267,8 +267,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
     	{help sgpv##subcmds_example:Using subcommands} 
 				
 {* dlgtab:Basic Usage}
+  {marker prefix}
   {title:Usage of {cmd:sgpv} as a prefix-command:}
-{marker prefix}
   {stata . sysuse auto, clear}
   {stata ". sgpv, bonus(all): regress price mpg weight foreign"} 
   
@@ -302,8 +302,9 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
            _cons |     .0874         .5          .          . 
 
    
-  {title:Interpretation example:}
   {marker interpretation_example}  
+  {title:Interpretation example:}
+  
   There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
   Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
   This is the standard null-hypothesis of no effect.	
@@ -317,15 +318,15 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   I cannot guarantee that my understanding is correct.
   These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
   
-  {title:Exporting results}
   {marker exporting_results}
+  {title:Exporting results}
   You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.
   {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier
   {stata . estout e(comparison)} //display the results
   {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document
   
-  {title:Using stored estimations}
   {marker stored_estimations} 
+  {title:Using stored estimations}
   Save estimation for later usage 
 	{stata . estimate store pricereg} 
 
@@ -340,8 +341,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
 	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
   
-  {title:Setting a different null-hypothesis}
   {marker alternative_null-hypothesis}
+  {title:Setting a different null-hypothesis}
   Set an alternative null-hypothesis -> 1% of the mean value of the price variable (-62, 62) 
   and remove the constant from the calculations  
 	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly noconstant: regress price mpg weight foreign"}
@@ -358,8 +359,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
     The example illustrates the need to set a scientifically reasonable null-hypothesis. 
     For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
-  {title:Setting an individual null hypotheses for each coefficient}
   {marker multiple-null-hypotheses-example}
+  {title:Setting an individual null hypotheses for each coefficient}
   To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.
 	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}
@@ -367,8 +368,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   The same null hypotheses but this time one null-hypothesis for each selected equation or quantile
 	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}
 	
-  {title:Selecting coefficients}	
   {marker multiple-equations-example}
+  {title:Selecting coefficients}	
   Calculate sgpvs for a multiple equation estimation command and select coefficients
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
 	Select only the foreign coefficient for sgpv calculation
@@ -379,8 +380,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	  {stata ". sgpv, coefficient(q50:foreign)"} 
 
 
-  {title:Calculating SGPVs for a large dataset of estimation or t-test results}
   {marker leukemia-example}
+  {title:Calculating SGPVs for a large dataset of estimation or t-test results}
   The example leukemia dataset can be used to show how the SGPVs can be calculated for a large dataset which contains the information usually returned in the {cmd:{it:r(table)}} matrix.
   The leukemia dataset contains from 7218 gene specific t-tests for a difference in mean expression.
   More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
@@ -393,8 +394,8 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
   Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
   You can run {stata display c(matsize)} to see your current setting.
 
-  {title:Subcommands examples} 
   {marker subcmds_example}
+  {title:Subcommands examples} 
   The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
 	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
 	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
@@ -404,10 +405,11 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 	{stata . sgpv menu, perm}  
 
 {title:Stored results}
-Besides its own calculations, {cmd:sgpv} also preserves the returned results from the estimation command including everything returned in r().
+{cmd:sgpv} stores the following in r();
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Matrices}{p_end}
 {synopt:{cmd:r(comparison)}}  a matrix containing the displayed results {p_end}
+{synopt:{cmd:r(table)}}	coefficient statistics{p_end}
 
 {marker formulas}{...}
 {title:Formulas & Interpretation}

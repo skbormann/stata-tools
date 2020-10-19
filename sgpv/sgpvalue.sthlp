@@ -125,7 +125,7 @@ If you don't want to create new variables and time is not an issue then don't se
 Stata might become unresponsive when using Mata because it takes time to return a large matrix.
 
 {phang}
-{opt replace} replace    replace existing variables in case the nomata-option was used.
+{opt replace}  replace existing variables in case the nomata-option was used.
 
 {dlgtab:Further options}
 {phang}
@@ -141,14 +141,13 @@ The following examples are based on the original documentation for the R-code, b
  {bf:Simple example for three estimated log odds ratios but the same null interval} (To run this example copy the following lines into Stata and hit return.){p_end}
 		 . local lb log(1.05) log(1.3) log(0.97)	
 		 . local ub log(1.8) log(1.8) log(1.02)	
-		 . sgpvalue, estlo(`lb') esthi(`ub') nulllo(log(1/1.1)) nullhi(log(1.1))		 
+		{stata . sgpvalue, estlo(log(1.05) log(1.3) log(0.97)) esthi(log(1.8) log(1.8) log(1.02)) nulllo(log(1/1.1)) nullhi(log(1.1))}		 
 	{pstd}{bf:One sided intervals/infinite interval bounds:}{p_end}
 		{stata . sgpvalue, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
 		{stata . sgpvalue, estlo(`=log(1.05)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
 	
 	 {bf:Example t-test with simulated data:}  (To run this example copy the following lines into Stata and hit return.)
-		. preserve
-		. clear
+
 		. set seed 1776
 		. qui set obs 15
 		. qui gen x1 = rnormal(0,2) 
@@ -157,10 +156,7 @@ The following examples are based on the original documentation for the R-code, b
 		. local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975)
 		. local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975)
 		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1) 
-		. restore
 
-		. preserve
-		. clear
 		. set seed 2019
 		. qui set obs 15
 		. qui gen x1 = rnormal(0,2) 
@@ -169,11 +165,8 @@ The following examples are based on the original documentation for the R-code, b
 		. local ci1 = (`r(mu_1)'-`r(mu_2)')- `r(se)'*invt(`=_N-2',0.975) 
 		. local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975)
 		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1)
-		. restore
 	 
 	 {bf:Simulated two-group dichotomous data for different parameters:}
-		. preserve
-		. clear
 		. set seed 1492 
 		. local n 30
 		. local x1 = rbinomial(30,0.15)
@@ -182,7 +175,7 @@ The following examples are based on the original documentation for the R-code, b
 		. qui prtesti 30 `x1' 30 `x2',count
 		. local ci1 = (`r(P_1)'-`r(P_2)') - 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
 		. local ci2 = (`r(P_1)'-`r(P_2)') + 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
-		. noisily sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-0.2) nullhi(0.2)
+		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-0.2) nullhi(0.2)
 
 		On the log odds ratio scale
 		. local a `x1'
@@ -191,8 +184,7 @@ The following examples are based on the original documentation for the R-code, b
 		. local d = 30-`x2'
 		. local cior1 = log(`a'*`d'/(`b'*`c')) - 1.96*sqrt(1/`a'+1/`b'+1/`c'+1/`d') // Delta-method SE for log odds ratio
 		. local cior2 = log(`a'*`d'/(`b'*`c')) + 1.96*sqrt(1/`a'+1/`b'+1/`c'+1/`d') // Delta-method SE for log odds ratio
-		. noisily sgpvalue, estlo(`cior1') esthi(`cior2') nulllo(`=log(1/1.5)') nullhi(`=log(1.5)')
-		. restore 
+		. sgpvalue, estlo(`cior1') esthi(`cior2') nulllo(`=log(1/1.5)') nullhi(`=log(1.5)') 
 	 		
 	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}	
 		{stata . sysuse auto, clear}
