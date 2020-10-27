@@ -19,7 +19,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpvalue}
-{cmd:,} estlo(string) esthi(string) nulllo(string) nullhi(string)
+{cmd:,} {opt estlo(string)} {opt esthi(string)} {opt nulllo(string)} {opt nullhi(string)}
 [{it:options}]
 
 {synoptset 20 tabbed}{...}
@@ -143,8 +143,8 @@ The following examples are based on the original documentation for the R-code, b
 		 . local ub log(1.8) log(1.8) log(1.02)	
 		{stata . sgpvalue, estlo(log(1.05) log(1.3) log(0.97)) esthi(log(1.8) log(1.8) log(1.02)) nulllo(log(1/1.1)) nullhi(log(1.1))}		 
 	{pstd}{bf:One sided intervals/infinite interval bounds:}{p_end}
-		{stata . sgpvalue, estlo(`=log(1.3)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
-		{stata . sgpvalue, estlo(`=log(1.05)') esthi(.) nulllo(.) nullhi(`=log(1.1)')}
+		{stata . sgpvalue, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1))}
+		{stata . sgpvalue, estlo(log(1.05)) esthi(.) nulllo(.) nullhi(log(1.1))}
 	
 	 {bf:Example t-test with simulated data:}  (To run this example copy the following lines into Stata and hit return.)
 
@@ -173,20 +173,15 @@ The following examples are based on the original documentation for the R-code, b
 		. local x2 = rbinomial(30,0.5)
 		. * On the difference in proportions
 		. qui prtesti 30 `x1' 30 `x2',count
-		. local ci1 = (`r(P_1)'-`r(P_2)') - 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
-		. local ci2 = (`r(P_1)'-`r(P_2)') + 1.96*sqrt((`r(P_1)'*(1-`r(P_1)')/`n')+(`r(P_2)'*(1-`r(P_2)')/`n'))
-		. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-0.2) nullhi(0.2)
+		. local d = 1.96*sqrt((`r(P_1)'*(1-`r(P_1)') + `r(P_2)'*(1-`r(P_2)'))/30)
+		. sgpvalue, estlo(`m'-`d') esthi(`m'+`d') nulllo(-0.2) nullhi(0.2)
 
 		On the log odds ratio scale
-		. local a `x1'
-		. local b `x2'
-		. local c = 30-`x1'
-		. local d = 30-`x2'
-		. local cior1 = log(`a'*`d'/(`b'*`c')) - 1.96*sqrt(1/`a'+1/`b'+1/`c'+1/`d') // Delta-method SE for log odds ratio
-		. local cior2 = log(`a'*`d'/(`b'*`c')) + 1.96*sqrt(1/`a'+1/`b'+1/`c'+1/`d') // Delta-method SE for log odds ratio
-		. sgpvalue, estlo(`cior1') esthi(`cior2') nulllo(`=log(1/1.5)') nullhi(`=log(1.5)') 
+		. local m = log(`x1'*(30-`x2')/(`x2'*(30-`x1')))
+		. local d = 1.96*sqrt(1/`x1'+1/`x2'+1/(30-`x1')+1/(30-`x2'))
+		. sgpvalue, estlo(`m'-`d') esthi(`m'+`d') nulllo(log(1/1.5)) nullhi(log(1.5))
 	 		
-	{bf: A simple more Stata-like example with a point null hypothesis (not based on the R-code)}	
+	{bf: A simple more Stata-like example with a point null hypothesis}	
 		{stata . sysuse auto, clear}
 		{stata . regress price mpg foreign weight}
 		{stata . mat table = r(table)}  //Copies the regression results into a new matrix for the next calculations
@@ -207,8 +202,8 @@ The following examples are based on the original documentation for the R-code, b
 {marker formulas}{...}
 {title:Remarks & Formulas}
 {pstd}
-When {it:"nullhi"} and {it:"nulllo"} are of length 1, the same null interval is used for every interval estimate of [{it:"estlo"}, {it:"esthi"}]. 
-If {it:"nullhi"} is not of length 1, its length must match that of {it:"esthi"}.{p_end}
+When the options {it:"nullhi"} and {it:"nulllo"} have only one value, the same null interval is used for every interval estimate of [{it:"estlo"}, {it:"esthi"}]. 
+If the options {it:"nullhi"} and {it:"nulllo"} have more than one value, then options {it:"esthi"} and {it:"estlo"} must have the same number of values.{p_end}
 
  {col 10} The SGPV is defined as : 	p_δ  = |I ∩ H_0|/|I|*max{|I|/(2|H_0|), 1} 
 {col 10}				    = |I ∩ H_0|/|I| 		when |I|<=2|H_0| 

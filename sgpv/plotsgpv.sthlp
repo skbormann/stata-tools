@@ -21,16 +21,16 @@
 {cmdab:plotsgpv}
 [{help if}]
 [{help in}]
-{cmd:,} estlo(string) esthi(string) nulllo(string) nullhi(string)
+{cmd:,} {opt estlo(string)} {opt esthi(string)} {opt nulllo(string)} {opt nullhi(string)}
 [{it:options}]
 
 {synoptset 25 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{synopt:{opt estlo(string)}}  lower bound of interval estimate. Values may be finite or infinite.
+{synopt:{opt estlo(string)}}  lower bound of interval estimate. 
 {p_end}
-{synopt:{opt esthi(string)}}  upper bound of interval estimate. Values may be finite or infinite.
+{synopt:{opt esthi(string)}}  upper bound of interval estimate. 
 {p_end}
 {synopt:{opt nulllo(string)}}  lower bound of null interval.
 {p_end}
@@ -62,14 +62,14 @@
 {p_end}
 {synopt:{opt noleg:end}}  deactivate plotting the legend.
 {p_end}
-{synopt:{opt noout:linezone}}  deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.
+{synopt:{opt noout:linezone}}  deactivate drawing a slim white outline around the null zone. 
 {p_end}
 {synopt:{opt seto:rder(string)}} a variable giving the desired order along the x-axis. 
 {p_end}
-{synopt:{opt x:show(#)}}  a number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.
+{synopt:{opt x:show(#)}}  a number representing the maximum ranking on the x-axis that is displayed. 
 {p_end}
 {synopt:{opt nullpt(#)}} a number representing a point null hypothesis. {p_end}
-{synopt:{opt nomata}}  do not use Mata for calculating the SGPVs if esthi() and estlo() are variables as inputs or if {cmd:c(matsize)} is smaller than the size of these options.
+{synopt:{opt nomata}}  do not use Mata for calculating the SGPVs. 
 {p_end}
 {synopt:{opt replace}}  replace existing variables in case the nomata-option was used.
 {p_end}
@@ -95,7 +95,7 @@ The command works best if a dataset is used which contains the estimation or tes
 Typically the lower bound of a confidence interval can be used. A variable or matrix containing the lower bound can be also used, but then a variable/matrix containing the upper bounds must be also used for option {it:esthi}.
 
 {phang}
-{opt esthi(name)}  upper bound of interval estimate. Values may be finite 
+{opt esthi(name)}  upper bound of interval estimate.
  Typically the upper bound of a confidence interval can be used. A variable or matrix containing the upper bound can be also used but then a variable/matrix containing the lower bounds must be also used for option {it:estlo}.
 
 {phang}
@@ -150,7 +150,7 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 {opt noplotx:_axis}    deactive showing the x-axis.
 
 {phang}
-{opt noout:linezone}     deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.
+{opt noout:linezone}    deactivate drawing a slim white outline around the null zone. Helpful visual aid when plotting many intervals. Default is on.
 
 {phang}
 {opt noleg:end}     deactivate plotting the legend.
@@ -188,10 +188,11 @@ Options set here may override the values set in other options before.
 Run following the lines with the help of {stata do plotsgpv-leukemia-example.do}
 
 	. sysuse leukstats ,clear 
-	. plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) setorder(p_value) xshow(7000) title("Leukemia Example") ///
-		xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") nullpt(0) nomata replace   ///
-		twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" `=log10(1/2)' "1/2" `=log10(2)' ///
-		"2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000")) 
+	. plotsgpv, esthi(ci_hi) estlo(ci_lo) nulllo(-0.3) nullhi(0.3) ///
+			title("Leukemia Example") xtitle("Classical p-value ranking") ytitle("Fold Change (base 10)") ///
+			setorder(p_value) xshow(7000) nullpt(0) nomata replace ///
+			twoway_opt(ylabel(`=log10(1/1000)' "1/1000" `=log10(1/100)' "1/100" `=log10(1/10)' "1/10" ///
+			`=log10(1/2)' "1/2" `=log10(2)' "2" `=log10(10)' "10" `=log10(100)' "100" `=log10(1000)'  "1000")) 
 	
 	The last option in twoway_opt(...) changes the labeling of the y-axis (See {help axis_label_options} for more information).
 	

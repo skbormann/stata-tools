@@ -622,10 +622,10 @@ end
 
 *Make the dialog boxes accessible from the User-menu
 program define menu
- syntax [, PERMdialog clear] 
+ syntax [, PERMdialog remove] 
  *Error checking
- if "`permdialog'"=="permdialog" & "`clear'"=="clear"{
-		stop `"Only one option 'permanent' or 'clear' can be set at the same time."'
+ if "`permdialog'"=="permdialog" & "`remove'"=="remove"{
+		stop `"Only one option 'permanent' or 'remove' can be set at the same time."'
 		
 	}
  
@@ -659,8 +659,8 @@ program define menu
 
  }
  
- *Clear option -> Read in the profile.do and write all entries which were not written by the permanent-option
- if "`clear'"=="clear"{
+ *remove option -> Read in the profile.do and write all entries which were not written by the permdialog-option -> not finished yet
+ if "`remove'"=="remove"{
 		capture findfile profile.do, path(STATA;.)
 		if _rc==601{
 			disp as error "profile.do not found. Menu entries cannot be deleted."
@@ -670,19 +670,22 @@ program define menu
 			local replace replace
 			local profile `"`r(fn)'"'
 			disp "Deleting menu entries created by permdialog-option from your profile.do"
-			tempname fh
+			tempname fh fh2 
 			file open `fh' using `"`profile'"' , read write text `replace'
 			file read `fh' line
-			while r(eof)!=0{
+			while r(eof)!=0{ // Skip the lines containing the window commands and write only the others back to a new file, then rename the original file to profile.do.bak and rename the new file as profile.do
 				if "`line'"==`" window menu append submenu "stUserStatistics"  "SGPV" "'{
 				
+				continue
 				}
-				
+				file write 
 				file read `fh' line
 			}
 			file close `fh'
 	}
- 
+	*plattform dependent backup file
+	disp ""
+  exit
  }
  
  *Menu adding for one Stata session
@@ -693,7 +696,6 @@ program define menu
 	window menu append item "SGPV" "SGPV Power Calculations (sg&power)" "db sgpower" 
 	window menu append item "SGPV" "False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" 
 	window menu append item "SGPV" "SGPV Plot Interval Estimates (p&lotsgpv)" "db plotsgpv"
-
 	window menu refresh
 	disp "Menu entries succesfully created.{break} Go to User->Statistics->SGPV to access the dialog boxes for this package."
 	

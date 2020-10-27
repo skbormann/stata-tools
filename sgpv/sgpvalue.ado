@@ -1,5 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
+*!Version 1.05  16.10.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals (not implemented yet, a bug in isValid -> the logic does not work yet with missing values)
 *!Version 1.04  05.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". Noshow-option now works expected. 
 *Version 1.03a 23.06.2020: Removed unnecessary input checks
 *Version 1.03 24.05.2020 : Added further input checks	
@@ -147,22 +148,24 @@ else{	// Run if rows less than matsize -> the "original" approach
 	forvalues i=1/`estint'{
 		*Parse interval -> Not the best names yet
 		local null_lo  `: word `i' of `nulllo''
-			capture local null_lo = `null_lo'
+			/*capture local null_lo = `null_lo'
+			if _rc==111 | _rc==0{ // Could be probably simplified further or moved to isValid
+				stop "`null_lo' in option {cmd:`nulllo'}  is not a number nor . (missing value) nor empty."
+			}*/
 			isValid `null_lo' nulllo
 			isInfinite `null_lo'
 			if (`s(infinite)' == `=c(maxdouble)'){
 			 local null_lo = `=c(mindouble)'
 			} 
-		
 		local null_hi  `: word `i' of `nullhi''
-			capture local null_hi = `null_hi'
+			*capture local null_hi = `null_hi'
 			isValid `null_hi' nullhi
 			isInfinite `null_hi'
 			local null_hi = `s(infinite)'
-		*Only required if no variables as input
+		*Only required if no variables as input -> Is that check needed? If I found variables earlier than I should be already in a different algorithm?
 		if `variablefound'==0{
 		local est_lo  `: word `i' of `estlo''	
-			capture local est_lo = `est_lo'
+			*capture local est_lo = `est_lo'
 			isValid `est_lo' estlo
 			isInfinite `est_lo'
 			if (`s(infinite)' == `=c(maxdouble)'){
@@ -170,12 +173,12 @@ else{	// Run if rows less than matsize -> the "original" approach
 			}
 			
 		local est_hi  `: word `i' of `esthi''
-			capture local `est_hi' =`est_hi'
+			*capture local `est_hi' =`est_hi'
 			isValid `est_hi' esthi
 			isInfinite `est_hi'
 			local est_hi =`s(infinite)'
 		}
-		else{
+		else{ // For which scenario did I include variables in the macro algorithm? In case someone does not want to create variables when using variables as input?
 			local est_lo = `estlo'[`i']
 			local est_hi = `esthi'[`i']
 		}
@@ -367,14 +370,16 @@ program define convertMacro, rclass
 	return matrix `matname' = `macromat'
 end
 
-*Check if the input is valid
-program define isValid
+*Check if the input is valid -> Missing value or number
+program define isValid // Does not deal yet with missing value as symbol for one-sided intervals -> needs a rewrite of the whole input evaluation logic for the macro algorithm
 args valid optname
-if real("`=`valid''")==.{
-	disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
-	exit 198
+
+if `valid'!=.{
+	if real("`=`valid''")==.{
+		disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
+		exit 198
 		}
-		
+}		
 end
 
 *Check if input is infinite
@@ -395,7 +400,7 @@ program define stop
  exit 198
 end
 
-*Use new variables to store and calculate the SGPVs
+*Use new variables to store and calculate the SGPVs -> Do I properly deal with one-sided intervals yet?
 program define sgpv_var, rclass
  syntax ,esthi(varname) estlo(varname) nullhi(string) nulllo(string) [replace nodeltagap infcorrection(real 1e-5)]
  if "`replace'"=="replace"{

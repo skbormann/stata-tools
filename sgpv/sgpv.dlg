@@ -83,7 +83,7 @@ BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
 	RADIO 	r1 				_lft	20		50 		., first label("Replay") onclickon(script replay_on) ///
-													tooltip("Replay the previous estimation command and calculate the SGPVs and bonus statistics for it")
+													tooltip("Replay the previous estimation command and calculate the SGPVs and bonus statistics for it.")
 	RADIO 	r2 				+70		@ 	 	150 	., 	middle label("Stored Estimate") onclickon(script estimate_on) ///
 														tooltip("Calculate SGPVs for a previously stored estimate.")
 	COMBOBOX cb_estimate 	80	 	_ss	 	150		., dropdown content(estimates) option(estimate)
@@ -127,7 +127,7 @@ BEGIN
 	CHECKBOX ck_nonull		120		_lft    200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
 	
 	TEXT tx_matlist 		10 		_ls 	200 	., label("Further results display options")
-	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt)
+	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt) tooltip("Change the format of the displayed matrix. The same options as for the command matlist can be used.")
 	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
 	TEXT tx_bonus 		10 		_ss 	150 	., label("Bonus Statistics:")
@@ -136,7 +136,7 @@ BEGIN
 														onselchangelist(bonus_action) 
 	TEXT     tx_format    	_lft    +35     _iwd    .,   label(resource LBL_FORMAT) 
 	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
-													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the same named option of {cmd:matlist}, but works independently of it. Setting the format option via matlistopt() overrides the setting here and also changes the format of the column names.")
+													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the option above, but works independently of it. Setting the format option via the option above overrides the setting here and also changes the format of the column names.")
 	BUTTON   bu_format    340  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
 
 END

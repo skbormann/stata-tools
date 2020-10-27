@@ -18,8 +18,7 @@
 {marker syntax}{...}
 {title:Syntax}
 {p 8 17 2}
-{cmdab:fdrisk}
-{cmd:,} nulllo(string) nullhi(string) {cmdab:std:err(#)} {cmdab:intt:ype(interval_type)} {cmdab:intl:evel(string)} {cmdab:nulls:pace(string)} {cmdab:nullw:eights(string)} {cmdab:alts:pace(string)} {cmdab:altw:eights(string)}
+{opt fdrisk}{cmd:,} {opt nulllo(string)} {opt nullhi(string)} {opt std:err(#)} {opt intt:ype(interval_type)} {opt intl:evel(string)} {opt nulls:pace(string)} {opt nullw:eights(string)} {opt alts:pace(string)} {opt altw:eights(string)}
 [{cmdab:sgpv:al(#)} {cmdab:p:i0(#)}]
 
 {synoptset 20 tabbed}{...}

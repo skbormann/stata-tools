@@ -182,10 +182,9 @@ The number of upper bounds must match the number of arguments set in the {cmd:co
 The number of lower and upper bounds must also match. 
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. 
 
-
 {pstd}
 The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 
-Please change this value to something more reasonable. What is reasonable lower or upper bound of no scientifically interesting effect(s), depends on your dataset and your research question.
+Please change this value to something more reasonable. Reasonable lower or upper bounds depend on your dataset and your research question.
 Using this default value will always result in having SGPVs of value 0 or 0.5!{p_end}
 
 {dlgtab:Display}
@@ -193,7 +192,7 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!{p
 {opt q:uietly}     suppress the output of the estimation command.
 
 {phang}
-{opt matl:istopt(string)}     change the options of the displayed matrix. The same options as for {helpb matlist} can be used.
+{opt matl:istopt(string)}     change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
 {opt b:onus(string)}    display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.
@@ -382,12 +381,12 @@ The dialog boxes can be accessed as usual by for example {stata db sgpv}.
 
   {marker leukemia-example}
   {title:Calculating SGPVs for a large dataset of estimation or t-test results}
+  For this example you need to install the ancillary files of this package by {net "get sgpv.pkg, replace":by clicking here} which will install the example leukemia dataset together with other examples.
   The example leukemia dataset can be used to show how the SGPVs can be calculated for a large dataset which contains the information usually returned in the {cmd:{it:r(table)}} matrix.
-  The leukemia dataset contains from 7218 gene specific t-tests for a difference in mean expression.
+  The leukemia dataset contains 7218 gene specific t-tests for a difference in mean expression.
   More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
   The example file below will calculate the SGPVs and bonus statistics for the leukemia dataset. 
-  You can view the {view sgpv-leukemia-example.do:code} if installed. 
-  If not, you can install it {net "get sgpv.pkg, replace":by clicking here} together with the other ancillary files:
+  You can view the {view sgpv-leukemia-example.do:code}. 
 	{stata . do sgpv-leukemia-example.do}
 	
   This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
