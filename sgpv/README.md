@@ -76,6 +76,12 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.1b 31.10.2020 : 
+  * Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. 
+  * Fixed the format option in the Dialog box 
+  * Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
+  * Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options".
+* Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 * Version 1.1  28.05.2020 : 
   * Added support for multiple null hypotheses. 
   * Added a noconstant-option to remove the constant from the list of coefficients. 
@@ -116,6 +122,9 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.05  01.11.2020: 
+  * Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals
+  * Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
 * Version 1.04  01.07.2020: 
 	* Added/improved support matrices as inputs for options "esthi" and "estlo".
 	* Noshow-option now works as expected.  

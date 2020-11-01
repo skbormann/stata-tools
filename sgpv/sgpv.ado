@@ -1,8 +1,9 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
 *!Version 1.1b 04.09.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
-							Fixed the format option in the Dialog box/// 
-							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
+							Fixed the format option in the Dialog box /// 
+							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
+							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options".
 *!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
