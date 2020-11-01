@@ -1,6 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.05  16.10.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals (not implemented yet, a bug in isValid -> the logic does not work yet with missing values)
+*!Version 1.05  01.11.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals; Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
 *!Version 1.04  05.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". Noshow-option now works expected. 
 *Version 1.03a 23.06.2020: Removed unnecessary input checks
 *Version 1.03 24.05.2020 : Added further input checks	
@@ -148,24 +148,18 @@ else{	// Run if rows less than matsize -> the "original" approach
 	forvalues i=1/`estint'{
 		*Parse interval -> Not the best names yet
 		local null_lo  `: word `i' of `nulllo''
-			/*capture local null_lo = `null_lo'
-			if _rc==111 | _rc==0{ // Could be probably simplified further or moved to isValid
-				stop "`null_lo' in option {cmd:`nulllo'}  is not a number nor . (missing value) nor empty."
-			}*/
 			isValid `null_lo' nulllo
 			isInfinite `null_lo'
 			if (`s(infinite)' == `=c(maxdouble)'){
 			 local null_lo = `=c(mindouble)'
 			} 
 		local null_hi  `: word `i' of `nullhi''
-			*capture local null_hi = `null_hi'
 			isValid `null_hi' nullhi
 			isInfinite `null_hi'
 			local null_hi = `s(infinite)'
 		*Only required if no variables as input -> Is that check needed? If I found variables earlier than I should be already in a different algorithm?
 		if `variablefound'==0{
 		local est_lo  `: word `i' of `estlo''	
-			*capture local est_lo = `est_lo'
 			isValid `est_lo' estlo
 			isInfinite `est_lo'
 			if (`s(infinite)' == `=c(maxdouble)'){
@@ -173,7 +167,6 @@ else{	// Run if rows less than matsize -> the "original" approach
 			}
 			
 		local est_hi  `: word `i' of `esthi''
-			*capture local `est_hi' =`est_hi'
 			isValid `est_hi' esthi
 			isInfinite `est_hi'
 			local est_hi =`s(infinite)'
@@ -193,7 +186,7 @@ else{	// Run if rows less than matsize -> the "original" approach
 				if (`est_len'<0  ) & (`null_len'<0){
 					disp "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
 				}
-				if (`est_len'==`=c(maxdouble)') | (`null_len'==`=c(maxdouble)'){ // Needs further corrections for everything close to but not exactly c(maxdouble)
+				if reldif(`est_len',`=c(maxdouble)')<1e-5 | reldif(`null_len',`=c(maxdouble)')<1e-5{ // Needs further corrections for everything close to but not exactly c(maxdouble)
 					disp "The `i'th interval has infinite length."
 				}				
 				if (`est_len'==0 | `null_len'==0 ) {
@@ -257,8 +250,8 @@ else{	// Run if rows less than matsize -> the "original" approach
 		if "`deltagap'"!="nodeltagap"{
 			local gap = max(`est_lo', `null_lo') - min(`null_hi', `est_hi')
 			local delta = `null_len'/2
-			* Report unscaled delta-gap if null has infinite length
-			if `null_len' ==0{
+			* Report unscaled delta-gap if null has infinite length, use reldif to check if the distance between infinite and null_len is sufficiently small
+			if reldif(`null_len',c(maxdouble)) <1e-5{
 				local delta 1
 			}
 			
@@ -373,7 +366,6 @@ end
 *Check if the input is valid -> Missing value or number
 program define isValid // Does not deal yet with missing value as symbol for one-sided intervals -> needs a rewrite of the whole input evaluation logic for the macro algorithm
 args valid optname
-
 if `valid'!=.{
 	if real("`=`valid''")==.{
 		disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."

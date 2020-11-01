@@ -71,6 +71,8 @@
 {syntab:menu}
 {synopt:{opt perm:dialog}} install permanently the dialog boxes into the User menubar.
 {p_end}
+{synopt:{opt remove}} remove the entries created by the option {opt permdialog}.
+{p_end}
 {synoptline}
 {p2colreset}{...}
 {marker estimation_command}{...}
@@ -250,6 +252,13 @@ Other possible places like the user's home folder are not accessed yet.
 See {help profile} to get more information about how to setup the {cmd:profile.do}.
 Without this option, the dialog boxes will only available from the menubar until the next restart of Stata. 
 The dialog boxes can be accessed as usual by for example {stata db sgpv}.
+
+{phang}
+{opt remove} remove the entries created by the option {opt permdialog} from the {cmd:profile.do} file. 
+A backup of the original file is kept with the name {cmd:profile.do.bak}. 
+ONLY tested under Windows, other operation systems should work but could not be tested.
+The {cmd:profile.do} file should NOT contain a line like "global F4 `" or like "global F5 '". 
+Otherwise, the option returns an error and will not delete the menu entries. 
 
 {marker examples}{...}
 {title:Examples}

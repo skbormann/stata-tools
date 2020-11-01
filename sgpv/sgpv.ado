@@ -1,6 +1,8 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permdialog  as suggested by reviewer for the SJ article to clarify the meaning of the option.
+*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
+							Fixed the format option in the Dialog box/// 
+							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
 *!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -648,13 +650,13 @@ program define menu
 	 
 	 tempname fh
 	 file open `fh' using `"`profile'"' , write text `replace'
-	 file write `fh' `" window menu append submenu "stUserStatistics"  "SGPV" "' _n
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv" "' _n
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue" "' _n
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Power Calculations (&sgpower)" "db sgpower" "' _n
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" "' _n
-	 file write `fh' `"  window menu append item "stUserStatistics" "SGPV Plot Interval Estimates (&plotsgpv)" "db plotsgpv" "' _n
-	 file write `fh' `" window menu refresh "' _n
+	 file write `fh' `"window menu append submenu "stUserStatistics"  "SGPV" "' _n
+	 file write `fh' `"window menu append item "stUserStatistics" "SGPV (Main Command) (&sgpv)" "db sgpv" "' _n
+	 file write `fh' `"window menu append item "stUserStatistics" "SGPV Value Calculations (&sgpvalue)" "db sgpvalue" "' _n
+	 file write `fh' `"window menu append item "stUserStatistics" "SGPV Power Calculations (&sgpower)" "db sgpower" "' _n
+	 file write `fh' `"window menu append item "stUserStatistics" "SGPV False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" "' _n
+	 file write `fh' `"window menu append item "stUserStatistics" "SGPV Plot Interval Estimates (&plotsgpv)" "db plotsgpv" "' _n
+	 file write `fh' `"window menu refresh"' _n
 	 file close `fh'
 
  }
@@ -667,26 +669,43 @@ program define menu
 			exit 198
 		}
 	if !_rc{
-			local replace replace
 			local profile `"`r(fn)'"'
-			disp "Deleting menu entries created by permdialog-option from your profile.do"
+			mata:pathreturn(`"`profile'"')
+			local profile_new `path'\\`filename'.new
+			local start_line `"window menu append submenu "stUserStatistics"  "SGPV" "'
+			local end_line `"window menu refresh"'
+			disp "Deleting menu entries created by the permdialog-option from your profile.do"
 			tempname fh fh2 
-			file open `fh' using `"`profile'"' , read write text `replace'
+			file open `fh' using `"`profile'"' , read text 
+			file open `fh2' using `"`profile_new'"', write replace
 			file read `fh' line
-			while r(eof)!=0{ // Skip the lines containing the window commands and write only the others back to a new file, then rename the original file to profile.do.bak and rename the new file as profile.do
-				if "`line'"==`" window menu append submenu "stUserStatistics"  "SGPV" "'{
-				
-				continue
+			while r(eof)==0{ // Skip the lines containing the window commands and write only the others back to a new file, then rename the original file to profile.do.bak and rename the new file as profile.do
+				if `"`line'"'==`"`start_line'"'{
+				while r(eof)==0 & `"`line'"' != `"`end_line'"'{
+					file read `fh' line
 				}
-				file write 
+				
+				}
+				file write `fh2' `"`line'"' _n
 				file read `fh' line
 			}
 			file close `fh'
+			file close `fh2'
 	}
 	*plattform dependent backup file
-	disp ""
+	disp "Renaming the original profile.do to profile.do.bak"
+	if strmatch(c(os),"Win*"){
+		!ren "`path'\\`filename'" `filename'.bak
+		!ren "`profile_new'" `filename'
+		
+	}
+	else{ // Not testable on my system
+		!mv  "`path'/`filename'" `"`path'/`filename'.bak"'
+		!mv "`profile_new'" "`path'/`filename'"
+	}
   exit
  }
+
  
  *Menu adding for one Stata session
 	window menu clear // Assuming that no one else installs dialog boxes into the menubar. If this assumption is wrong then the code will be changed.
@@ -699,4 +718,21 @@ program define menu
 	window menu refresh
 	disp "Menu entries succesfully created.{break} Go to User->Statistics->SGPV to access the dialog boxes for this package."
 	
+end
+
+
+mata:
+mata set matastrict on
+// Split the filepath into path and filename -> convenience function to access the results of pathsplit()
+void pathreturn(string scalar pathfile){
+
+string scalar path, filename 
+pragma unset path
+pragma unset filename
+
+pathsplit(pathfile,path,filename)
+
+st_local("path" , path)
+st_local("filename",filename)
+}
 end

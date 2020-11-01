@@ -62,7 +62,7 @@
 Compute the second-generation {it:p}-value (SGPV) and its associated delta-gaps, as introduced in Blume et al. (2018). 
 See the {help sgpvalue##formulas:formulas} at the end for a more detailed description.
 This command and its companions commands ({cmd:sgpower}, {cmd:fdrisk}, {cmd:plotsgpv}) are based on the R-code for the sgpv-package from {browse "https://github.com/weltybiostat/sgpv"}.
-A wrapper command {help sgpv} also exists  which makes the computation after common estimation commands easier.
+The command {help sgpv} also exists  which makes the computation after common estimation commands easier.
 The {cmd:sgpvalue} command should be used mostly for individual SGPV calculations.
 A {dialog sgpvalue:dialog box} exists to make using this command easier. {p_end}
 

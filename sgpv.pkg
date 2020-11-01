@@ -6,7 +6,7 @@ d Second Generation P-Values are the proportion of null-hypotheses supported by 
 d They are easier to understand than ordinary p-values.
 d See the {help sgpv:help file} after installation for introduction.
 d Additional dialog boxes further help with using the commands are available. 
-d and can also be added to the User-menubar by running {stata sgpv menuInstall}.
+d and can also be added to the User-menubar by running {stata sgpv menu}.
 d
 d KW: p-value
 d KW: second generation
@@ -16,7 +16,7 @@ d
 d Requires: Stata 12.0
 d Author: Sven-Kristjan Bormann
 d Support: email sven-kristjan@gmx.de
-d Distribution-Date: 20200710
+d Distribution-Date: 20201101
 d
 d 
 d License: MIT

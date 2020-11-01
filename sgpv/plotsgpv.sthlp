@@ -156,16 +156,21 @@ You can set the colors to any other available color in Stata. See {helpb colorst
 {opt noleg:end}     deactivate plotting the legend.
 
 {phang}
-{opt seto:rder(string)}     a variable giving the desired order along the x-axis. If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. If {bf:setorder} is empty, the original input ordering is used.
+{opt seto:rder(string)}     a variable giving the desired order along the x-axis. 
+If {bf:setorder} is set to {bf:"sgpv"}, the second-generation {it:p}-value ranking is used. 
+If {bf:setorder} is empty, the original input ordering is used.
 
 {phang}
-{opt x:show(#)}    a number representing the maximum ranking on the x-axis that is displayed. Default is to display all intervals.
+{opt x:show(#)}    a number representing the maximum ranking on the x-axis that is displayed. 
+Default is to display all intervals.
 
 {phang}
-{opt nullpt(#)} 	a number representing a point null hypothesis. If set, the command will draw a horizontal dashed red line at this location.
+{opt nullpt(#)} 	a number representing a point null hypothesis. 
+If set, the command will draw a horizontal dashed red line at this location.
 
 {phang}
-{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with matrices larger than {cmd:c(matsize)} or variables. If this option is set, an approach based on variables is used. 
+{opt nomata}  deactivate the usage of Mata for calculating the SGPVs with matrices larger than {cmd:c(matsize)} or variables. 
+If this option is set, an approach based on variables is used. 
 Using variables instead of Mata will be faster, but new variables containing the results are created. 
 If you don't want to create new variables and time is not an issue then don't set this option. 
 Stata might become unresponsive when using Mata because it takes time to return a large matrix.

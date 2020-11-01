@@ -31,6 +31,14 @@ RESET res1
 COPY copy1
 
 
+//Copied from format.dlg
+SCRIPT PREINIT
+BEGIN
+        create STRING formatString
+        setscale_hadj resource FORMAT_DLG_HSCALE
+END
+
+
 LIST nullweights_list
 BEGIN
 	Point
@@ -114,33 +122,54 @@ BEGIN
 	EDIT ed_nullhi 			@ 		_ss 	170 	., option(nullhi) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
 	
 	TEXT tx_null1			15		_ls		390		., label("To have an individual null-hypothesis for each coefficient,")
-	TEXT tx_null2			@		_vss	@		., label("you need to separate the lower and upper bounds with a space.")
-	TEXT tx_null3			@		_vss	@ 		., label("The number of bounds need to match the number of coefficient ")
-	TEXT tx_null4			@		_vss	@		., label("in the coefficient-option.")
+	TEXT tx_null2			@		_vss	@		., label("you need to separate the bounds with spaces.")
+	TEXT tx_null3			@		_vss	@ 		., label("The number of bounds need to match the number of coefficients.")
 
 END
 
-DIALOG display ,tabtitle("Display options")
+DIALOG further, tabtitle("Further options")
 BEGIN
-
-	CHECKBOX ck_quiet 		10 		_lft 	100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
-	CHECKBOX ck_nonull		120		_lft    200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
+	GROUPBOX gb_display		_top	_lft 		405		180,label("Display options")
+	CHECKBOX ck_quiet 		+10 	+20 		100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
+	CHECKBOX ck_nonull		+120		@    		200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
 	
-	TEXT tx_matlist 		10 		_ls 	200 	., label("Further results display options")
+	TEXT tx_matlist 		15 		_ss 	200 	., label("Further results display options")
 	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt) tooltip("Change the format of the displayed matrix. The same options as for the command matlist can be used.")
 	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
-	TEXT tx_bonus 		10 		_ss 	150 	., label("Bonus Statistics:")
-	COMBOBOX cb_bonus 	10 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
+	TEXT tx_bonus 			15 		_ss 	150 	., label("Bonus Statistics:")
+	COMBOBOX cb_bonus 		@ 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
 														tooltip(Display and calculate the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then no bonus statistcs are calculated and displayed.) ///
 														onselchangelist(bonus_action) 
-	TEXT     tx_format    	_lft    +35     _iwd    .,   label(resource LBL_FORMAT) 
+	TEXT     tx_format    	15    	+25     200    .,   label(resource LBL_FORMAT) 
 	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
 													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the option above, but works independently of it. Setting the format option via the option above overrides the setting here and also changes the format of the column names.")
-	BUTTON   bu_format    340  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
+	BUTTON   bu_format    350  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
+	
+	GROUPBOX gb_fdrisk 	 _top	200	405 	190, label("Fdrisk options")
+	TEXT tx_nullspace      15   +10    200    ., label("Null hypothesis parameter space:")
+	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
+	
+	TEXT tx_nullweights     15    _ls    150    ., label("Null hypothesis distribution:")
+	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
+													tooltip("The probability distribution for the null parameter space.")
+	
+	TEXT tx_altweights      15   _ls      170    ., label("Alternative hypothesis distribution:")
+	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
+												tooltip("Probability distribution for the alternative parameter space")
+	
+	TEXT tx_inttpye       	180  -70      @    ., label("Interval type:")
+	COMBOBOX cb_inttype     @  _ss      @    ., dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
+	
+	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
+	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level) default(0.05)
+	
+	TEXT tx_pi0           +120  -70     120   ., label("Prior probability of H0:")
+	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
 END
 
+/*
 DIALOG fdrisk, tabtitle("Fdrisk options")
 BEGIN
 	TEXT tx_nullspace      10    10    200    ., label("Null hypothesis parameter space:")
@@ -168,13 +197,13 @@ BEGIN
 
 	
 END
-
+*/
 //Copied from format.dlg
 SCRIPT showFormatDialog 
 BEGIN
         create CHILD format_chooser
         format_chooser.setExitString formatString
-        format_chooser.setExitAction "main.ed_format.setvalue class formatString.value"
+        format_chooser.setExitAction "further.ed_format.setvalue class formatString.value"
 END
 
 
@@ -210,24 +239,22 @@ END
 //Deactive display of fdrisk options if bonus is set to none or deltagap 
 SCRIPT fdrisk_off
 BEGIN
-	fdrisk.ex_nullspace.disable
-	*fdrisk.ex_altspace.disable
-	fdrisk.cb_altweights.disable
-	fdrisk.cb_nullweights.disable
-	fdrisk.cb_inttype.disable
-	fdrisk.ed_intlevel.disable
-	fdrisk.ed_pi0.disable
+	further.ex_nullspace.disable
+	further.cb_altweights.disable
+	further.cb_nullweights.disable
+	further.cb_inttype.disable
+	further.ed_intlevel.disable
+	further.ed_pi0.disable
 END
 
 SCRIPT fdrisk_on
 BEGIN
-	fdrisk.ex_nullspace.enable
-	*fdrisk.ex_altspace.enable
-	fdrisk.cb_altweights.enable
-	fdrisk.cb_nullweights.enable
-	fdrisk.cb_inttype.enable
-	fdrisk.ed_intlevel.enable
-	fdrisk.ed_pi0.enable
+	further.ex_nullspace.enable
+	further.cb_altweights.enable
+	further.cb_nullweights.enable
+	further.cb_inttype.enable
+	further.ed_intlevel.enable
+	further.ed_pi0.enable
 END
 
 
@@ -235,8 +262,7 @@ PROGRAM sgpv_options
 BEGIN
 	put "sgpv "
 	
-	beginoptions
-		
+	beginoptions		
 		optionarg main.cb_matrix
 		optionarg main.cb_estimate
 		optionarg main.vl_coefficient
@@ -244,20 +270,20 @@ BEGIN
 		optionarg /hidedefault main.ed_nullhi
 		optionarg /hidedefault main.ed_nulllo
 		
-		option display.ck_quiet
-		option display.ck_nonull
+		option further.ck_quiet
+		option further.ck_nonull
 		
-		optionarg display.ed_matlist
-		optionarg /hidedefault display.cb_bonus
-		optionarg /hidedefault display.ed_format
+		optionarg further.ed_matlist
+		optionarg /hidedefault further.cb_bonus
+		optionarg /hidedefault further.ed_format
 		
-		optionarg fdrisk.ex_nullspace
-		optionarg /hidedefault fdrisk.cb_nullweights 
-		optionarg fdrisk.ex_altspace
-		optionarg /hidedefault fdrisk.cb_altweights 
-		optionarg /hidedefault fdrisk.cb_inttype 
-		optionarg /hidedefault fdrisk.ed_intlevel
-		optionarg /hidedefault fdrisk.ed_pi0
+		optionarg further.ex_nullspace
+		optionarg /hidedefault further.cb_nullweights 
+		*optionarg further.ex_altspace
+		optionarg /hidedefault further.cb_altweights 
+		optionarg /hidedefault further.cb_inttype 
+		optionarg /hidedefault further.ed_intlevel
+		optionarg /hidedefault further.ed_pi0
 	endoptions
 END
 
