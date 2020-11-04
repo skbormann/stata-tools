@@ -47,7 +47,11 @@
 {p_end}
 {synopt:{opt matl:istopt(string)}}  change the options of the displayed matrix. 
 {p_end}
-{synopt:{opt b:onus(string)}}   display and calculate bonus statistics like delta gaps and fdr. 
+{synopt:{opt delta:gap}} calculate and display the delta gap.
+{p_end}
+{synopt:{opt fd:risk}} calculate and display the false discovery risk.
+{p_end}
+{synopt:{opt all}} calculate and display both, the delta gap and the false discovery risk.
 {p_end}
 {synopt:{opth for:mat(%fmt)}} display format of the results.
 {p_end}
@@ -174,7 +178,6 @@ The number of lower bounds must match the number of arguments set in the {cmd:co
 The number of lower and upper bounds must also match. 
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration.
 
-
 {phang}
 {opt nullhi(upper_bound(s))}  change the upper bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed.
@@ -197,7 +200,16 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!{p
 {opt matl:istopt(string)}     change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
-{opt b:onus(string)}    display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.
+{* opt b:onus(string)}    {* display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.}
+{opt delta:gap} calculate and display the delta-gap if the SGPV is 0.
+
+{phang}
+{opt fd:risk} calculate and display the false discovery risk if the SGPV is 0.
+
+{phang}
+{opt all} calculate and display both, the delta-gap and the false discovery if the SGPV is 0. 
+This options takes precedence over the options {cmd:deltagap} and {cmd:fdrisk}. 
+Using both options together has the same effect as using this option alone.
 
 {phang}
 {opth for:mat(%fmt)} specifies the format for displaying the individual elements of the result matrix.  The default is format(%5.4f). 
@@ -278,7 +290,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {marker prefix}
   {title:Usage of {cmd:sgpv} as a prefix-command:}
   {stata . sysuse auto, clear}
-  {stata ". sgpv, bonus(all): regress price mpg weight foreign"} 
+  {stata ". sgpv, all: regress price mpg weight foreign"} 
   
   Example Output:
   		
@@ -336,18 +348,18 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {marker stored_estimations} 
   {title:Using stored estimations}
   Save estimation for later usage 
-	{stata . estimate store pricereg} 
+	{stata . estimate store reg} 
 
   The same result but this time after the last estimation.
 	{stata . sgpv} 
 	
   Now run a quantile regression instead	
 	{stata . qreg price mpg weight foreign} 
-	{stata . estimates store priceqreg}
+	{stata . estimates store quantile}
 
   Calculate sgpvs for the stored estimation and only the foreign coefficient 
-	{stata . sgpv, estimate(pricereg) coefficient("foreign")} 
-	{stata . sgpv, estimate(priceqreg) coefficient("foreign")}
+	{stata . sgpv, estimate(reg) coefficient("foreign")} 
+	{stata . sgpv, estimate(quantile) coefficient("foreign")}
   
   {marker alternative_null-hypothesis}
   {title:Setting a different null-hypothesis}

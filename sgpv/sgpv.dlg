@@ -52,6 +52,7 @@ BEGIN
 	TruncNormal
 END
 
+/*
 LIST bonus_values
 BEGIN
 	none // a filler option introduced to have a default option for the dropdownlist
@@ -60,6 +61,7 @@ BEGIN
 	all
 END
 
+
 LIST bonus_list
 BEGIN
 	None
@@ -67,7 +69,7 @@ BEGIN
 	False discovery risk
 	Both
 END
-
+*/
 
 LIST bonus_action
 BEGIN
@@ -133,15 +135,22 @@ BEGIN
 	CHECKBOX ck_quiet 		+10 	+20 		100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
 	CHECKBOX ck_nonull		+120		@    		200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
 	
-	TEXT tx_matlist 		15 		_ss 	200 	., label("Further results display options")
+	TEXT tx_matlist 		15 		_ss 	200 	., label("Result Matrix format:")
 	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt) tooltip("Change the format of the displayed matrix. The same options as for the command matlist can be used.")
 	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
 	TEXT tx_bonus 			15 		_ss 	150 	., label("Bonus Statistics:")
-	COMBOBOX cb_bonus 		@ 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
+	/*COMBOBOX cb_bonus 		@ 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
 														tooltip(Display and calculate the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then no bonus statistcs are calculated and displayed.) ///
-														onselchangelist(bonus_action) 
-	TEXT     tx_format    	15    	+25     200    .,   label(resource LBL_FORMAT) 
+														onselchangelist(bonus_action)*/
+	CHECKBOX ck_deltagap	@		_ss 	100		., label("Delta-gap") option(deltagap) tooltip("Calculate the delta-gap.") ///
+														onclickon(script deltagap_on) onclickoff(script deltagap_off)
+	CHECKBOX ck_fdrisk		150		@		100		., label("Fdrisk") option(fdrisk) tooltip("Calculate the false discovery risk (fdr).") ///
+														onclickon(script fdrisk_on) onclickoff(script fdrisk_off)
+	CHECKBOX ck_all			300		@		50		., label("All") option(all) tooltip("Calculate both the delta-gap and the false discovery risk.") ///
+														onclickon(script all_on) onclickoff(script all_off)
+	
+	TEXT     tx_format    	15    	+25     200    .,   label(Format result matrix elements:) 
 	EDIT     ed_format    	@       _ss     320   .,    label(resource LBL_FORMAT) option(format) default(%5.4f) ///
 													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the option above, but works independently of it. Setting the format option via the option above overrides the setting here and also changes the format of the column names.")
 	BUTTON   bu_format    350  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
@@ -178,9 +187,6 @@ BEGIN
 	TEXT tx_nullweights     10    _ls    150    ., label("Null hypothesis distribution:")
 	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
 													tooltip("The probability distribution for the null parameter space.")
-	
-	//TEXT tx_altspace     	10   _ls      200    ., label("Alternative hypothesis parameter space:")
-	//EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution")
 	
 	TEXT tx_altweights      10   _ls      200    ., label("Alternative hypothesis distribution:")
 	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
@@ -236,8 +242,60 @@ BEGIN
 END
 
 
-//Deactive display of fdrisk options if bonus is set to none or deltagap 
+//(De-)activate display of bonus statistic options  
+//03.11.2020: Not all scripts work yet as expected. It is not possible
+
+SCRIPT deltagap_on
+BEGIN
+	further.ck_fdrisk.disable
+	further.ck_all.disable
+END
+
+SCRIPT deltagap_off
+BEGIN
+	further.ck_all.enable
+	further.ck_fdrisk.enable
+END
+
+SCRIPT fdrisk_on
+BEGIN
+	further.ck_deltagap.disable
+	further.ck_all.disable
+	script fdrisk_options_on
+END
+
 SCRIPT fdrisk_off
+BEGIN
+	further.ck_deltagap.enable
+	further.ck_all.enable
+	script fdrisk_options_off
+END
+
+SCRIPT all_on
+BEGIN
+	further.ck_deltagap.disable
+	further.ck_fdrisk.disable
+	script fdrisk_options_on
+END
+
+SCRIPT all_off
+BEGIN
+	script fdrisk_options_off
+	further.ck_deltagap.enable
+	further.ck_fdrisk.enable
+END
+
+SCRIPT fdrisk_options_on
+BEGIN
+	further.ex_nullspace.enable
+	further.cb_altweights.enable
+	further.cb_nullweights.enable
+	further.cb_inttype.enable
+	further.ed_intlevel.enable
+	further.ed_pi0.enable
+END
+
+SCRIPT fdrisk_options_off
 BEGIN
 	further.ex_nullspace.disable
 	further.cb_altweights.disable
@@ -247,15 +305,8 @@ BEGIN
 	further.ed_pi0.disable
 END
 
-SCRIPT fdrisk_on
-BEGIN
-	further.ex_nullspace.enable
-	further.cb_altweights.enable
-	further.cb_nullweights.enable
-	further.cb_inttype.enable
-	further.ed_intlevel.enable
-	further.ed_pi0.enable
-END
+
+
 
 
 PROGRAM sgpv_options
@@ -274,7 +325,10 @@ BEGIN
 		option further.ck_nonull
 		
 		optionarg further.ed_matlist
-		optionarg /hidedefault further.cb_bonus
+		*optionarg /hidedefault further.cb_bonus
+		option further.ck_deltagap
+		option further.ck_fdrisk
+		option further.ck_all
 		optionarg /hidedefault further.ed_format
 		
 		optionarg further.ex_nullspace

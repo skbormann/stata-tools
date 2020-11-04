@@ -1,11 +1,12 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.1b 04.09.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
+*!Version 1.2 31.10.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box /// 
 							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
-							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options".
-*!Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
-*!Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
+							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options". ///
+							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.  (recommended by reviewer)
+*Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
+*Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
 							fixed errors in the perm-option of the "sgpv menu"-subcommand; ///
 							fixed a confusion in the help-file about the nulllo and nullhi options ///
@@ -113,7 +114,7 @@ else{
 
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
- Quietly MATListopt(string asis) Bonus(string) FORmat(str) NONULLwarnings   /// display-options
+ Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings Bonus(string)/*depreciated*/   DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
  ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/  ] 
@@ -261,23 +262,27 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 **Parse bonus option
 *Changed the default behaviour so that the option is now a bit confusing
+*02.11.2020: Changed these options from one singular option to multiple optionally_on options as per reviewer request;
+*old code is kept to avoid breaking existing code -> need to change syntax and examples in help file,  
+*no checks implemented on ensure that only one of the optionally_on options is used.
 if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
 	stop `"Option 'bonus' is incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
 }
+
 if "`bonus'"=="" | "`bonus'"=="none"{ 	
 	local nodeltagap nodeltagap
 	local fdrisk_stat 
 }
 
-if "`bonus'"=="deltagap"{
+if "`bonus'"=="deltagap" | "`deltagap'"=="deltagap" {
 	local nodeltagap 
 	}
 	
-if "`bonus'"=="fdrisk"{
+if "`bonus'"=="fdrisk" | "`fdrisk'"=="fdrisk" {
 	local fdrisk_stat fdrisk
 }
 
-if "`bonus'"=="all"{
+if "`bonus'"=="all"| "`all'"=="all"{
 	local fdrisk_stat fdrisk
 	local nodeltagap 
 }
@@ -311,7 +316,6 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
  return add // save existing returned results 
  
  *Coefficient selection 
- *local coeforig  `coefficient' // save coefficients in case this local gets overriden at some point
  ParseCoef `input', coefficient(`coefficient') `noconstant'
  mat `input' = r(coef_mat)
  local case `r(case)'
