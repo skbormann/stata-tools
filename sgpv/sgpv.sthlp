@@ -114,13 +114,11 @@ An example of how to interpret the result from {cmd:sgpv} can be found in the {h
 
 {pstd}
 The formulas for the Second-Generation P-Values can be found {help sgpv##formulas:here}.{p_end}
-
-
-    The sgpv-package consists of: sgpv       - the main command to calculate SGPVs, {help sgpvalue} and {help fdrisk}, to be used after estimations commands
-    				  {help sgpvalue}   - calculate the SGPVs.
-    				  {help sgpower}    - power functions for the SGPVs.
-    				  {help fdrisk}     - false confirmation/discovery risks for the SGPVs.
-    				  {help plotsgpv}   - plot interval estimates according to SGPV rankings.
+    {pstd}The sgpv-package consists of: sgpv {space 4}- the main command to calculate SGPVs, {help sgpvalue} and {help fdrisk}, to be used after estimations commands{break}
+    {space 29}		  {help sgpvalue}   - calculate the SGPVs.{break}
+    {space 29}	  {help sgpower} {space 1}- power functions for the SGPVs.{break}
+    {space 29}	  {help fdrisk} {space 2}- false confirmation/discovery risks for the SGPVs.{break}
+    {space 29}	  {help plotsgpv}   - plot interval estimates according to SGPV rankings.{break}
 
 {marker subcmd}{...}
 {title:Subcommands}
@@ -274,22 +272,20 @@ Otherwise, the option returns an error and will not delete the menu entries.
 
 {marker examples}{...}
 {title:Examples}
-
-    Contents
-    	{help sgpv##prefix:Basic Usage}
-	{help sgpv##interpretation_example:How to interpret results}
-	{help sgpv##exporting_results:Exporting results}
-    	{help sgpv##stored_estimations:Using stored estimations}
-    	{help sgpv##alternative_null-hypothesis:Setting a different null-hypothesis}
-    	{help sgpv##multiple-null-hypotheses-example:Setting an individual null hypotheses for each coefficient}
-    	{help sgpv##multiple-equations-example:Selecting coefficients}
-	{help sgpv##leukemia-example:Calculating SGPVs for a large dataset of estimation or t-test results}
-    	{help sgpv##subcmds_example:Using subcommands} 
+    {pstd}Contents{p_end}
+{phang2}{help sgpv##prefix:Usage of {cmd:sgpv} as a prefix-command}{p_end}
+{phang2}{help sgpv##interpretation_example:How to interpret results}{p_end}
+{phang2}{help sgpv##exporting_results:Exporting results}{p_end}
+{phang2}{help sgpv##stored_estimations:Using stored estimations}{p_end}
+{phang2}{help sgpv##alternative_null-hypothesis:Setting a different null-hypothesis}{p_end}
+{phang2}{help sgpv##multiple-null-hypotheses-example:Setting an individual null hypotheses for each coefficient}{p_end}
+{phang2}{help sgpv##multiple-equations-example:Selecting coefficients}{p_end}
+{phang2}{help sgpv##leukemia-example:Calculating SGPVs for a large dataset of estimation or t-test results}{p_end}
+{phang2}{help sgpv##subcmds_example:Using subcommands} {p_end}
 				
-{* dlgtab:Basic Usage}
   {marker prefix}
   {title:Usage of {cmd:sgpv} as a prefix-command:}
-  {stata . sysuse auto, clear}
+  {pstd}{stata . sysuse auto, clear}{break}
   {stata ". sgpv, all: regress price mpg weight foreign"} 
   
   Example Output:
@@ -310,7 +306,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
   	   _cons |  -5853.696   3376.987    -1.73   0.087    -12588.88    881.4934
       ------------------------------------------------------------------------------
   
-  
+  {pstd}
   Comparison of ordinary P-Values and Second Generation P-Values for a point Null-Hypothesis of 0
   
 
@@ -324,7 +320,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
    
   {marker interpretation_example}  
   {title:Interpretation example:}
-  
+  {pstd}
   There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
   Remember that the null-hypothesis is an interval of length 0 with both lower and upper bounds being also 0.
   This is the standard null-hypothesis of no effect.	
@@ -334,89 +330,84 @@ Otherwise, the option returns an error and will not delete the menu entries.
   Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
   Whether 5% is much, is for you to decide.
   
-  {bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019).
+  {pstd}{bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019).
   I cannot guarantee that my understanding is correct.
-  These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.	
-  
+  These interpretations are just meant as examples how to make sense out of the calculated numbers, but not meant as a definitive answer.
+ 
   {marker exporting_results}
   {title:Exporting results}
-  You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.
-  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier
-  {stata . estout e(comparison)} //display the results
-  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document
+  {pstd}
+  You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.{break}
+  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document{break}
+  {stata . estout e(comparison)} //display the results{break}
+  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier{p_end}
   
   {marker stored_estimations} 
   {title:Using stored estimations}
-  Save estimation for later usage 
-	{stata . estimate store reg} 
-
-  The same result but this time after the last estimation.
-	{stata . sgpv} 
-	
-  Now run a quantile regression instead	
-	{stata . qreg price mpg weight foreign} 
-	{stata . estimates store quantile}
-
-  Calculate sgpvs for the stored estimation and only the foreign coefficient 
-	{stata . sgpv, estimate(reg) coefficient("foreign")} 
-	{stata . sgpv, estimate(quantile) coefficient("foreign")}
-  
+  {pstd}Save estimation for later usage{break} 
+  {stata . estimate store reg}{p_end} 
+  {pstd}The same result but this time after the last estimation.{break}
+  {stata . sgpv}{p_end}
+  {pstd}Now run a quantile regression instead{break}	
+	{stata . qreg price mpg weight foreign}{break} 
+	{stata . estimates store quantile}{p_end}
+  {pstd}Calculate sgpvs for the stored estimation and only the foreign coefficient{break} 
+	{stata . sgpv, estimate(reg) coefficient("foreign")}{break} 
+	{stata . sgpv, estimate(quantile) coefficient("foreign")}{p_end}
   {marker alternative_null-hypothesis}
   {title:Setting a different null-hypothesis}
-  Set an alternative null-hypothesis -> 1% of the mean value of the price variable (-62, 62) 
-  and remove the constant from the calculations  
+  {pstd}Set an alternative null-hypothesis -> 1% of the mean value of the price variable (-62, 62) and remove the constant from the calculations {break} 
 	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly noconstant: regress price mpg weight foreign"}
 	
-    Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {-62,62}
-    
+    {pstd}Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {-62,62}{p_end}
        Variables |   P-Value       SGPV  Delta-Gap        Fdr 
     -------------+--------------------------------------------
              mpg |     .7693         .5          .          . 
           weight |         0          1          .          . 
          foreign |         0          0    36.2405      .0394 
-
+	{pstd}
     The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
     The example illustrates the need to set a scientifically reasonable null-hypothesis. 
     For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
 	
   {marker multiple-null-hypotheses-example}
   {title:Setting an individual null hypotheses for each coefficient}
-  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
-  The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.
-	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}
-	
-  The same null hypotheses but this time one null-hypothesis for each selected equation or quantile
-	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}
+  
+{pstd}  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
+  The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.{break}
+	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
+  {pstd}The same null hypotheses but this time one null-hypothesis for each selected equation or quantile{break}
+	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
 	
   {marker multiple-equations-example}
   {title:Selecting coefficients}	
-  Calculate sgpvs for a multiple equation estimation command and select coefficients
+  {pstd}Calculate sgpvs for a multiple equation estimation command and select coefficients{p_end}
 	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
-	Select only the foreign coefficient for sgpv calculation
+  {pstd}Select only the foreign coefficient for sgpv calculation{p_end}
 	{stata . sgpv, coefficient(foreign) }
-        Select only the 10%, 50% and 90% quantile equation for sgpv calculation
+  {pstd}Select only the 10%, 50% and 90% quantile equation for sgpv calculation{p_end}
 	 {stata ". sgpv, coefficient(q10: q50: q90:)"}  
-        Select only the 50% quantile equation and foreign coefficient for sgpv calculation
+  {pstd}Select only the 50% quantile equation and foreign coefficient for sgpv calculation{p_end}
 	  {stata ". sgpv, coefficient(q50:foreign)"} 
 
 
   {marker leukemia-example}
   {title:Calculating SGPVs for a large dataset of estimation or t-test results}
-  For this example you need to install the ancillary files of this package by {net "get sgpv.pkg, replace":by clicking here} which will install the example leukemia dataset together with other examples.
+  {pstd}For this example you need to install the ancillary files of this package by {net "get sgpv.pkg, replace":by clicking here} which will install the example leukemia dataset together with other examples.
   The example leukemia dataset can be used to show how the SGPVs can be calculated for a large dataset which contains the information usually returned in the {cmd:{it:r(table)}} matrix.
   The leukemia dataset contains 7218 gene specific t-tests for a difference in mean expression.
   More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
   The example file below will calculate the SGPVs and bonus statistics for the leukemia dataset. 
-  You can view the {view sgpv-leukemia-example.do:code}. 
-	{stata . do sgpv-leukemia-example.do}
+  You can view the {view sgpv-leukemia-example.do:code}.{break} 
+	{stata . do sgpv-leukemia-example.do}{p_end}
 	
-  This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
-  Should your {help matsize:maximum matrix size}  be higher than the number of observations in the dataset (7128), then the example code should run faster. 
-  You can run {stata display c(matsize)} to see your current setting.
+ {pstd}This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
+  Should your {help matsize:maximum matrix size} be higher than the number of observations in the dataset (7128), then the example code should run faster.
+  You can run {stata display c(matsize)} to see your current setting.{p_end}
 
   {marker subcmds_example}
   {title:Subcommands examples} 
-  The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package
+  {pstd}The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package:{p_end}
 	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
 	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
  
@@ -454,10 +445,10 @@ You could set a small null-hypothesis interval which includes effects of less th
 
 {pstd}
 p_δ lies between 0 and 1. {break}
-A p_δ of 0 indicates that 0% of the null hypotheses are compatible with the data.  {break} 
+A p_δ of 0 indicates that 0% of the null hypotheses are compatible with the data. {break} 
 A p_δ of 1 indicates that 100% of the null hypotheses are compatible with the data. {break}
 A p_δ between 0 and 1 indicates inconclusive evidence. {break}
-A p_δ of 1/2 indicates strictly inconclusive evidence.  {break} 
+A p_δ of 1/2 indicates strictly inconclusive evidence.  {p_end} 
 
 {pstd}
 For more information about how to interpret the SGPVs and other common questions, 
@@ -470,29 +461,29 @@ The delta-gap is have a way of ranking two studies that both have second-generat
 						delta 	  = |H_0|/2 
 						delta.gap = gap/delta 
 								
-    For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
+   {pstd} For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
     Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. 
     If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. 
-    If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.
-		
-    The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
-    The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
-    with r = P(H_1)/P(H_0) being the prior probability.	
-    See equation(4) in Blume et.al.(2018)
+    If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.{p_end}
+	
+    {pstd}The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1){break}
+   The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1){break}
+    with r = P(H_1)/P(H_0) being the prior probability.{break}	
+    See equation(4) in Blume et.al.(2018){p_end}
 
-{pstd}
+
 
 {title:References}
 {pstd}
  Blume JD, D’Agostino McGowan L, Dupont WD, Greevy RA Jr. (2018). Second-generation {it:p}-values: Improved rigor, reproducibility, & transparency in statistical analyses. {it:PLoS ONE} 13(3): e0188299. 
-{browse "https://doi.org/10.1371/journal.pone.0188299"}
+{browse "https://doi.org/10.1371/journal.pone.0188299"}{p_end}
 
 {pstd}
-Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}-values. {it:The American Statistician}. In press. {browse "https://doi.org/10.1080/00031305.2018.1537893"} 
+Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction to Second-generation {it:p}-values. {it:The American Statistician}. In press. {browse "https://doi.org/10.1080/00031305.2018.1537893"} {p_end}
 
 
 {title:Author}
-{p}
+{pstd}
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}
@@ -503,6 +494,6 @@ Further Stata programs and development versions can be found under {browse "http
 
 
 {title:See Also}
-Related commands:
+{pstd}Related commands:{break}
  {help plotsgpv}, {help sgpvalue}, {help sgpower}, {help fdrisk}  
 
