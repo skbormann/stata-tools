@@ -23,7 +23,7 @@
 [{cmd:,}
 {it:options}] [{cmd::} {help sgpv##estimation_command:{it:estimation_command}}]
 
-{synoptset 25 tabbed}{...}
+{synoptset 22 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
@@ -31,15 +31,15 @@
 {p_end}
 {p2coldent :* {opt m:atrix(name)}}  takes the name of matrix as input for the calculation.
 {p_end}
-{synopt:{opt c:oefficient(string)}}  the coefficients for which the SGPVs and other statistics are calculated.
+{synopt:{opth c:oefficient(sgpv##coeflist:coeflist)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
 {synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term.
 {p_end}
 
 {syntab:Null hypothesis}
-{synopt:{opt nulllo(#)}}  change the lower bound(s) of the null-hypothesis interval(s).
+{synopt:{opth nulllo(sgpv##boundlist:boundlist)}}  change the lower bound(s) of the null-hypothesis interval(s).
 {p_end}
-{synopt:{opt nullhi(#)}}  change the upper bound(s) of the null-hypothesis interval(s).
+{synopt:{opth nullhi(sgpv##boundlist:boundlist)}}  change the upper bound(s) of the null-hypothesis interval(s).
 {p_end}
 
 {syntab:Display}
@@ -156,18 +156,25 @@ Example code is located in the file {cmd:sgpv-leukemia-example.do} which can be 
 To run the example code, go to the respective {help sgpv##leukemia-example:example section}.
 
 {phang}
-{opt c:oefficient(string)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
+{opth c:oefficient(sgpv##coeflist:coeflist)}  allows the selection of the coefficients for which the SGPVs and other statistics are calculated. 
 The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
 Otherwise, you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
-You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See {help sgpv##multiple-equations-example: the multiple equations example} for an example.
+You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See{help sgpv##multiple-equations-example: the multiple equations example} for an example and the definition of {it:coeflist} below..
+
+{marker coeflist}{...}
+        {it:coeflist} is
+            {it:coef} [{it:coef} ...]
+            {cmd:[}{it:eq}{cmd:]}{it:coef} [{cmd:[}{it:eq}{cmd:]}{it:coef}...]
+            {cmd:eq:}
+
 
 {phang}
 {opt nocons:tant} do not calculate SGPVs, delta-gaps and Fdrs for the constant term. The constant term is also removed from the list of coefficients if the {it:coefficient}-option is used and only equations are specified.
 
 {dlgtab:Null-Hypothesis}
 {phang}
-{opt nulllo(lower_bound(s))}  change the lower bound of the null-hypothesis interval. 
+{opth nulllo(sgpv##boundlist:boundlist)}  change the lower bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). 
 Missing values, strings and variable names are not allowed. 
 {help exp:Expressions}/formulas are also allowed as input.
@@ -177,13 +184,17 @@ The number of lower and upper bounds must also match.
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration.
 
 {phang}
-{opt nullhi(upper_bound(s))}  change the upper bound of the null-hypothesis interval. 
+{opth nullhi(sgpv##boundlist:boundlist)}  change the upper bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed.
 {help exp:Expressions}/formulas are also allowed as input. 
 More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
 The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. 
+
+{marker boundlist}{...}
+	{pstd}A {it:boundlist} is:{p_end}
+	{phang2}	# [# ...]{p_end}
 
 {pstd}
 The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. 

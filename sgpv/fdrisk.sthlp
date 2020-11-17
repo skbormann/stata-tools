@@ -46,12 +46,12 @@
 This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk (FCR) for a second-generation {it:p}-value of 1. 
 This command should be used mostly for single calculations. 
 For calculations after estimation commands use the {help sgpv} command.
-A {dialog fdrisk:dialog box} for easier usage of this command is available. 
-
-		The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1)
-		The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1)
-		with r = P(H_1)/P(H_0) being the ratio of the prior probabilities for the alternative and null hypothesis and {it:p_δ} being the calculated SGPV.	
-		See equation(4) in Blume et.al.(2018){p_end}
+A {dialog fdrisk:dialog box} for easier usage of this command is available.{p_end} 		
+		{pstd}{space 8}The false discovery risk is defined as:{space 4} 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1){break}
+		{space 8}The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1){break}
+		{space 8}with r = P(H_1)/P(H_0) being the ratio of the prior probabilities for the alternative and null hypothesis
+				and {it:p_δ} being the calculated SGPV.	{break}
+		{space 8}See equation(4) in Blume et.al.(2018){p_end}
 
 {pstd}
 When possible, one should compute the second-generation {it:p}-value and FDR/FCR on a scale that is symmetric about the null hypothesis. 
@@ -88,7 +88,7 @@ Options are "confidence" for a (1-α)100% confidence interval and "likelihood" f
 {opt intl:evel(string)}     level of interval estimate. If inttype is "confidence", the level is α. If "inttype" is "likelihood", the level is 1/k (not k).
 
 {phang}
-{opt nulls:pace(string asis)}  support of the null probability distribution. If "nullweights" is set to "Point", then "nullspace" is one number. 
+{opt nulls:pace(string)}  support of the null probability distribution. If "nullweights" is set to "Point", then "nullspace" is one number. 
 If "nullweights" is set to "Uniform" or "TruncNormal", then "nullspace" are two numbers separated by a space. 
 These numbers can be also formulas which must enclosed in " ".
 
@@ -96,7 +96,7 @@ These numbers can be also formulas which must enclosed in " ".
 {opt nullw:eights(string)}     probability distribution for the null parameter space. Options are  "Point", "Uniform", and "TruncNormal".
 
 {phang}
-{opt alts:pace(string asis)}  support for the alternative probability distribution. 
+{opt alts:pace(string)}  support for the alternative probability distribution. 
 If "altweights" is set to "Point", then "altspace" is one number. 
 If "altweights" is set to "Uniform" or "TruncNormal", then "altspace" contains two numbers separated by a space.
 These numbers can be also formulas which must enclosed in " ".
@@ -111,36 +111,34 @@ The default value assumes that both hypotheses are equally likely.
 
 {marker examples}{...}
 {title:Examples}
- To run the examples copy the lines into a Stata or use the file {view fdrisk-examples.do} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
-{pstd}{bf:False discovery risk with 95% confidence level:} (Click to {stata run fdrisk-examples.do example1:run} the example.){p_end}
-	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1)) /// 
-		  altweights("Uniform") altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") inttype("confidence")  intlevel(0.05)		
-	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata do fdrisk-examples.do example2a:run} the example.){p_end}
-	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0) /// 
-	          altweights("Uniform") altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
-	 	
-	{bf:with truncated normal weighting distribution:}(Click to {stata run fdrisk-examples.do example2b:run} the example.)
-	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("TruncNormal") ///
-	          altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
-
-{pstd}{bf:False discovery risk with LSI and wider null hypothesis:}(Click to {stata run fdrisk-examples.do example3:run} the example.){p_end}
-	. fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  ///
-		  altweights("Uniform") altspace("2.5-1*invnorm(1-0.041/2)*0.8" "2.5+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8)
+ {pstd}To run the examples copy the lines into a Stata or use the file {view fdrisk-examples.do} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here}) {p_end}
  
-{pstd}	{bf:False confirmation risk example:}(Click to {stata run fdrisk-examples.do example4:run} the example.) {p_end}
-	. fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform")  ///
-	          nullspace("0.01 - 1*invnorm(1-0.041/2)*0.15" "0.01 + 1*invnorm(1-0.041/2)*0.15") altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5)) ///
-	          inttype("likelihood")  intlevel(1/8)
+{pstd}{bf:False discovery risk with 95% confidence level:} (Click to {stata run fdrisk-examples.do example1:run} the example.){break}
+	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)  nullweights("Uniform")  nullspace(log(1/1.1) log(1.1))  
+		  altweights("Uniform") altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") inttype("confidence")  intlevel(0.05)
+		  
+	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata do fdrisk-examples.do example2a:run} the example.){break}
+	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point") nullspace(0) 
+	altweights("Uniform") altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
+	
+	{pstd}{bf:with truncated normal weighting distribution:}(Click to {stata run fdrisk-examples.do example2b:run} the example.){break}
+	. fdrisk, sgpval(0)  nulllo(log(1/1.1)) nullhi(log(1.1))  stderr(0.8)   nullweights("Point")  nullspace(0)  altweights("TruncNormal") 
+	          altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
+			  
+	{pstd}{bf:False discovery risk with LSI and wider null hypothesis:}(Click to {stata run fdrisk-examples.do example3:run} the example.){break}
+	. fdrisk, sgpval(0)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.8)   nullweights("Point")  nullspace(0)  
+		  altweights("Uniform") altspace("2.5-1*invnorm(1-0.041/2)*0.8" "2.5+1*invnorm(1-0.041/2)*0.8")  inttype("likelihood")  intlevel(1/8) 
  
-
-
+	{pstd}{bf:False confirmation risk example:}(Click to {stata run fdrisk-examples.do example4:run} the example.){break}
+	. fdrisk, sgpval(1)  nulllo(log(1/1.5)) nullhi(log(1.5))  stderr(0.15)   nullweights("Uniform")  
+	          nullspace("0.01 - 1*invnorm(1-0.041/2)*0.15" "0.01 + 1*invnorm(1-0.041/2)*0.15") altweights("Uniform")  altspace(log(1.5) 1.25*log(1.5)) 
+	          inttype("likelihood")  intlevel(1/8) 
+ 
 {title:Stored results}
-
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Scalars}{p_end}
 {synopt:{cmd:r(fdr)}}  false discovery risk {p_end}
 {synopt:{cmd:r(fcr)}}  false confirmation risk  {p_end}
-
 
 {title:References}
 {pstd}

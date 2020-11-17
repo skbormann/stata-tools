@@ -20,7 +20,9 @@
 *				Corrected minor errors in the documentation
 *Version 0.90 : Initial Github release
 
-
+/*To-Do List:  	- Check the result if a macro vector is used as input for esthi and estlo
+				- Allow multiple null hypotheses to be plotted in one graph
+*/
 program define plotsgpv, sortpreserve
 version 12.0
 syntax [if] [in] ,  estlo(name) esthi(name) nulllo(string) nullhi(string)  /// 
