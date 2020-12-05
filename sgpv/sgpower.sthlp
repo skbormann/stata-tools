@@ -65,7 +65,7 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 		P_θ(0 < p_δ < 1) = 1 - ϕ[ (θ_0 - δ) /SE - θ/SE - Z_α/2 ] + ϕ[ -(θ_0 + δ) /SE + θ/SE - Z_α/2 ] 
 					 when δ <= Z_α/2 * SE					 
 
-		SE denotes the standard error, (θ_0 - δ) and (θ_0 + δ) denote the lower and upper bound of the null interval.
+		{pstd} SE denotes the standard error, (θ_0 - δ) and (θ_0 + δ) denote the lower and upper bound of the null interval.
 
 
 {marker options}{...}

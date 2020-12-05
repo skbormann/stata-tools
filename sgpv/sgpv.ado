@@ -1,10 +1,13 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.2 31.10.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
+*!Version 1.2 21.11.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box /// 
 							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
 							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options". ///
-							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.  (recommended by reviewer)
+							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.  (recommended by reviewer) ///
+							Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix -> Without the option, the example ends with a matrix error. ///
+							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the nullspace. (21.11.2020) -> not documented yet and not implemented in dialog box yet
+							
 *Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -114,10 +117,11 @@ else{
 
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
- Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings Bonus(string)/*depreciated*/   DELTAgap FDrisk all  /// display-options
+ Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings    DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
- ALTWeights(string) ALTSpace(string asis) NULLSpace(string asis) NULLWeights(string) INTLevel(string) INTType(string) Pi0(real 0.5) /// fdrisk-options
-    debug  /*Display additional debug messages: undocumented*/  ] 
+  TRUNCnormal  /*set truncated normal distribution for nullspace*/ Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) /// fdrisk-options
+    debug  /*Display additional debug messages: undocumented*/ ///
+	/*depreciated options*/ Bonus(string) NULLSpace(string asis) NULLWeights(string) ALTWeights(string) ALTSpace(string asis) INTLevel(string) INTType(string) 	] 
 
 
 ***Option parsing
@@ -207,24 +211,18 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 
 	**Process fdrisk options 	
 	*Nullspace option
-	if "`nullspace'"!=""{
+	/*if "`nullspace'"!=""{
 		local nullspace `nullspace'
-	}
-	else if "`nullhi'"!= "`nulllo'"{
+	}*/
+	/*else*/ if "`nullhi'"!= "`nulllo'"{
 		local nullspace `nulllo' `nullhi'
 	}
 	else if "`nullhi'"== "`nulllo'"{
 		local nullspace `nulllo'
 	}
-	*Intlevel
-	if "`intlevel'"!=""{
-		local intlevel = `intlevel'
-	}
-	else{
-		local intlevel 0.05
-	}
 	
-	*Inttype
+	**Set the interval type for Fdrisk Inttype
+	* Depreciated approach based on R -> will be removed after two releases
 	if "`inttype'"!="" & inlist("`inttype'", "confidence","likelihood"){
 		local inttype `inttype'
 	}
@@ -234,8 +232,41 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	else{
 		local inttype "confidence"
 	}
+	
+	* More Stata-like documented approach
+	if "`inttype'"==""{ // Make confidence the default interval type
+		local inttype "confidence"
+	}
+	if "`likelihood'"!="" & "`matrix'"!="" { // Allow likelihood intervals only for matrices, because likelihood intervals are not used by standard estimation commands.
+		local inttype "likelihood"
+	}
+	else if "`likelihood'"!="" & "`matrix'"==""{
+		stop "Option 'likelihood' is only allowed together with the option 'matrix'."
+	}
+	
+	
+	**Set the level of the confidence or likelihood interval 
+	*Depreciated approach based on R
+	if "`intlevel'"!=""{
+		local intlevel = `intlevel'
+	}
+		
+	*More Stata like approach
+	if "`likelihood'"==""{
+			if "`level'"!=""{
+			local intlevel = 0.01*`level'
+			}
+			else{
+				local intlevel 0.05
+			}
+	}
+	else{
+		local intlevel = `likelihood'
+	}
 
-	*Nullweights
+	
+	*Nullweights: 21.11.2020 -> Depreciated nullspace and nullweights option but left the code in place to not break existing code. Will be removed in another release for clearer code.
+	*Not properly tested yet
 	if "`nullweights'"!=""  {
 		local nullweights `nullweights'
 	}
@@ -245,10 +276,16 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	else if "`nullweights'"=="" & mod(`=wordcount("`nullspace'")',2)==0{ //Assuming that Uniform is good default nullweights for a nullspace with two values -> TruncNormal will be chosen only if explicitly set.	
 		local nullweights "Uniform" 
 	} 
+	else if "`truncnormal'"!="" & mod(`=wordcount("`nullspace'")',2)==0{
+		local nullweights "TruncNormal"
+	}
 	
 	*Altweights
 	if "`altweights'"!="" & inlist("`altweights'", "Uniform", "TruncNormal"){
 		local altweights `altweights'
+	}
+	else if "`truncnormal'"!=""{ // Set altweights and nullweights to same distribution -> not strictly required by Blume et. al.
+		local altweights "TruncNormal"	
 	}
 	else{
 		local altweights "Uniform"
@@ -293,7 +330,12 @@ if "`cmd'"!=""{
  `quietly'	`cmd'
 }
 else if "`e(cmd)'"!=""{ // Replay previous estimation
- `quietly'	`e(cmd)'
+ `quietly'	`e(cmd)'  , `level' /* might add the option to change the level of the confidence intervals */
+}
+
+*Check if the confidence level for the estimation command is different than set in the level()-option and overwrite the previously set option
+if r(level)!=`level'{
+	local intlevel = 0.01*r(level)
 }
  
  

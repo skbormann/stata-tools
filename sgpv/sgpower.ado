@@ -16,7 +16,7 @@
 capture program drop sgpower
 program define sgpower, rclass
 version 12.0
-syntax , true(real)  nulllo(real)  nullhi(real)  INTType(string)   INTLevel(string) [STDerr(real 1)  Bonus]
+syntax , true(real)  nulllo(real)  nullhi(real)  INTType(string)   INTLevel(string) [STDerr(real 1)  Bonus Level(cilevel) LIKelihood(real )]
 
 if !inlist("`inttype'", "confidence","likelihood"){
 	disp as err "Option 'inttype' must be one of the following: confidence or likelihood "

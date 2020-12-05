@@ -4,7 +4,7 @@ To-Do/Further improvements: 	Add additional input checks for nullweights and alt
 								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses.
 */
 /*
-sgpv dialog version 1.04, 21.05.2020, Sven-Kristjan Bormann
+sgpv dialog version 1.05, 21.05.2020, Sven-Kristjan Bormann
 for sgpv version 1.1
 
 To install in User Statistics menu via Stata commands:
@@ -38,13 +38,14 @@ BEGIN
         setscale_hadj resource FORMAT_DLG_HSCALE
 END
 
-
+/*
 LIST nullweights_list
 BEGIN
 	Point
 	Uniform
 	TruncNormal
 END
+*/
 
 LIST altweights_list
 BEGIN
@@ -156,54 +157,40 @@ BEGIN
 	BUTTON   bu_format    350  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
 	
 	GROUPBOX gb_fdrisk 	 _top	200	405 	190, label("Fdrisk options")
-	TEXT tx_nullspace      15   +10    200    ., label("Null hypothesis parameter space:")
-	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
+	//TEXT tx_nullspace      15   +10    200    ., label("Null hypothesis parameter space:")
+	//EXP ex_nullspace       15    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
 	
-	TEXT tx_nullweights     15    _ls    150    ., label("Null hypothesis distribution:")
-	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
-													tooltip("The probability distribution for the null parameter space.")
+	//TEXT tx_nullweights     15    _ls    150    ., label("Null hypothesis distribution:")
+	//COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
+													// tooltip("The probability distribution for the null parameter space.")
+
+	CHECKBOX ck_truncnormal 	15	+10 	200		., label("Truncated Normal distribution") option(truncnormal) ///
+													tooltip("Use the truncated normal distribution for nullspace and alternative parameter space.")
 	
-	TEXT tx_altweights      15   _ls      170    ., label("Alternative hypothesis distribution:")
-	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
+	//TEXT tx_altweights      15   +10      170    ., label("Alternative hypothesis distribution:")
+	//COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
 												tooltip("Probability distribution for the alternative parameter space")
 	
-	TEXT tx_inttpye       	180  -70      @    ., label("Interval type:")
-	COMBOBOX cb_inttype     @  _ss      @    ., dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
+	//TEXT tx_inttpye       180  @      @    ., label("Interval type:")
+	//COMBOBOX cb_inttype     @  _ss      @    ., 	dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
 	
-	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
-	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level) default(0.05)
+	//TEXT tx_level 		 @  	_ls      @    ., 	label("Interval level:")
+	//EDIT ed_level        @  	_ss      @    ., 	option(intlevel) error(Interval level) default(0.05)
 	
-	TEXT tx_pi0           +120  -70     120   ., label("Prior probability of H0:")
-	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
+	
+	//COMBOBOX  sp_level    	15      _ls      _spwd   .,  	dropdown label(resource LBL_TX_LEVEL) default(c(level)) /// 
+														contents(levels) option(level)
+	//TEXT     tx_level     _spsep  @       _spr2		., label(Interval level) tooltip()
+	  
+	//CHECKBOX ck_likelihood 	15	_ls 	@	., 	label("Likelihood support interval") option(likelihood) tooltip("")
+
+	
+	TEXT tx_pi0           +120  	@    	 120   ., label("Prior probability of H0:")
+	EDIT ed_pi0              @  	_ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
 END
 
-/*
-DIALOG fdrisk, tabtitle("Fdrisk options")
-BEGIN
-	TEXT tx_nullspace      10    10    200    ., label("Null hypothesis parameter space:")
-	EXP ex_nullspace       @    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
-	
-	TEXT tx_nullweights     10    _ls    150    ., label("Null hypothesis distribution:")
-	COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
-													tooltip("The probability distribution for the null parameter space.")
-	
-	TEXT tx_altweights      10   _ls      200    ., label("Alternative hypothesis distribution:")
-	COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
-												tooltip("Probability distribution for the alternative parameter space")
-	
-	TEXT tx_inttpye       	@  _xxls      @    ., label("Interval type:")
-	COMBOBOX cb_inttype     @  _ss      @    ., dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
-	
-	TEXT tx_intlevel 		 @  _ls      @    ., label("Interval level:")
-	EDIT ed_intlevel         @  _ss      @    ., option(intlevel) error(Interval level) default(0.05)
-	
-	TEXT tx_pi0           +150  -70     120   ., label("Prior probability of H0:")
-	EDIT ed_pi0              @  _ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
-	
-END
-*/
 //Copied from format.dlg
 SCRIPT showFormatDialog 
 BEGIN
@@ -243,7 +230,7 @@ END
 
 
 //(De-)activate display of bonus statistic options  
-//03.11.2020: Not all scripts work yet as expected. It is not possible
+
 
 SCRIPT deltagap_on
 BEGIN
@@ -287,21 +274,23 @@ END
 
 SCRIPT fdrisk_options_on
 BEGIN
-	further.ex_nullspace.enable
-	further.cb_altweights.enable
-	further.cb_nullweights.enable
-	further.cb_inttype.enable
-	further.ed_intlevel.enable
+	//further.ex_nullspace.enable
+	//further.cb_altweights.enable
+	//further.cb_nullweights.enable
+	further.ck_truncnormal.enable
+	further.ck_likelihood.enable
+	further.sp_level.enable
 	further.ed_pi0.enable
 END
 
 SCRIPT fdrisk_options_off
 BEGIN
-	further.ex_nullspace.disable
-	further.cb_altweights.disable
-	further.cb_nullweights.disable
-	further.cb_inttype.disable
-	further.ed_intlevel.disable
+	//further.ex_nullspace.disable
+	//further.cb_altweights.disable
+	//further.cb_nullweights.disable
+	further.ck_truncnormal.disable
+	further.ck_likelihood.disable
+	further.sp_level.disable
 	further.ed_pi0.disable
 END
 
@@ -331,12 +320,15 @@ BEGIN
 		option further.ck_all
 		optionarg /hidedefault further.ed_format
 		
-		optionarg further.ex_nullspace
-		optionarg /hidedefault further.cb_nullweights 
+		*optionarg further.ex_nullspace
+		*optionarg /hidedefault further.cb_nullweights 
 		*optionarg further.ex_altspace
-		optionarg /hidedefault further.cb_altweights 
-		optionarg /hidedefault further.cb_inttype 
-		optionarg /hidedefault further.ed_intlevel
+		*option further.truncnormal
+		*option further.likelihood
+		*optionarg /hidedefault further.sp_level
+		*optionarg /hidedefault further.cb_altweights 
+		*optionarg /hidedefault further.cb_inttype 
+		*optionarg /hidedefault further.ed_intlevel
 		optionarg /hidedefault further.ed_pi0
 	endoptions
 END

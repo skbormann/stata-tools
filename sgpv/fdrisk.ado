@@ -23,15 +23,85 @@ capture program drop fdrisk
 
 program define fdrisk, rclass
 version 12.0
-syntax, nulllo(string) nullhi(string) STDerr(real) INTType(string) INTLevel(string) ///
-		NULLSpace(string asis) NULLWeights(string) ALTSpace(string asis) ALTWeights(string) ///
-		[SGPVal(integer 0) Pi0(real 0.5)]
+syntax, nulllo(string) nullhi(string) STDerr(real)   ///
+		NULLSpace(string asis)  ALTSpace(string asis) ///
+		/*Depreciated options */ NULLWeights(string)  ALTWeights(string) INTType(string) INTLevel(string)  ///
+		[ Pi0(real 0.5) ///
+		/*Depreciated options */ SGPVal(integer 0)
+		/*Newly added options to replace existing ones*/ fdr fcr Level(cilevel) LIKelihood(numlist min=1 max=2) NULLUniform NULLTruncnormal ALTUniform ALTTruncnormal]
 *Syntax parsing
 local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
+
+
+*New syntax(checks)---------------------------
+// The new command syntax is mapped to the old syntax so that existing code still works with new version.
+// But the new syntax should be more Stata-like than the old R-based one. 
+/*
+*Set sgpval
+if "`fdr'"!="" & "´fcr'"!=""{
+	stop "Only either the Fdr or Fcr  are allowed but not both."
+}
+
+if "`fcr'"!="" local sgpval 1
+if "`fdr'"!="" local sgpval 0
+if "`fdr'"=="" & "´fcr'"=="" local sgpval 0
+
+*Set nullweights
+if wordcount("`nullspace'")==1 local nullweights "Point"
+
+if wordcount("`nullspace'")==2 & ("`nulluniform'"=="" | "`nulltruncnormal'" ==""){
+		disp "No distribution for the nullspace provided. Using 'Uniform' as the default distribution."
+		local nullweights "Uniform"
+	}
+if wordcount("`nullspace'")==2 & ("`nulluniform'"!="") &  "`nulltruncnormal'" !=""{
+	stop "You cannot set both options 'nulluniform' & 'nulltruncnormal' at the same time. Only one of them can be set."
+}	
+
+if wordcount("`nullspace'")==2 & ("`nulluniform'"!=""){
+	local nullweights "Uniform"
+}
+
+if wordcount("`nullspace'")==2 & "`nulltruncnormal'" !=""{
+	local nullweights "TruncNormal"
+}
+
+*Set altweights
+if wordcount("`altspace'")==1 local altweights "Point"
+
+if wordcount("`altspace'")==2 & ("`altuniform'"=="" | "`alttruncnormal'" ==""){
+		disp "No distribution for the altspace provided. Using 'Uniform' as the default distribution."
+		local altweights "Uniform"
+	}
+if wordcount("`altspace'")==2 & ("`altuniform'"!="") &  "`alttruncnormal'" !=""{
+	stop "You cannot set both options 'altuniform' & 'alttruncnormal' at the same time. Only one of them can be set."
+}	
+
+if wordcount("`altspace'")==2 & ("`altuniform'"!=""){
+	local altweights "Uniform"
+}
+
+if wordcount("`altspace'")==2 & "`alttruncnormal'" !=""{
+	local altweights "TruncNormal"
+}
+
+*Set inttype & intlevel
+
+if "`level'"!="" & "`likelihood'"==""{
+	local inttype "confidence"
+	local intlevel = 0.01*`level'
+}
+if "`likelihood'"!=""{
+	local inttype "likelihood"
+	local intlevel = `likelihood'
+}
+
+*/
+*Old syntax (checks)-----------------------------
 if !inlist(`sgpval',0,1){
 	stop "Only values 0 and 1 allowed for the option 'sgpval'"	
 }
+
 
 if !inlist("`inttype'", "confidence","likelihood"){
 	stop "Option 'inttype' must be one of the following: confidence or likelihood."	
@@ -48,6 +118,8 @@ if !inlist("`altweights'", "Point", "Uniform", "TruncNormal"){
 if !(`pi0'>0 & `pi0'<1){
 	stop "Values for option 'pi0' need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
 }
+
+
 
 *Code taken from sgpower.ado -> in R-code things are handled directly by the sgpower() function. This would be only possible in Mata in the same way.
 local intlevel = `intlevel' 
@@ -117,7 +189,7 @@ if "`inttype'"=="likelihood"{
 	   *interval null
      if(`nulllo' != `nullhi')  {
      *PsgpvH0 @ point (=type I error at nullspace)
-      if("`nullweights'" == "Point")  {
+     if ("`nullweights'" == "Point"){
         if(`:word count `nullspace''!=1){
 			stop "Option 'nullspace' must contain only one value when using a point null probability distribution, e.g. 'nullspace(0)'."
 		} 
@@ -263,7 +335,3 @@ return local integral `r(integral)'
 restore
  
 end
-
-
-
-

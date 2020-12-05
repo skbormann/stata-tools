@@ -33,6 +33,8 @@
 {p_end}
 {synopt:{opth c:oefficient(sgpv##coeflist:coeflist)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
+{synopt:{opt l:evel(#)}} set confidence level for ...; default is {cmd:level(95)}
+{p_end}
 {synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term.
 {p_end}
 
@@ -59,16 +61,20 @@
 {p_end}
 
 {syntab:Fdrisk}
-{synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
+//{synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
+//{p_end}
+{* synopt:{opt nulls:pace(string)}}  support of the null probability distribution.
+{* p_end}
+{* synopt:{opt nullw:eights(string)}}  probability distribution for the null parameter space.
+{* p_end}
+{synopt:{opt trunc:normal}} use truncated normal distribution as probibility distribution for null parameter space.
 {p_end}
-{synopt:{opt nulls:pace(string)}}  support of the null probability distribution.
-{p_end}
-{synopt:{opt nullw:eights(string)}}  probability distribution for the null parameter space.
-{p_end}
-{synopt:{opt intl:evel(string)}}  level of interval estimate.
-{p_end}
-{synopt:{opt intt:ype(string)}}  class of interval estimate used.
-{p_end}
+
+{synopt:{opt likelihood(#)} } use the likehood support interval with level 1/k
+//{synopt:{opt intl:evel(string)}}  level of interval estimate.
+//{p_end}
+//{synopt:{opt intt:ype(string)}}  class of interval estimate used.
+//{p_end}
 {synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.
 {p_end}
 
@@ -122,10 +128,12 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
 
 {marker subcmd}{...}
 {title:Subcommands}
+{pstd}
     It is possible to call the other commands of the sgpv-package with the {cmd:sgpv}-command. 
     This is mostly a convenience feature so that the help-files for the individual commands should be consulted for the options of these commands.
     Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk:risk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
     Two examples how to use the subcommands are given {help sgpv##subcmds_example:here}.
+	Using the subcommands directly is comparable to the immediate form of other Stata commands, like {help ttesti:ttesti}.
 
 {marker options}{...}
 {title:Options}
@@ -160,7 +168,7 @@ To run the example code, go to the respective {help sgpv##leukemia-example:examp
 The selected coefficients need to have the same names as displayed in the estimation output. If you did not use {help fvvarlist:factor-variable notation}, then the names are identical to the variable names. 
 Otherwise, you have to use {help fvvarlist:the factor-variable notation} e.g. 1.foreign if you estimated  {cmd:reg price mpg i.foreign}.
 Multiple coefficients must be separated with a space.
-You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See{help sgpv##multiple-equations-example: the multiple equations example} for an example and the definition of {it:coeflist} below..
+You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See{help sgpv##multiple-equations-example: the multiple equations example} for an example and the definition of {it:coeflist} below.
 
 {marker coeflist}{...}
         {it:coeflist} is
@@ -174,7 +182,7 @@ You can also select only an equation by using "eq:" or select a specific equatio
 
 {dlgtab:Null-Hypothesis}
 {phang}
-{opth nulllo(sgpv##boundlist:boundlist)}  change the lower bound of the null-hypothesis interval. 
+{cmd:nulllo({help sgpv##boundlist:boundlist)}}  change the lower bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). 
 Missing values, strings and variable names are not allowed. 
 {help exp:Expressions}/formulas are also allowed as input.
@@ -184,7 +192,7 @@ The number of lower and upper bounds must also match.
 See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration.
 
 {phang}
-{opth nullhi(sgpv##boundlist:boundlist)}  change the upper bound of the null-hypothesis interval. 
+{cmd:nullhi({help sgpv##boundlist:boundlist)}}  change the upper bound of the null-hypothesis interval. 
 The default is 0 (the same bound as for the usually reported p-values). Missing values, strings and variable names are not allowed.
 {help exp:Expressions}/formulas are also allowed as input. 
 More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
@@ -231,32 +239,43 @@ You should disable these warning messages only if using the default point 0 null
 what you want to do and you understand the consequences of doing so.
 
 {dlgtab:Fdrisk}
-{pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end}
+{pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end} // Add here comments about default values 
 
-{phang}
+The following default values are used, when calculating the False Discovery Risk. More information about each option can be found in the help for {help fdrisk}. 
+
+{* {phang}
 {opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal". The default is "Uniform".
-The alternative parameter space is automatically set as the lower and upper bound of the estimated confidence interval.
+The alternative parameter space is automatically set as the lower and upper bound of the estimated confidence interval.}
 
-{phang}
-{opt nulls:pace(string)}  support of the null probability distribution. 
+{* phang}
+{* {* opt nulls:pace(string)}  support of the null probability distribution. 
 If "nullweights" is "Point", then "nullspace" is a single number. 
 If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" contains two numbers separated by a space. 
-These numbers can be also formulas which must be  enclosed in " ". The default is to use the lower and upper bounds of the given null-hypothesis as the support of the null probability distribution.
+These numbers can be also formulas which must be  enclosed in " ". The default is to use the lower and upper bounds of the given null-hypothesis as the support of the null probability distribution.}
 
-{phang}
-{opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
+{* phang}
+{* {opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
 The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set to the same value. 
-If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".
+If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".}
 
 {phang}
-{opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. 
+{opt trunc:normal} use truncated normal distribution as the probability distribution for the null parameter space. // Add more explanations here
+
+{*phang}
+{* {*opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. 
 If "inttype" is "likelihood", the level is 1/k (not k). 
-The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. 
+The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. }
 
-{phang}
+{* {phang}
 {opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. 
 Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval. 
-The default is "confidence".
+The default is "confidence".}
+
+{phang}
+{opt l:evel(#)} set the level of the confidence interval; default is level(95); see also {helpb estimation options##level():[R] estimation options}. This option is overriden by the same named option of an estimation command. Use this option primarily
+
+{phang}
+{opt lik:elihood(#)} use a 1/k likelihood support interval instead of a (1-α)100% confidence interval. This option works only in combination with the option {cmd:matrix()} for a user supplied matrix. No official Stata command reports likelihood support intervals.
 
 {phang}
 {opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
@@ -468,16 +487,16 @@ see {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.p
 {pstd}
 The delta-gap is have a way of ranking two studies that both have second-generation p-values of zero (p_δ = 0). It is defined as the distance between the intervals in δ units with δ being the half-width of the interval null hypothesis.{p_end}
 
-		The delta-gap is calculated as: gap   	  = max(θ_l, H_0l) - min(H_0u, θ_u) 
-						delta 	  = |H_0|/2 
-						delta.gap = gap/delta 
+		 The delta-gap is calculated as: gap   	   = max(θ_l, H_0l) - min(H_0u, θ_u) 
+						 delta 	   = |H_0|/2 
+						 delta.gap = gap/delta 
 								
    {pstd} For the standard case of a point 0 null hypothesis and a 95% confidence interval, delta is set to be equal to 1. 
     Then the delta-gap is just the distance between either the upper or the lower bound of the confidence interval and 0. 
     If both θ_u and θ_l are negative then, the delta-gap is just θ_u, the upper bound of the confidence interval. 
     If both bounds of the confidence interval are positive, then the delta-gap is equal to the lower bound of the confidence interval.{p_end}
 	
-    {pstd}The false discovery risk is defined as: 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1){break}
+    {pstd}The false discovery risk is defined as: {space 3} 	P(H_0|p_δ=0) = (1 + P(p_δ = 0| H_1)/P(p_δ=0|H_0) * r)^(-1){break}
    The false confirmation risk is defined as: 	P(H_1|p_δ=1) = (1 + P(p_δ = 1| H_0)/P(p_δ=1|H_1) * 1/r )^(-1){break}
     with r = P(H_1)/P(H_0) being the prior probability.{break}	
     See equation(4) in Blume et.al.(2018){p_end}

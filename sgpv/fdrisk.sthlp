@@ -29,6 +29,7 @@
 {synopt:{opt nulllo(string)}}  the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
 {synopt:{opt nullhi(string)}}  the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
 {synopt:{opt std:err(#)}}  standard error of the point estimate.{p_end}
+{}
 {synopt:{opt intt:ype(string)}}  class of interval estimate used.{p_end}
 {synopt:{opt intl:evel(string)}}  level of interval estimate. {p_end}
 {synopt:{opt nulls:pace(string)}}  support of the null probability distribution.{p_end}
