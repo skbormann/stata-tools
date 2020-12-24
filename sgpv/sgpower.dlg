@@ -24,7 +24,7 @@ BEGIN
 	likelihood
 END
 
-DIALOG main, label("Sgpower 1.00 - SGPV Power Calculations") tabtitle("Main")
+DIALOG main, label("Sgpower 1.02 - SGPV Power Calculations") tabtitle("Main")
 BEGIN
 	TEXT tx_true 		20    _top   120    ., label("True value")
 	EDIT ed_true 		 @    _ss    120    ., numonly option(true) error("A true value is required.") tooltip("The true value of a parameter for which the power function should be calculated.")
@@ -43,6 +43,12 @@ BEGIN
 	
 	TEXT tx_intlevel    @    _ls      @     ., label("Interval level")
 	EDIT ed_intlevel    @    _ss      @     ., option(intlevel) error("An interval level is required.") tooltip("The interval level is")
+	
+	/*TEXT tx_inttpye   +160   -70      100     ., label("Interval type")
+	COMBOBOX cb_inttype @    _ss      @     ., dropdown content(inttype_list) option(inttype) error("An interval type") tooltip("Set the interval type to either confidence or likelihood.")
+	
+	TEXT tx_intlevel    @    _ls      @     ., label("Interval level")
+	EDIT ed_intlevel    @    _ss      @     ., option(intlevel) error("An interval level is required.") tooltip("The interval level is")*/
 	
 	
 END
@@ -69,11 +75,13 @@ BEGIN
 		 require main.ed_nullhi
 		 optionarg main.ed_nullhi
 		 
-		 require main.cb_inttype
-		 optionarg main.cb_inttype
+		 optionarg main.
 		 
-		 require main.ed_intlevel
-		 optionarg main.ed_intlevel
+		 *require main.cb_inttype
+		 *optionarg main.cb_inttype
+		 
+		 *require main.ed_intlevel
+		 *optionarg main.ed_intlevel
 		 
 		 optionarg options.ed_se
 		 option options.ck_bonus

@@ -39,9 +39,9 @@
 {p_end}
 
 {syntab:Null hypothesis}
-{synopt:{opth nulllo(sgpv##boundlist:boundlist)}}  change the lower bound(s) of the null-hypothesis interval(s).
+{synopt:{cmd:nulllo({help sgpv##boundlist:boundlist})}}  change the lower bound(s) of the null-hypothesis interval(s).
 {p_end}
-{synopt:{opth nullhi(sgpv##boundlist:boundlist)}}  change the upper bound(s) of the null-hypothesis interval(s).
+{synopt:{cmd:nullhi({help sgpv##boundlist:boundlist})}}  change the upper bound(s) of the null-hypothesis interval(s).
 {p_end}
 
 {syntab:Display}
@@ -61,20 +61,10 @@
 {p_end}
 
 {syntab:Fdrisk}
-//{synopt:{opt altw:eights(string)}}  probability distribution for the alternative parameter space.
-//{p_end}
-{* synopt:{opt nulls:pace(string)}}  support of the null probability distribution.
-{* p_end}
-{* synopt:{opt nullw:eights(string)}}  probability distribution for the null parameter space.
-{* p_end}
 {synopt:{opt trunc:normal}} use truncated normal distribution as probibility distribution for null parameter space.
 {p_end}
-
 {synopt:{opt likelihood(#)} } use the likehood support interval with level 1/k
-//{synopt:{opt intl:evel(string)}}  level of interval estimate.
-//{p_end}
-//{synopt:{opt intt:ype(string)}}  class of interval estimate used.
-//{p_end}
+{p_end}
 {synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.
 {p_end}
 
@@ -103,8 +93,7 @@ The SGPVs are reported alongside the usually reported p-values. {p_end}
 
 {pstd}
 An ordinary user should use this command and not other commands of this package on which {cmd:sgpv} is based upon. 
-{cmd:sgpv} uses sensible default values for calculating the SGPVs, the delta-gaps and the accompaning false discovery risks (fdr), which can be changed.  
-This wrapper command runs commands which are based on the original R-code from the {browse "https://github.com/weltybiostat/sgpv":sgpv-package}. 
+{cmd:sgpv} uses sensible default values for calculating the SGPVs, the delta-gaps and the accompaning false discovery risks (fdr), which can be changed.   
 This package comes also with the example leukemia dataset from {browse "https://github.com/ramhiser/datamicroarray/wiki/Golub-(1999)"}.{break}
 Dialog boxes for each command (including {dialog sgpv:this one}) are also provided to make the usage of the commands easier.
 The dialog boxes can be installed into the User menubar. 
@@ -217,7 +206,6 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!{p
 {opt matl:istopt(string)}     change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
-{* opt b:onus(string)}    {* display and calculate bonus statistics like delta gaps and fdrs. Possible values are "deltagap", "fdrisk", "all" to activate only the display and calculations of the delta-gaps or the fdrs or both.}
 {opt delta:gap} calculate and display the delta-gap if the SGPV is 0.
 
 {phang}
@@ -368,9 +356,10 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {title:Exporting results}
   {pstd}
   You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.{break}
-  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document{break}
-  {stata . estout e(comparison)} //display the results{break}
-  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier{p_end}
+  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier{break}
+  {stata . estout e(comparison)} //display the results{break} 
+  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document{p_end}
+  
   
   {marker stored_estimations} 
   {title:Using stored estimations}
@@ -405,20 +394,20 @@ Otherwise, the option returns an error and will not delete the menu entries.
   
 {pstd}  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.{break}
-	{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
+	{space 4}{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
   {pstd}The same null hypotheses but this time one null-hypothesis for each selected equation or quantile{break}
-	{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
+	{space 4}{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
 	
   {marker multiple-equations-example}
   {title:Selecting coefficients}	
-  {pstd}Calculate sgpvs for a multiple equation estimation command and select coefficients{p_end}
-	{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}
-  {pstd}Select only the foreign coefficient for sgpv calculation{p_end}
-	{stata . sgpv, coefficient(foreign) }
-  {pstd}Select only the 10%, 50% and 90% quantile equation for sgpv calculation{p_end}
-	 {stata ". sgpv, coefficient(q10: q50: q90:)"}  
-  {pstd}Select only the 50% quantile equation and foreign coefficient for sgpv calculation{p_end}
-	  {stata ". sgpv, coefficient(q50:foreign)"} 
+  {pstd}Calculate sgpvs for a multiple equation estimation command and select coefficients{break}
+	{space 4}{stata . sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)}{p_end}
+  {pstd}Select only the foreign coefficient for sgpv calculation{break}
+	{space 4}{stata . sgpv, coefficient(foreign) }{p_end}
+  {pstd}Select only the 10%, 50% and 90% quantile equation for sgpv calculation{break}
+	{space 4} {stata ". sgpv, coefficient(q10: q50: q90:)"}  {p_end}
+  {pstd}Select only the 50% quantile equation and foreign coefficient for sgpv calculation{break}
+	 {space 4} {stata ". sgpv, coefficient(q50:foreign)"} {p_end}
 
 
   {marker leukemia-example}
@@ -429,21 +418,23 @@ Otherwise, the option returns an error and will not delete the menu entries.
   More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
   The example file below will calculate the SGPVs and bonus statistics for the leukemia dataset. 
   You can view the {view sgpv-leukemia-example.do:code}.{break} 
-	{stata . do sgpv-leukemia-example.do}{p_end}
+	{stata . do sgpv-leukemia-example.do}{p_end}	
 	
  {pstd}This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
   Should your {help matsize:maximum matrix size} be higher than the number of observations in the dataset (7128), then the example code should run faster.
   You can run {stata display c(matsize)} to see your current setting.{p_end}
-
   {marker subcmds_example}
   {title:Subcommands examples} 
-  {pstd}The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package:{p_end}
-	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }
-	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
- 
+  {pstd}The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package:{break}
+	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }{break}
+	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}{p_end}
 {marker menuInstall}{...}
-  Install the dialog boxes permanently in the User menubar: User -> Statistics 
-	{stata . sgpv menu, perm}  
+  {pstd}Install the dialog boxes permanently in the User menubar: User -> Statistics {break}
+	{stata . sgpv menu, perm}{p_end}
+{marker menuRemove}{...}
+{pstd}Remove the installed dialog boxes (permanently) from the User menubar:{break}
+{stata . sgpv menu, remove}{p_end}
+	
 
 {title:Stored results}
 {cmd:sgpv} stores the following in r();

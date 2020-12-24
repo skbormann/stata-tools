@@ -18,7 +18,7 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpower}
-{cmd:,} true(#) nulllo(#) nullhi(#) {cmdab:intt:ype(interval_type)} {cmdab:intl:evel(#)}
+{cmd:,} true(#) nulllo(#) nullhi(#) {opt l:evel(#)} {opt lik:elihood(#)}
 [{it:options}]
 
 {synoptset 20 tabbed}{...}
@@ -31,9 +31,9 @@
 {p_end}
 {synopt:{opt nullhi(#)}}  the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 {p_end}
-{synopt:{opt intt:ype(string)}}  class of interval estimate used for calculating the SGPV. 
+{synopt:{opt l:evel(#)}} use confidence interval with the specified level; default is {cmd:level(95)}.
 {p_end}
-{synopt:{opt intl:evel(#)}}  level of interval estimate. 
+{synopt:{opt lik:elihood(#)}} use likelihood support interval with level was used to calculate the SGPV.
 {p_end}
 
 {syntab:Further options}
@@ -82,12 +82,10 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {opt nullhi(#)}     the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 
 {phang}
-{opt intt:ype(string)}     class of interval estimate used for calculating the SGPV. 
-Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval.
+{opt l:evel(#)} use a confidence interval with level (1-α)100%. The default is {cmd:level(95)} if option {cmd:likelihood} or another confidence level is not set. 
 
 {phang}
-{opt intl:evel(#)}     level of interval estimate. If "inttype" is "confidence", the level is α. 
-If "inttype" is "likelihood", the level is 1/k (not k). 
+{opt lik:elihood(#)} use a likelihood support interval with level 1/k. 
 				
 {pstd}
 {p_end}
@@ -110,8 +108,8 @@ If "inttype" is "likelihood", the level is 1/k (not k).
 {title:Examples}
 {pstd}
 
-{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
-{stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}
+{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) level(95)}
+{stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) level(95))}
 
 Plot the power curve examples (view the {view sgpower-plot-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
 {stata . do sgpower-plot-example.do}

@@ -1,12 +1,14 @@
 *! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.2 21.11.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
+*!Version 1.2 12.12.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box /// 
 							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
 							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options". ///
 							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.  (recommended by reviewer) ///
 							Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix -> Without the option, the example ends with a matrix error. ///
-							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the nullspace. (21.11.2020) -> not documented yet and not implemented in dialog box yet
+							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the nullspace. (21.11.2020) ->  not implemented in dialog box yet ///
+							Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option is meant to be used with stored estimations. The likelihood-option is meant to be used together with the matrix-option. ///
+							The previous inttype and intlevel options did not work as intended.		
 							
 *Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
@@ -254,7 +256,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	*More Stata like approach
 	if "`likelihood'"==""{
 			if "`level'"!=""{
-			local intlevel = 0.01*`level'
+			local intlevel = 1 - 0.01*`level'
 			}
 			else{
 				local intlevel 0.05
@@ -327,10 +329,10 @@ if "`bonus'"=="all"| "`all'"=="all"{
 **Estimation command
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
 if "`cmd'"!=""{
- `quietly'	`cmd'
+	`quietly'	`cmd'
 }
 else if "`e(cmd)'"!=""{ // Replay previous estimation
- `quietly'	`e(cmd)'  , `level' /* might add the option to change the level of the confidence intervals */
+	`quietly'	`e(cmd)'  , `level' 
 }
 
 *Check if the confidence level for the estimation command is different than set in the level()-option and overwrite the previously set option
