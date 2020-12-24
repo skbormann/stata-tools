@@ -2,7 +2,7 @@
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for fdisk.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
 *!Version 1.1  24.12.2020 : Changed the syntax of the command to match more closely Stata standards, the old syntax still works: (dialog not changed yet) ///
-							Option sgpval became two options 'fdr' and 'fcr'. If none of them are set then the default is to calculate the Fdr. ///
+							Option sgpval became one option 'fcr'. The default is to calculate the Fdr. ///
 							Option nullweights became 'nulltruncnormal'. The option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default weighting distribution. ///
 							Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default weighting distribution. ///
 							Options inttype and intlevel became options level(#) and likelihood(#). If no option is set then the confidence interval with the default confidence interval level is used. 							
@@ -32,7 +32,7 @@ syntax, nulllo(string) nullhi(string) STDerr(real)   ///
 		NULLSpace(string asis)  ALTSpace(string asis) ///
 		[ Pi0(real 0.5) ///
 		/*Depreciated options */  NULLWeights(string)  ALTWeights(string) INTType(string) INTLevel(string) SGPVal(integer 0) ///
-		/*Newly added options to replace existing ones*/ fdr fcr Level(cilevel) LIKelihood(numlist min=1 max=2)  NULLTruncnormal ALTTruncnormal]
+		/*Newly added options to replace existing ones*/  fcr Level(cilevel) LIKelihood(numlist min=1 max=2)  NULLTruncnormal ALTTruncnormal]
 *Syntax parsing
 local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
@@ -43,13 +43,13 @@ local integrate nomataInt // Keep this macro in case I offer a Mata-based soluti
 // But the new syntax should be more Stata-like than the old R-based one. 
 
 *Set sgpval
-if "`fdr'"!="" & "`fcr'"!=""{
+/*if "`fdr'"!="" & "`fcr'"!=""{
 	stop "Only either the Fdr or Fcr  are allowed but not both."
 }
-
+*/
 if "`fcr'"!="" local sgpval 1
-if "`fdr'"!="" local sgpval 0
-if "`fdr'"=="" & "´fcr'"=="" local sgpval 0
+if "`fcr'"=="" local sgpval 0
+*if "`fdr'"=="" & "´fcr'"=="" local sgpval 0
 
 *Set nullweights
 if `:word count `nullspace''==1 local nullweights "Point"

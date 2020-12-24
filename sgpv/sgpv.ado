@@ -765,7 +765,7 @@ program define menu
 	window menu append item "SGPV" "False Confirmation/Discovery Risk (&fdrisk)" "db fdrisk" 
 	window menu append item "SGPV" "SGPV Plot Interval Estimates (p&lotsgpv)" "db plotsgpv"
 	window menu refresh
-	disp "Menu entries succesfully created.{break} Go to User->Statistics->SGPV to access the dialog boxes for this package."
+	disp "Menu entries succesfully created.{break}Go to User->Statistics->SGPV to access the dialog boxes for this package."
 	
 end
 

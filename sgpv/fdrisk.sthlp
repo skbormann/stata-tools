@@ -19,14 +19,13 @@
 {title:Syntax}
 {p 8 17 2}
 {opt fdrisk}{cmd:,} {opt nulllo(string)} {opt nullhi(string)} {opt std:err(#)}  {opt nulls:pace(string)}  {opt alts:pace(string)} 
-[{opt fdr} {opt fcr} {opt l:evel(#)} {opt lik:elihood(#)} {opt nullu:niform} {opt nullt:runcnormal} {opt altu:niform} {opt altt:runcnormal} {opt p:i0(#)} ]
+[{opt fcr} {opt l:evel(#)} {opt lik:elihood(#)} {opt nullu:niform} {opt nullt:runcnormal} {opt altu:niform} {opt altt:runcnormal} {opt p:i0(#)} ]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{synopt:{opt fdr}} calculate the false discovery risk.  {p_end}
-{synopt:{opt fcr}} calculate the false confirmation risk. {p_end}
+{synopt:{opt fcr}} calculate the false confirmation risk instead of the default false discovery risk. {p_end}
 {synopt:{opt nulllo(lower_bound)}}  the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
 {synopt:{opt nullhi(upper_bound)}}  the upper bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.{p_end}
 {synopt:{opt std:err(#)}}  standard error of the point estimate.{p_end}
@@ -45,6 +44,7 @@
 {title:Description}
 {pstd}
 This command computes the false discovery risk (sometimes called the "empirical bayes FDR") for a second-generation {it:p}-value of 0, or the false confirmation risk (FCR) for a second-generation {it:p}-value of 1. 
+The default is to calculate the FDR. The calculation of the FCR needs to be requested by setting the option {cmd:fcr}.
 This command should be used mostly for single calculations. 
 For calculations after estimation commands use the {help sgpv} command.
 A {dialog fdrisk:dialog box} for easier usage of this command is available.{p_end} 		
@@ -70,10 +70,8 @@ although they may be implemented in future versions.{p_end}
 {title:Options}
 {dlgtab:Main}
 {phang}
-{opt fdr} calculate the false discovery risk, when the observed second-generation p-value is 0. The default if no other option is given.
-
-{phang}
-{opt fcr} calculate the false confirmation risk, when the observed second-generation p-value is 1.  
+{opt fcr} calculate the false confirmation risk instead of the false discovery risk, when the observed second-generation p-value is 1.  
+The default is to calculate the false discovery risk, when the observed second-generation p-value is 0.
 
 {phang}
 {opt nulllo(string)}     the lower bound of the indifference zone (null interval) upon which the second-generation {it:p}-value was based.
@@ -95,20 +93,20 @@ although they may be implemented in future versions.{p_end}
  The "nullspace" can contain either one or two numbers. These numbers can be also formulas which must enclosed in " ".
 If "nullspace" is one number, then no distribution for the null parameter space is used. 
 If "nullspace" contains two numbers separated by a space, then the distribution for the null parameter space are either the Uniform-distribution or the Truncated-Normal-distribution (option {cmd:nulltruncnormal}).
-If the Uniform-distribution is used as the default and option {cmd:nulltruncnormal} selects the Truncated-Normal-distribution with the mean being the middlepoint of the nullspace and standard deviation given by option {cmd:stderr}.
+The Uniform-distribution is used as the default.
 
 {phang}
-{opt nullt:runcnormal} use the Truncated-Normal-distribution as the probability distribution for the null parameter space.
+{opt nullt:runcnormal} use the Truncated-Normal-distribution as the probability distribution for the null parameter space with the mean being the middlepoint of the nullspace and standard deviation given by option {cmd:stderr}.
 
 {phang}
 {opt alts:pace(string)}  support for the alternative probability distribution. 
 The "altspace" can contain either one or two numbers. These numbers can be also formulas which must enclosed in " ".
 If "altspace" is one number, then no distribution for the alternative parameter space is used. 
-If "altspace" contains two numbers separated by a space, then the distribution for the alternative parameter space are either the Uniform-distribution (option {cmd:altuniform}) or the Truncated-Normal-distribution (option {cmd:alttruncnormal}).
-If the Uniform-distribution is used as the default and option {cmd:alttruncnormal} selects the Truncated-Normal-distribution with the mean being the middlepoint of the altspace and the standard deviation given by option {cmd:stderr}.
+If "altspace" contains two numbers separated by a space, then the distribution for the alternative parameter space are either the Uniform-distribution  or the Truncated-Normal-distribution (option {cmd:alttruncnormal}).
+The Uniform-distribution is used as the default. 
  
 {phang}
-{opt altt:runcnormal} use Truncated-Normal-distribution as the probability distribution for the alternative parameter space.
+{opt altt:runcnormal} use Truncated-Normal-distribution as the probability distribution for the alternative parameter space with the mean being the middlepoint of the altspace and the standard deviation given by option {cmd:stderr}.
 
 {phang}
 {opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 

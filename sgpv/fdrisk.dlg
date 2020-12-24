@@ -1,6 +1,6 @@
 /*
-fdrisk dialog version 1.04 , 09.11.2020, Sven-Kristjan Bormann
-for fdrisk version 1.04 
+fdrisk dialog version 1.1 , 24.12.2020, Sven-Kristjan Bormann
+for fdrisk version 1.1 
 
 To install in User Statistics menu via Stata commands:
   
@@ -27,27 +27,7 @@ BEGIN
 	main.ed_likelihood.disable
 END
 
-/*
-LIST nullweights_list
-BEGIN
-	Point
-	Uniform
-	TruncNormal
-END
 
-LIST altweights_list
-BEGIN
-	Uniform
-	TruncNormal
-END
-
-
-LIST inttype_list
-BEGIN
-	confidence
-	likelihood
-END
-*/
 LIST sgpval_values
 BEGIN
 	0
@@ -73,9 +53,9 @@ BEGIN
 	EXP ex_nullhi	 	    @	 _ss    250      ., label("Expression") option(nullhi) ///
 													tooltip("Set upper bound of the null-hypothesis interval") error(Upper Bound null-hypothesis interval)
 	
-	TEXT tx_sgpval           300  -60    140  	 ., label("Set Fdr/Fcr:")
-	COMBOBOX cb_sgpval       @  _ss      40 	  20, option(sgpval) content(sgpval_list) values(sgpval_values) dropdownlist  default(0) ///
-													tooltip("If you choose 0, the False Discovery Risk will be calculated. If you choose 1, the False Confirmation Risk will be calculated.")
+	CHECKBOX ck_fcr           300  -60    140  	 ., label("Calculate the FCR") option(fcr) tooltip("Calculate the False Confirmatory Risk instead of the default False Discovery Risk when the observed SGPV is 1.")
+	/*COMBOBOX cb_sgpval       @  _ss      40 	  20, option(sgpval) content(sgpval_list) values(sgpval_values) dropdownlist  default(0) ///
+													tooltip("If you choose 0, the False Discovery Risk will be calculated. If you choose 1, the False Confirmation Risk will be calculated.")*/
 	
 	TEXT tx_se			    300   _ss   80      ., label("Standard Error")
 	EDIT ed_se			    @     _ss     @     ., option(stderr) default(1) numonly error(Standard error) tooltip("Standard error of the point estimate")
@@ -85,10 +65,6 @@ BEGIN
 												tooltip("Support of the null probability distribution.")
 												
 	GROUPBOX gb_nullweights     10    _ls    180    50, label("Null hypothesis distribution:")
-	//COMBOBOX cb_nullweights @    _ss     100    ., dropdown content(nullweights_list) option(nullweights) error(Nullweights) ///
-	//												tooltip("The probability distribution for the null parameter space.")
-													
-	//CHECKBOX ck_nulluniform 	20 		_ss 	200		., label("Uniform") option(nulluniform) tooltip("Use the Uniform-distribution as the probability distribution for the null parameter space.")
 	CHECKBOX ck_nulltruncnormal 20 	_ss 	150 	., label("Truncated Normal") option(nulltruncnormal) tooltip("Use the Truncated-Normal-distribution instead of the Uniform-distribution as the probability distribution for the null parameter space.")												
 	
 	//FRAME fr_altspace		5  	+20		410		120
@@ -96,13 +72,9 @@ BEGIN
 	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution.")
 	
 	GROUPBOX gb_altweights      @   _ls      180    50, label("Alternative hypothesis distribution:")
-	//COMBOBOX cb_altweights  @   _ss      @    ., dropdown content(altweights_list) option(altweights) error(Altweights) tooltip("Probability distribution for the alternative parameter space")
-	
-	//CHECKBOX ck_altuniform 	20 		_ss 	200		., label("Uniform") option(altuniform) tooltip("Use the Uniform-distribution as the probability distribution for the alternative parameter space.")
 	CHECKBOX ck_alttruncnormal 20 	_ss 	150 	., label("Truncated Normal") option(alttruncnormal) tooltip("Use the Truncated-Normal-distribution instead of the Uniform-distribution as the probability distribution for the alternative parameter space.")
 	
 	CHECKBOX ck_level       	10  _xxls      150    ., label("Confidence Interval Level:")  onclickon(script confidence_on) onclickoff(script confidence_off)
-	//COMBOBOX cb_inttype     10  _ss      @    ., dropdown content(inttype_list) option(inttype) error(Interval type) 
 	SPINNER  sp_level    	10      _ss      @   .,   label(resource LBL_TX_LEVEL) default(c(level)) /// 
 														min(5) max(100) option(level)
 	//TEXT     tx_level     _spsep  @       _spr2		., label(Interval level) tooltip()
@@ -181,8 +153,7 @@ BEGIN
 		*optionarg main.ed_intlevel
 		
 		optionarg main.ed_pi0
-
-		optionarg main.cb_sgpval
+		option main.ck_fcr
 	endoptions
 
 END

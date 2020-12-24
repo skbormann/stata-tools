@@ -108,8 +108,8 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {title:Examples}
 {pstd}
 
-{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1) level(95)}
-{stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1) level(95))}
+{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1)} 
+{stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1)}
 
 Plot the power curve examples (view the {view sgpower-plot-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
 {stata . do sgpower-plot-example.do}
