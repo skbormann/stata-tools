@@ -1,15 +1,17 @@
-*! A wrapper program for calculating the Second-Generation P-Values and their associated diagnosis based on Blume et al. 2018,2019
+*!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.2 12.12.2020 : Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. ///
-							Fixed the format option in the Dialog box /// 
-							Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
-							Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options". ///
-							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.  (recommended by reviewer) ///
+*!Version 1.2 27.12.2020 : Changed the name of the option permament to permdialog to clarify the meaning of the option. ///
+							Fixed the format option in the Dialog box. /// 
+							Added a remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
+							Renamed the dialog tab "Display" to "Reporting". Moved the options from the dialog tab "Fdrisk" to dialog tab "Reporting". ///
+							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported. ///
 							Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix -> Without the option, the example ends with a matrix error. ///
-							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the nullspace. (21.11.2020) ->  not implemented in dialog box yet ///
-							Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option is meant to be used with stored estimations. The likelihood-option is meant to be used together with the matrix-option. ///
-							The previous inttype and intlevel options did not work as intended.		
-							
+							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the null and alternative space. ///
+							Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option overwrites the level option of an estimation command. ///
+							The likelihood-option is meant to be used together with the matrix-option. ///
+							The previous inttype and intlevel options did not work as intended. ///
+							The title for results matrix now shows the level and type which was used to calculate the SGPVs (, delta-gaps and Fdrs). ///
+							Calculating SGPVs for stored estimations will only show the SGPV results and not the saved estimation results.
 *Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -50,9 +52,9 @@ To-Do(Things that I wish to implement at some point or that I think that might b
 	- Shorten parts of the code by using the cond()-function instead if ... else if ... constructs.
 	- Write a certification script which checks all possible errors (help cscript)
 	- change the help file generation from makehlp to markdoc for more control over the layout of the help files -> currently requires a lot of manual tuning to get desired results.
+	- Write a subcommand to parse the Fdrisk-options or at least move the code to a different place; at the moment the code is not at the best place and the fdrisk-options are set before it is checked if they are needed at all.
 	
 	External changes (Mostly more features):
-	- Add a clear option for the menu subcommand to allow an uninstall of the menubar entries.
 	- Allow a mixture of case 1 & 2 for the coefficient-option -> select only some equations and variables from a multi-equation estimation -> ex. coef(((q10: q50: q90:) (mpg weight foreign)) which will then be expanded to coef(q10:mpg q10:weight ... q90:weight q90:foreign) -> requires changes in how this option is parsed
 	- Unify options nulllo and nullhi into one option named "null" to make it easier for users to enter null-hypothesis -> requires rewriting the parsing of the input -> initial code written -> could rename the option to "H0" -> not sure which way to input intervals works best
 	- Add an option to not display the individual null-hypothesis if multiple null hypotheses are set.
@@ -179,8 +181,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 		local nulllo `r(lb)'
 		local nullhi `r(ub)'
 	}
-	
-	
+		
 	
 	*Catch input errors when using multiple null hypotheses
 	*Add checks for string input
@@ -213,10 +214,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 
 	**Process fdrisk options 	
 	*Nullspace option
-	/*if "`nullspace'"!=""{
-		local nullspace `nullspace'
-	}*/
-	/*else*/ if "`nullhi'"!= "`nulllo'"{
+	if "`nullhi'"!= "`nulllo'"{
 		local nullspace `nulllo' `nullhi'
 	}
 	else if "`nullhi'"== "`nulllo'"{
@@ -247,7 +245,8 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	}
 	
 	
-	**Set the level of the confidence or likelihood interval 
+	**Set the level of the confidence or likelihood interval: 
+	*Only needed when calculating the fdr, but setting them here regardless of Fdr-calculations does not hurt.
 	*Depreciated approach based on R
 	if "`intlevel'"!=""{
 		local intlevel = `intlevel'
@@ -286,7 +285,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	if "`altweights'"!="" & inlist("`altweights'", "Uniform", "TruncNormal"){
 		local altweights `altweights'
 	}
-	else if "`truncnormal'"!=""{ // Set altweights and nullweights to same distribution -> not strictly required by Blume et. al.
+	else if "`truncnormal'"!=""{ // Set altweights and nullweights to same distribution -> not strictly required by Blume et. al. but makes the code a bit shorter.
 		local altweights "TruncNormal"	
 	}
 	else{
@@ -300,9 +299,9 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 	
 **Parse bonus option
-*Changed the default behaviour so that the option is now a bit confusing
-*02.11.2020: Changed these options from one singular option to multiple optionally_on options as per reviewer request;
-*old code is kept to avoid breaking existing code -> need to change syntax and examples in help file,  
+*Changed the default behaviour so that the option is now a bit confusing, at least the code for it.
+*02.11.2020: Changed these options from one singular option to multiple optionally_on options;
+*old code is kept to avoid breaking existing code,  
 *no checks implemented on ensure that only one of the optionally_on options is used.
 if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
 	stop `"Option 'bonus' is incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
@@ -329,15 +328,21 @@ if "`bonus'"=="all"| "`all'"=="all"{
 **Estimation command
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
 if "`cmd'"!=""{
-	`quietly'	`cmd'
+	//Remove any level option set for the estimation command by the one for the sgpv command 
+	gettoken com opt:cmd,parse(,)
+	local opt:list uniq opt // assuming that options are allowed to appear only once
+	if ustrregexm("`opt'","level\(\d+\)") disp "The level option of your estimation command is overwritten by the level option of the {cmd:sgpv} command."
+	local opt = cond(ustrregexm("`opt'","level\(\d+\)"),ustrregexrf("`opt'","level\(\d+\)","level(`level')"),"`opt' level(`level')") 
+	local cmd `com'`opt'
+	`quietly' `cmd'
 }
 else if "`e(cmd)'"!=""{ // Replay previous estimation
-	`quietly'	`e(cmd)'  , `level' 
+	quietly `e(cmd)' , level(`level')
 }
 
 *Check if the confidence level for the estimation command is different than set in the level()-option and overwrite the previously set option
 if r(level)!=`level'{
-	local intlevel = 0.01*r(level)
+	local intlevel = 1-0.01*r(level)
 }
  
  
@@ -402,12 +407,12 @@ if "`fdrisk_stat'"=="fdrisk"{
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
 		if wordcount("`nullhi'")==1{
-			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0')
+			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(0) pi0(`pi0')
 			}
 		else if wordcount("`nullhi'")>1{			
 			qui fdrisk, nullhi(`=word("`nullhi'",`i')') nulllo(`=word("`nulllo'",`i')') ///
 			stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') ///
-			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(`=`comp'[`i',1]') pi0(`pi0') 	
+			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(0) pi0(`pi0') 	
 			}			
 			capture confirm scalar r(fdr)
 			if !_rc mat `fdrisk'[`i',1] = r(fdr)
@@ -449,7 +454,8 @@ if wordcount("`nulllo'")>1{
  if wordcount("`nulllo'")==1{
 	local interval_name = cond(`nullhi'==`nulllo',"point","interval")
 	local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","[`nulllo',`nullhi']")
-	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' "') rowtitle(Variables) `matlistopt'
+	pause before matlist
+	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' based on a `=cond("`inttype'"=="confidence","`: display %6.4g 100*(1-`intlevel')'%",cond("`inttype'"=="likelihood","`intlevel'",""))' `inttype' `=cond("`inttype'"=="likelihood","support","")' interval"') rowtitle(Variables) `matlistopt'
  }
 
 

@@ -14,12 +14,15 @@ To permanently install, place the commands in your -profile.do- file.
 VERSION 12.0
 POSITION . . 420 470
 INCLUDE _std_large
+
+*INCLUDE header
 OK ok1,      label("OK")
 CANCEL can1, label("Cancel")
 SUBMIT sub1, label("Submit") 
 HELP hlp1,   view("help fdrisk")  
 RESET res1
 COPY copy1
+INCLUDE levels_list
 
 SCRIPT INIT
 BEGIN
@@ -27,18 +30,6 @@ BEGIN
 	main.ed_likelihood.disable
 END
 
-
-LIST sgpval_values
-BEGIN
-	0
-	1
-END
-
-LIST sgpval_list
-BEGIN
-	Fdr
-	Fcr
-END
 
 DIALOG main, label("Fdrisk 1.1 - False discovery/confirmation risk (Fdr/Fcr)") tabtitle("Main")
 BEGIN
@@ -54,9 +45,7 @@ BEGIN
 													tooltip("Set upper bound of the null-hypothesis interval") error(Upper Bound null-hypothesis interval)
 	
 	CHECKBOX ck_fcr           300  -60    140  	 ., label("Calculate the FCR") option(fcr) tooltip("Calculate the False Confirmatory Risk instead of the default False Discovery Risk when the observed SGPV is 1.")
-	/*COMBOBOX cb_sgpval       @  _ss      40 	  20, option(sgpval) content(sgpval_list) values(sgpval_values) dropdownlist  default(0) ///
-													tooltip("If you choose 0, the False Discovery Risk will be calculated. If you choose 1, the False Confirmation Risk will be calculated.")*/
-	
+
 	TEXT tx_se			    300   _ss   80      ., label("Standard Error")
 	EDIT ed_se			    @     _ss     @     ., option(stderr) default(1) numonly error(Standard error) tooltip("Standard error of the point estimate")
 	
@@ -67,7 +56,6 @@ BEGIN
 	GROUPBOX gb_nullweights     10    _ls    180    50, label("Null hypothesis distribution:")
 	CHECKBOX ck_nulltruncnormal 20 	_ss 	150 	., label("Truncated Normal") option(nulltruncnormal) tooltip("Use the Truncated-Normal-distribution instead of the Uniform-distribution as the probability distribution for the null parameter space.")												
 	
-	//FRAME fr_altspace		5  	+20		410		120
 	TEXT tx_altspace     	10   _ls     200    ., label("Alternative hypothesis parameter space:")
 	EXP ex_altspace        	@   _ss      400    ., option(altspace) error(Altspace) label("Expression") tooltip("Support for the alternative probability distribution.")
 	
@@ -75,9 +63,8 @@ BEGIN
 	CHECKBOX ck_alttruncnormal 20 	_ss 	150 	., label("Truncated Normal") option(alttruncnormal) tooltip("Use the Truncated-Normal-distribution instead of the Uniform-distribution as the probability distribution for the alternative parameter space.")
 	
 	CHECKBOX ck_level       	10  _xxls      150    ., label("Confidence Interval Level:")  onclickon(script confidence_on) onclickoff(script confidence_off)
-	SPINNER  sp_level    	10      _ss      @   .,   label(resource LBL_TX_LEVEL) default(c(level)) /// 
-														min(5) max(100) option(level)
-	//TEXT     tx_level     _spsep  @       _spr2		., label(Interval level) tooltip()
+	COMBOBOX  sp_level    	10      _ss      _spwd   .,   label(resource LBL_TX_LEVEL) default(c(level)) option(level) contents(levels) dropdown /// 
+														 
 	
 	CHECKBOX ck_likelihood		 10  _ls      170    ., label("Likelihood support interval level:") onclickon(script likelihood_on) onclickoff(script likelihood_off)
 	EDIT ed_likelihood         10  _ss      @    ., option(likelihood) error(No Interval level for the Likelihood-Support-Interval set) tooltip("Set the interval level for the Likelihood-Support-Interval(LSI).")
@@ -129,11 +116,6 @@ BEGIN
 		require main.ex_nullspace
 		optionarg main.ex_nullspace
 		
-		*require main.cb_nullweights
-		*optionarg main.cb_nullweights 
-		
-		*option main.ck_nulluniform
-		
 		option main.ck_nulltruncnormal
 		
 		require main.ex_altspace
@@ -143,18 +125,9 @@ BEGIN
 		
 		optionarg main.sp_level /hidedefault
 		optionarg main.ed_likelihood
-		*require main.cb_altweights
-		*optionarg main.cb_altweights 
-		
-		*require main.cb_inttype
-		*optionarg main.cb_inttype 
-		
-		*require main.ed_intlevel
-		*optionarg main.ed_intlevel
-		
+	
 		optionarg main.ed_pi0
 		option main.ck_fcr
 	endoptions
-
 END
 

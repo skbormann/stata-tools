@@ -1,7 +1,8 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.05  01.11.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals; Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
-*!Version 1.04  05.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". Noshow-option now works expected. 
+*!Version 1.05  01.11.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals. ///
+							Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
+*Version 1.04  05.07.2020: Added/improved support matrices as inputs for options "esthi" and "estlo". Noshow-option now works expected. 
 *Version 1.03a 23.06.2020: Removed unnecessary input checks
 *Version 1.03 24.05.2020 : Added further input checks	
 *Version 1.02 06.04.2020 : Added another check to prevent using more than one null interval with variables or large matrices as input estlo and esthi, added two more input error checks -> some non-sensical input is probably still possible. 
@@ -27,7 +28,8 @@
 capture program drop sgpvalue
 program define sgpvalue, rclass
 version 12.0 
-syntax, estlo(string) esthi(string)  nulllo(string) nullhi(string) [NOWARNings INFcorrection(real 1e-5) nodeltagap nomata noshow replace h0(string asis) h1(string asis) /*two additional options for a new syntax to enter intervals */ ] 
+syntax, estlo(string) esthi(string)  nulllo(string) nullhi(string) [NOWARNings INFcorrection(real 1e-5) nodeltagap nomata noshow replace ///
+/*two additional options for a new syntax to enter intervals */  h0(string asis) h1(string asis)  ] 
 
 *Parse the input : 
 *Check that the inputs are variables -> For the moment only allowed if both esthi and estlo are variables
@@ -184,13 +186,13 @@ else{	// Run if rows less than matsize -> the "original" approach
 		*Warnings -> Make warning messages more descriptive
 			if "`warnings'"!="nowarnings"{
 				if (`est_len'<0  ) & (`null_len'<0){
-					disp "The `i'th interval length is negative. Upper and lower bound of the interval might be switched." 
+					disp "The `i'. interval length is negative. Upper and lower bound of the interval might be switched." 
 				}
 				if reldif(`est_len',`=c(maxdouble)')<1e-5 | reldif(`null_len',`=c(maxdouble)')<1e-5{ // Needs further corrections for everything close to but not exactly c(maxdouble)
-					disp "The `i'th interval has infinite length."
+					disp "The `i'. interval has infinite length."
 				}				
 				if (`est_len'==0 | `null_len'==0 ) {
-					disp "The `i'th interval has a zero length. Consider using an interval hypothesis instead of a point hypothesis."
+					disp "The `i'. interval has zero length. Consider using an interval hypothesis instead of a point hypothesis."
 				}
 		}
 		
@@ -297,7 +299,6 @@ while "`interval'"!=""{
 	gettoken bracket interval:interval,parse (" (") 
 	if "`bracket'"!="(" stop "The interval `i' in option `optname' needs to start with a '('"
 	
-
 	gettoken lb interval:interval,parse(" ,")
 	if "`lb'"=="" stop "The interval `i' in option `optname' needs to have valid number or expression or variable name after the '('."
 	local lb_full `lb_full' `lb'
@@ -328,11 +329,9 @@ args matname macroname
 		exit 198
 		}
 
-	local rowvec 0
-	local colvec 0
 	if rowsof(`matname')>1{
 		local cnt = rowsof(`matname')
-		local colvec  1
+		local colvec 1
 	} 
 
 	if colsof(`matname')>1{
@@ -353,18 +352,19 @@ return local `macroname' `matmacro'
 end
 
 *Convert a local macro into a matrix -> needed if I want to remove the approach based on macros to calculate sgpvs and only use Mata-approach
-program define convertMacro, rclass
+*Not used yet 
+program define convertMacro, sclass
 	args macroname matname
 	tempname macromat
 	forvalues i=1/`=wordcount("`macroname'")' {
 	mat `macromat' = (nullmat(`macromat') \ `=`=word("`macroname'",`i')'')
 	}
 	
-	return matrix `matname' = `macromat'
+	sreturn matrix `matname' = `macromat'
 end
 
 *Check if the input is valid -> Missing value or number
-program define isValid // Does not deal yet with missing value as symbol for one-sided intervals -> needs a rewrite of the whole input evaluation logic for the macro algorithm
+program define isValid 
 args valid optname
 if `valid'!=.{
 	if real("`=`valid''")==.{
@@ -547,5 +547,4 @@ real scalar function min_s(real scalar x, real scalar y){
 real scalar function max_s(real scalar x, real scalar y){
 	return(x > y ? x : y)
 }
-
 end

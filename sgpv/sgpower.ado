@@ -1,7 +1,7 @@
 *!Power function calculations for Second Generation P-Values
 *!Author: Sven-Kristjan Bormann
 *Based on the R-code for sgpower.R  from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.05 06.12.2020 : Changed the syntax to set interval type and interval level to be more in line with Stata standard; old syntax still works ///
+*!Version 1.05 24.12.2020 : Changed the syntax to set interval type and interval level to be more in line with Stata standard; old syntax still works ///
 							Options "inttype" and "intlevel" became new options "level" and "likelihood".
 *Version 1.02 10.07.2020 : Fixed a missing bonus statistic ('at 0') in the help-file and the code
 *Version 1.01 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise

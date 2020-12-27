@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1b  14 October 2020}{...}
+{* *! version 1.2  27 Dec 2020}{...}
 {viewerdialog sgpv "dialog sgpv"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -9,11 +9,10 @@
 {viewerjumpto "Syntax" "sgpv##syntax"}{...}
 {viewerjumpto "Description" "sgpv##description"}{...}
 {viewerjumpto "Options" "sgpv##options"}{...}
-{* viewerjumpto "Remarks" "sgpv##remarks"}{...}
 {viewerjumpto "Examples" "sgpv##examples"}{...}
 {title:Title}
 {phang}
-{bf:sgpv} {hline 2} A wrapper command for calculating the Second-Generation P-Value(s) (SGPV) and their associated diagnosis.  
+{bf:sgpv} {hline 2} Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands.  
 
 {marker syntax}{...}
 {title:Syntax}
@@ -33,8 +32,6 @@
 {p_end}
 {synopt:{opth c:oefficient(sgpv##coeflist:coeflist)}}  the coefficients for which the SGPVs and other statistics are calculated.
 {p_end}
-{synopt:{opt l:evel(#)}} set confidence level for ...; default is {cmd:level(95)}
-{p_end}
 {synopt:{opt nocons:tant}} do not calculate SGPVs for the constant term.
 {p_end}
 
@@ -44,7 +41,9 @@
 {synopt:{cmd:nullhi({help sgpv##boundlist:boundlist})}}  change the upper bound(s) of the null-hypothesis interval(s).
 {p_end}
 
-{syntab:Display}
+{syntab:Reporting}
+{synopt:{opt l:evel(#)}} set confidence level for ...; default is {cmd:level(95)}
+{p_end}
 {synopt:{opt q:uietly}}  suppress the output of the estimation command.
 {p_end}
 {synopt:{opt matl:istopt(string)}}  change the options of the displayed matrix. 
@@ -63,12 +62,12 @@
 {syntab:Fdrisk}
 {synopt:{opt trunc:normal}} use truncated normal distribution as probibility distribution for null parameter space.
 {p_end}
-{synopt:{opt likelihood(#)} } use the likehood support interval with level 1/k
+{synopt:{opt lik:elihood(#)} } use the likehood support interval with level 1/k
 {p_end}
 {synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.
 {p_end}
 
-{syntab:menu}
+{syntab:Menu}
 {synopt:{opt perm:dialog}} install permanently the dialog boxes into the User menubar.
 {p_end}
 {synopt:{opt remove}} remove the entries created by the option {opt permdialog}.
@@ -198,9 +197,20 @@ The default value 0 is just meant to be used for an easier beginning when starti
 Please change this value to something more reasonable. Reasonable lower or upper bounds depend on your dataset and your research question.
 Using this default value will always result in having SGPVs of value 0 or 0.5!{p_end}
 
-{dlgtab:Display}
+{dlgtab:Reporting}
+{phang}
+{opt l:evel(#)} set the level of the confidence interval. 
+The default is {cmd:level(95)}. See also {helpb estimation options##level():[R] estimation options}. 
+This option overwrites the same named option of an estimation command.   
+A warning is displayed in the beginning if this happens.
+
 {phang}
 {opt q:uietly}     suppress the output of the estimation command.
+
+{phang}
+{opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. 
+You should disable these warning messages only if using the default point 0 null-hypothesis is 
+what you want to do and you understand the consequences of doing so.
 
 {phang}
 {opt matl:istopt(string)}     change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
@@ -221,56 +231,27 @@ Using both options together has the same effect as using this option alone.
 This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. 
 Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
-{phang}
-{opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. 
-You should disable these warning messages only if using the default point 0 null-hypothesis is 
-what you want to do and you understand the consequences of doing so.
-
-{dlgtab:Fdrisk}
-{pstd}These options are only needed for the calculations of the False Discovery Risk (fdr). The default values should give sensible results in most situations.{p_end} // Add here comments about default values 
-
-The following default values are used, when calculating the False Discovery Risk. More information about each option can be found in the help for {help fdrisk}. 
-
-{* {phang}
-{opt altw:eights(string)}  probability distribution for the alternative parameter space. Options are "Uniform", and "TruncNormal". The default is "Uniform".
-The alternative parameter space is automatically set as the lower and upper bound of the estimated confidence interval.}
-
-{* phang}
-{* {* opt nulls:pace(string)}  support of the null probability distribution. 
-If "nullweights" is "Point", then "nullspace" is a single number. 
-If "nullweights" is "Uniform" or "TruncNormal", then "nullspace" contains two numbers separated by a space. 
-These numbers can be also formulas which must be  enclosed in " ". The default is to use the lower and upper bounds of the given null-hypothesis as the support of the null probability distribution.}
-
-{* phang}
-{* {opt nullw:eights(string)}  probability distribution for the null parameter space. Options are "Point", "Uniform", and "TruncNormal". 
-The default is "Point" if both options {cmd:nulllo()} and {cmd:nullhi()} are set to the same value. 
-If the options {cmd:nulllo()} and {cmd:nullhi()} are set to different values, then {cmd:nullweights()} is by default set to "Uniform".}
+{pstd}The following options are only needed for the calculations of the False Discovery Risk (fdr).
+ More information about each option can be found in the help for {help fdrisk}. 
+{p_end} 
 
 {phang}
-{opt trunc:normal} use truncated normal distribution as the probability distribution for the null parameter space. // Add more explanations here
-
-{*phang}
-{* {*opt intl:evel(string)}  level of interval estimate. If inttype is "confidence", the level is α. 
-If "inttype" is "likelihood", the level is 1/k (not k). 
-The default value is 0.05 for the confidence interval which gives the fdr/fcr for the typically reported 95% confidence interval. }
-
-{* {phang}
-{opt intt:ype(string)}  class of interval estimate used. This determines the functional form of the power function. 
-Options are "confidence" for a (1-α)100% confidence interval and "likelihood" for a 1/k likelihood support interval. 
-The default is "confidence".}
+{opt trunc:normal} use the truncated normal distribution as the probability distribution for the null and alternative parameter space. 
+The default is to use the uniform distribution as the probability distribution for the null and alternative parameter space.
 
 {phang}
-{opt l:evel(#)} set the level of the confidence interval; default is level(95); see also {helpb estimation options##level():[R] estimation options}. This option is overriden by the same named option of an estimation command. Use this option primarily
+{opt lik:elihood(#)} use a 1/k likelihood support interval (LSI) instead of a (1-α)100% confidence interval to calculate the Fdr. 
+This option works only in combination with the option {cmd:matrix()} for a user supplied matrix. 
+The level should be set equal to the level of the LSI which was used to calculate the lower and upper bound of the estimated coefficients.
 
-{phang}
-{opt lik:elihood(#)} use a 1/k likelihood support interval instead of a (1-α)100% confidence interval. This option works only in combination with the option {cmd:matrix()} for a user supplied matrix. No official Stata command reports likelihood support intervals.
+No official Stata command reports likelihood support intervals.
 
 {phang}
 {opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
 A prior probability outside of this interval is not sensible. 
 The default value assumes that both hypotheses are equally likely.
 
-{dlgtab:menu}
+{dlgtab:Menu}
 {phang}
 {opt perm:dialog} install permanently the dialog boxes into the User menubar. 
 The necessary commands are added to the user's profile.do. 
@@ -295,6 +276,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
 {phang2}{help sgpv##interpretation_example:How to interpret results}{p_end}
 {phang2}{help sgpv##exporting_results:Exporting results}{p_end}
 {phang2}{help sgpv##stored_estimations:Using stored estimations}{p_end}
+{phang2}{help sgpv##setting_confidence_levels:Calculating for SGPVs with different levels of confidence}{p_end}
 {phang2}{help sgpv##alternative_null-hypothesis:Setting a different null-hypothesis}{p_end}
 {phang2}{help sgpv##multiple-null-hypotheses-example:Setting an individual null hypotheses for each coefficient}{p_end}
 {phang2}{help sgpv##multiple-equations-example:Selecting coefficients}{p_end}
@@ -336,7 +318,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
            _cons |     .0874         .5          .          . 
 
    
-  {marker interpretation_example}  
+  {marker interpretation_example}{...}  
   {title:Interpretation example:}
   {pstd}
   There is inconclusive evidence for an effect of mpg on price, while there is no evidence for the null-hypothesis of no effect for weight and foreign. 
@@ -361,8 +343,9 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document{p_end}
   
   
-  {marker stored_estimations} 
+  {marker stored_estimations}{...} 
   {title:Using stored estimations}
+  {pstd}{stata ". qui sgpv, all: regress price mpg weight foreign"} // Re-run the previous estimation {p_end} 
   {pstd}Save estimation for later usage{break} 
   {stata . estimate store reg}{p_end} 
   {pstd}The same result but this time after the last estimation.{break}
@@ -373,12 +356,20 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {pstd}Calculate sgpvs for the stored estimation and only the foreign coefficient{break} 
 	{stata . sgpv, estimate(reg) coefficient("foreign")}{break} 
 	{stata . sgpv, estimate(quantile) coefficient("foreign")}{p_end}
-  {marker alternative_null-hypothesis}
+	
+  {marker setting_confidence_levels}{...}
+  {title:Calculating for SGPVs with different levels of confidence}
+  {pstd}Usually the SGPVs are calculated for the standard 95% confidence interval, but other confidence levels are also possible.  {break}
+  At first the SGPVs are calculated for a 99% confidence interval:{break}
+  {stata ". sgpv, all level(99): regress price mpg weight foreign"}{p_end}
+  {pstd}Then for the stored quantile regression results also for 99% confidence level{break}
+  {stata . sgpv ,estimate(quantile) level(99) all} {p_end}
+    
+  {marker alternative_null-hypothesis}{...}
   {title:Setting a different null-hypothesis}
   {pstd}Set an alternative null-hypothesis -> 1% of the mean value of the price variable (-62, 62) and remove the constant from the calculations {break} 
-	{stata ". sgpv, bonus(all) nulllo(-62) nullhi(62) quietly noconstant: regress price mpg weight foreign"}
-	
-    {pstd}Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of {-62,62}{p_end}
+	{stata ". sgpv, all nulllo(-62) nullhi(62) quietly noconstant: regress price mpg weight foreign"}{p_end}	
+    {pstd}Comparison of ordinary P-Values and Second Generation P-Values for an interval Null-Hypothesis of [-62,62] based on a 95% confidence interval {p_end}
        Variables |   P-Value       SGPV  Delta-Gap        Fdr 
     -------------+--------------------------------------------
              mpg |     .7693         .5          .          . 
@@ -387,15 +378,15 @@ Otherwise, the option returns an error and will not delete the menu entries.
 	{pstd}
     The SGPV for the weight-coefficient has changed from 0 to 1 while the P-Value remained the same compared to the default point 0 null-hypothesis.
     The example illustrates the need to set a scientifically reasonable null-hypothesis. 
-    For the weight-coefficient, the null-hypothesis of {-62,62} is probably too wide.
+    For the weight-coefficient, the null-hypothesis of [-62,62] is probably too wide.
 	
-  {marker multiple-null-hypotheses-example}
+  {marker multiple-null-hypotheses-example}{...}
   {title:Setting an individual null hypotheses for each coefficient}
   
 {pstd}  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.{break}
 	{space 4}{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
-  {pstd}The same null hypotheses but this time one null-hypothesis for each selected equation or quantile{break}
+  {pstd}The same null hypotheses but this time one null-hypothesis for each selected equation or quantile:{break}
 	{space 4}{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
 	
   {marker multiple-equations-example}
@@ -418,8 +409,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
   More information about the dataset are in the dataset itself: Use {stata sysuse leukstats,clear} and {stata notes} to access this information.
   The example file below will calculate the SGPVs and bonus statistics for the leukemia dataset. 
   You can view the {view sgpv-leukemia-example.do:code}.{break} 
-	{stata . do sgpv-leukemia-example.do}{p_end}	
-	
+	{stata . do sgpv-leukemia-example.do}{p_end}		
  {pstd}This example code is rather slow on my machine and demonstrates some ways around the current limitations of the program code.
   Should your {help matsize:maximum matrix size} be higher than the number of observations in the dataset (7128), then the example code should run faster.
   You can run {stata display c(matsize)} to see your current setting.{p_end}
@@ -439,7 +429,10 @@ Otherwise, the option returns an error and will not delete the menu entries.
 {title:Stored results}
 {cmd:sgpv} stores the following in r();
 {synoptset 15 tabbed}{...}
-{p2col 5 15 19 2: Matrices}{p_end}
+{p2col 5 15 19 2:Scalars}{p_end}
+{synopt:{cmd:r(level)}}  confidence level {p_end}
+
+{p2col 5 15 19 2:Matrices}{p_end}
 {synopt:{cmd:r(comparison)}}  a matrix containing the displayed results {p_end}
 {synopt:{cmd:r(table)}}	coefficient statistics{p_end}
 

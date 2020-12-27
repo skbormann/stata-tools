@@ -18,8 +18,8 @@
 {title:Syntax}
 {p 8 17 2}
 {cmdab:sgpower}
-{cmd:,} true(#) nulllo(#) nullhi(#) {opt l:evel(#)} {opt lik:elihood(#)}
-[{it:options}]
+{cmd:,} {opt true(#)} {opt nulllo(#)} {opt nullhi(#)} {opt l:evel(#)} {opt lik:elihood(#)}
+[{opt std:err(#)} {opt b:onus}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
@@ -39,7 +39,7 @@
 {syntab:Further options}
 {synopt:{opt std:err(#)}}  standard error for the distribution of the estimator for the parameter of interest. 
 {p_end}
-{synopt:{opt b:onus}}  display the additional diagnostics for the type I error .
+{synopt:{opt b:onus}}  display the additional diagnostics for the type I error.
 {p_end}
 {synoptline}
 {p2colreset}{...}
@@ -99,7 +99,7 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {pstd}
 {p_end}
 {phang}
-{opt b:onus}     display the additional diagnostics for type I error . These are different ways the type I error may be summarized for an interval null hypothesis.
+{opt b:onus}     display the additional diagnostics for type I error. These are different ways the type I error may be summarized for an interval null hypothesis.
 
 {pstd}
 {p_end}
@@ -107,11 +107,11 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {marker examples}{...}
 {title:Examples}
 {pstd}
-
-{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1)} 
+{stata . sgpower,true(2) nulllo(-1) nullhi(1) stderr(1)} {break}
 {stata . sgpower,true(0) nulllo(-1) nullhi(1) stderr(1)}
 
-Plot the power curve examples (view the {view sgpower-plot-example.do:code} if installed; if not, you can download it {net "describe sgpv, from(https://raw.githubusercontent.com/skbormann/stata-tools/master/)":here})
+{pstd}Plot the power curve examples: Click {view sgpower-plot-example.do:here} to view the code which is part of the ancillary files of the {cmd:sgpv-package}.
+To download the file together with the rest of the examples click {net "get sgpv.pkg, replace":here}.{break}
 {stata . do sgpower-plot-example.do}
 
 
@@ -123,12 +123,12 @@ Plot the power curve examples (view the {view sgpower-plot-example.do:code} if i
 {synopt:{cmd:r(powernull)}}  probability of SGPV = 1 calculated assuming the parameter is equal to {cmd:true}. 	That is, {cmd:powernull} = P(SGPV = 1 | θ = {cmd:true}). {p_end}
 {synopt:{cmd:r(powerinc)}}  probability of 0 < SGPV < 1 calculated assuming the parameter is equal to {cmd:true}. 	That is, {cmd:powerinc} = P(0 < SGPV < 1 | θ = {cmd:true}). {p_end}
 
-The next three scalars are only returned if the bonus-option was used.
+{pstd}The next three scalars are only returned if the bonus-option was used.{p_end}
 {synopt:{cmd:r(minI)}}  is the minimum type I error over the range ({cmd:nulllo}, {cmd:nullhi}), which occurs at the midpoint of ({cmd:nulllo}, {cmd:nullhi}). {p_end}
 {synopt:{cmd:r(maxI)}}  is the maximum type I error over the range ({cmd:nulllo}, {cmd:nullhi}), which occurs at the boundaries of the null hypothesis, {cmd:nulllo} and {cmd:nullhi}.  {p_end}
 {synopt:{cmd:r(avgI)}}  is the average type I error (unweighted) over the range ({cmd:nulllo}, {cmd:nullhi}). {p_end}
 
-If 0 is included in the null hypothesis region, then "type I error summaries" also contains "at 0":
+{pstd}If 0 is included in the null hypothesis region, then "type I error summaries" also contains "at 0":{p_end}
 {synopt:{cmd:r(pow0)}}  is the type I error assuming the true parameter value θ is equal to 0. {p_end}
 
 
@@ -142,7 +142,7 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 
 {title:Author}
-{p}
+{pstd}
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}

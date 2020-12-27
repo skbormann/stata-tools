@@ -96,7 +96,6 @@ A variable/matrix containing the upper bounds can be also used, but then a varia
 If multiple bounds are used, the number of upper bounds must match the number of upper bounds specified in option {it:esthi}.
  The number of lower bounds must always match the number of upper bounds in option {it:nulllo}.
 
-
 {marker boundlist}{...}
 	{it:boundlist} is:
 		# [# ...]
@@ -138,7 +137,7 @@ The following examples are based on the original documentation for the R-code, b
  {bf:Simple example for three estimated log odds ratios but the same null interval} (To run this example copy the following lines into Stata and hit return.){break}
 	{stata . sgpvalue, estlo(log(1.05) log(1.3) log(0.97)) esthi(log(1.8) log(1.8) log(1.02)) nulllo(log(1/1.1)) nullhi(log(1.1))}{p_end}	 
 	{pstd}{bf:One sided intervals/infinite interval bounds:}{break}
-		{stata . sgpvalue, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1))}{break}
+		{stata . sgpvalue, estlo(log(1.3))  esthi(.) nulllo(.) nullhi(log(1.1))}{break}
 		{stata . sgpvalue, estlo(log(1.05)) esthi(.) nulllo(.) nullhi(log(1.1))}
 	
 	 {pstd}{bf:Example t-test with simulated data:}  (To run this example copy the following lines into Stata and hit return.){p_end}

@@ -7,6 +7,10 @@ The changelog is taken from the ado-files and slightly modified.
 
 ### General
 General remarks if updates come in larger "packages".
+* 27.12.2020:
+  * Made the syntax of most commands more Stata like and less R-like. Removed several options and replaced by them with default settings. 
+  * Certification scripts for each command are now available but not part of the package distribution. For now only the accuracy of the results is tested but later tests for input errors might be added.
+
 * 17.05.2020:
   * Changed type of returned results from macro to scalar to be more inline with standard practises for the commands __fdrisk__ and __sgpower__
   * Various additional input checks for __sgpvalue__ and __sgpv__
@@ -31,12 +35,21 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 1.1  24.12.2020 : 
+  * Changed the syntax of the command to match more closely Stata standards, the old syntax still works. 
+  * Option sgpval became one option 'fcr'. The default is to calculate the Fdr.
+  * Option nullweights became option 'nulltruncnormal'. The former option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default distribution. 
+ * Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default distribution. ///
+ * Options inttype and intlevel became options level(#) and likelihood(#). If no option is set then the confidence interval with the default confidence interval level is used. 
+* Version 1.04 09.11.2020 : Changed in the dialog the option sgpval (Set Fdr/Fcr) to display "Fdr" or "Fcr" instead of numerical values.
 * Version 1.03 24.05.2020 : Added more input checks 
 * Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
 * Version 1.01 : Removed unused code for Generalized Beta distribution 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.97a: Made error messages hopefully more understandable.
-* Version 0.97 : Added another input check for the pi0 option. Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
+* Version 0.97 : 
+  * Added another input check for the pi0 option. 
+  * Options altspace and nullspace deal now with spaces, but require their arguments now in "" if spaces are to be used with formulas.
 * Version 0.96 : Minor bugfixes; added all missing examples from the R-code to the help file and some more details
 * Version 0.95 : Updated documentation, added more possibilities to abbreviate options, probably last Github release before submission to SSC 
 * Version 0.91 : Removed the dependency on the user-provided integrate-command -> Removed nomata option
@@ -67,6 +80,9 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpower
+* Version 1.05 24.12.2020 : 
+  * Changed the syntax to set interval type and interval level to be more in line with Stata standard. The old syntax still works.
+  * Options "inttype" and "intlevel" became new options "level" and "likelihood".
 * Version 1.02 10.07.2020 : Fixed a missing bonus statistic ('at 0') in the help-file and the code.
 * Version 1.01 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
 * Version 1.00  : Initial SSC release, no changes compared to the last Github version.
@@ -76,11 +92,19 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
-* Version 1.1b 31.10.2020 : 
-  * Changed the name of the option permament to permdialog as suggested by reviewer for the SJ article to clarify the meaning of the option. 
+* Version 1.2 27.12.2020 : 
+  * Changed the name of the option permament to permdialog to clarify the meaning of the option. 
   * Fixed the format option in the Dialog box 
   * Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
-  * Renamed the dialog tabb "Display" to "Further options". Moved the options from the dialog tab "Fdrisk" to dialog tab "Further options".
+  * Renamed the dialog tab "Display" to "Reporting". Moved the options from the dialog tab "Fdrisk" to dialog tab "Reporting". 
+  * Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.
+  * Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix. 
+  * Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the null and alternative space. 
+  * Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option overwrites the level option of an estimation command. 
+  * The likelihood-option is meant to be used together with the matrix-option. 
+  * The previous inttype and intlevel options did not work as intended. 
+  * The title for results matrix now shows the level and type which was used to calculate the SGPVs (, delta-gaps and Fdrs). 
+  * Calculating SGPVs for stored estimations will only show the SGPV results and not the saved estimation results.
 * Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 * Version 1.1  28.05.2020 : 
   * Added support for multiple null hypotheses. 
@@ -123,7 +147,7 @@ General remarks if updates come in larger "packages".
 
 ### sgpvalue
 * Version 1.05  01.11.2020: 
-  * Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals
+  * Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals.
   * Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
 * Version 1.04  01.07.2020: 
 	* Added/improved support matrices as inputs for options "esthi" and "estlo".

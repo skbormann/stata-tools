@@ -70,7 +70,6 @@ BEGIN
 	main.ck_likelihood.enable
 END
 
-
 SCRIPT likelihood_on
 BEGIN
 	main.ed_likelihood.enable

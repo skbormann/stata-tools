@@ -6,7 +6,7 @@
 							Option nullweights became 'nulltruncnormal'. The option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default weighting distribution. ///
 							Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default weighting distribution. ///
 							Options inttype and intlevel became options level(#) and likelihood(#). If no option is set then the confidence interval with the default confidence interval level is used. 							
-*!Version 1.04 09.11.2020 : Changed in the dialog the option sgpval (Set Fdr/Fcr) to display "Fdr" or "Fcr" instead of numerical values.
+*Version 1.04 09.11.2020 : Changed in the dialog the option sgpval (Set Fdr/Fcr) to display "Fdr" or "Fcr" instead of numerical values.
 *Version 1.03 24.05.2020 : Added more input checks. 
 *Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises.
 *Version 1.01 : Removed unused code for Generalized Beta distribution -> I don't believe that this code will ever be used in the original R-code.
@@ -21,7 +21,6 @@
 *		 Evaluate input of options directly with the expression parser `= XXX' to allow more flexible input -> somewhat done, but not available for all options
 *		 Rewrite input logic for nullspace and altspace to allow spaces in the input and make it easier to generate inputs in the dialog box -> make options nullspace_lower and nullspace_upper and the same for altspace available.
 * 		Make error messages more descriptive and give hints how resolve the problems.
-*		Set reasonable default values based on the values for the sgpv-command to make using this command easier.
 
 
 capture program drop fdrisk
@@ -37,19 +36,13 @@ syntax, nulllo(string) nullhi(string) STDerr(real)   ///
 local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
 
-
 *New syntax(checks)---------------------------
 // The new command syntax is mapped to the old syntax so that existing code still works with new version.
 // But the new syntax should be more Stata-like than the old R-based one. 
 
 *Set sgpval
-/*if "`fdr'"!="" & "`fcr'"!=""{
-	stop "Only either the Fdr or Fcr  are allowed but not both."
-}
-*/
 if "`fcr'"!="" local sgpval 1
 if "`fcr'"=="" local sgpval 0
-*if "`fdr'"=="" & "´fcr'"=="" local sgpval 0
 
 *Set nullweights
 if `:word count `nullspace''==1 local nullweights "Point"
@@ -132,10 +125,10 @@ if "`inttype'"=="likelihood"{
 }
 
 *Evaluate inputs to allow more flexible specifications of intervals, null & alt spaces; no further checks yet for non-sensical input -> errors should be caught here by the expression parser -> the code will ignore more than two arguments, seems to be more robust than I initially thought 
-	if wordcount("`nullhi'")>1 stop "Option {cmd:nullhi} has more than one argument."
+	if wordcount("`nullhi'")>1 stop "Option {cmd:nullhi} has more than one number."
 	capture local nullhi = `nullhi'
 	isValid `nullhi' nullhi
-	if wordcount("`nulllo'")>1 stop "Option {cmd:nullhi} has more than one argument."
+	if wordcount("`nulllo'")>1 stop "Option {cmd:nullhi} has more than one number."
 	capture local nulllo = `nulllo'
 	isValid `nulllo' nulllo
 

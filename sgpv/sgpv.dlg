@@ -1,11 +1,11 @@
 /*
-To-Do/Further improvements: 	Add additional input checks for nullweights and altweights to allow only certain inputs for nullspace.
+To-Do/further improvements: 	
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses.
 */
 /*
-sgpv dialog version 1.05, 21.05.2020, Sven-Kristjan Bormann
-for sgpv version 1.1
+sgpv dialog version 1.2, 27.12.2020, Sven-Kristjan Bormann
+for sgpv version 1.2
 
 To install in User Statistics menu via Stata commands:
   
@@ -29,7 +29,7 @@ SUBMIT sub1, label("Submit")
 HELP hlp1,   view("help sgpv")  
 RESET res1
 COPY copy1
-
+INCLUDE levels_list
 
 //Copied from format.dlg
 SCRIPT PREINIT
@@ -38,58 +38,16 @@ BEGIN
         setscale_hadj resource FORMAT_DLG_HSCALE
 END
 
-/*
-LIST nullweights_list
-BEGIN
-	Point
-	Uniform
-	TruncNormal
-END
-*/
-
-LIST altweights_list
-BEGIN
-	Uniform
-	TruncNormal
-END
-
-/*
-LIST bonus_values
-BEGIN
-	none // a filler option introduced to have a default option for the dropdownlist
-	deltagap
-	fdrisk
-	all
-END
-
-
-LIST bonus_list
-BEGIN
-	None
-	Delta-Gap
-	False discovery risk
-	Both
-END
-*/
-
 LIST bonus_action
 BEGIN
 	script fdrisk_off
 	script fdrisk_off
 	script fdrisk_on
 	script fdrisk_on	 
-	  
-
-END
-
-LIST inttype_list
-BEGIN
-	confidence
-	likelihood
 END
 
 
-DIALOG main, label("sgpv 1.1 - Second Generation P-Values") tabtitle("Main")
+DIALOG main, label("sgpv 1.2 - Second Generation P-Values") tabtitle("Main")
 BEGIN
 
 	GROUPBOX gp_calcfor 		5 	5 		410 	110, label("Calculate SGPVs for:")
@@ -119,7 +77,6 @@ BEGIN
 	GROUPBOX gb_null 		5 		_ls 	410 	140, label("Null-Hypothesis Interval(s)")
 	TEXT tx_nulllo 			15 		_ss 	170 	., label("Lower Bound(s)") 
 	EDIT ed_nulllo 			@ 		_ss		 170 	 ., option(nulllo) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
-	//Add here infos about multiple null-hypotheses
 	
 	TEXT tx_nullhi 			+220 	-20 	170 	., label("Upper Bound(s)") 
 	EDIT ed_nullhi 			@ 		_ss 	170 	., option(nullhi) default(0) tooltip("The default value 0 is just meant to be used for an easier beginning when starting to use SGPVs. Please change this value to something more reasonable. Using this default value will always result in having SGPVs of value 0 or 0.5!")
@@ -130,25 +87,28 @@ BEGIN
 
 END
 
-DIALOG further, tabtitle("Further options")
+DIALOG rpt, tabtitle("Reporting")
 BEGIN
-	GROUPBOX gb_display		_top	_lft 		405		180,label("Display options")
-	CHECKBOX ck_quiet 		+10 	+20 		100 	., label("Quietly") option(quiet) tooltip("Do not display estimation results.")
-	CHECKBOX ck_nonull		+120		@    		200		., label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
+
+	GROUPBOX gb_display		_top	_lft 	405		210,label("Display options")
+	COMBOBOX  sp_level    _top      +20      _spwd   ., dropdown label(resource LBL_TX_LEVEL) default(c(level)) /// 
+															contents(levels) option(level)
+	TEXT     tx_level     _spsep  @       _spr2	., label(resource LBL_TX_LEVEL) 
+	CHECKBOX ck_quiet 		+100 	@ 	100 	.,  label("Quietly") option(quiet) tooltip("Do not display estimation results.")
+	CHECKBOX ck_nonull		@	_ms    	200		.,  label("No 0 Point Null-Hypothesis warnings") option(nonullwarnings) ///
+															tooltip("Deactive the warning messages shown when using the default point 0 null-hypothesis.")
 	
-	TEXT tx_matlist 		15 		_ss 	200 	., label("Result Matrix format:")
-	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt) tooltip("Change the format of the displayed matrix. The same options as for the command matlist can be used.")
+	TEXT tx_matlist 		15 		_ms 	200 	., label("Result Matrix format:")
+	EDIT ed_matlist 		@ 		_ss 	320 	., option(matlistopt) ///
+														tooltip("Change the format of the displayed matrix. The same options as for the command matlist can be used.")
 	BUTTON bu_matlist 		+330	@ 		60 		., label("Help") onpush("view help matlist") 
 			
 	TEXT tx_bonus 			15 		_ss 	150 	., label("Bonus Statistics:")
-	/*COMBOBOX cb_bonus 		@ 		_ss 	180 	., dropdownlist content(bonus_list) values(bonus_values) option(bonus) default(none)  ///
-														tooltip(Display and calculate the bonus statistics delta-gap and fdr/fcr. If `"None"' is selected then no bonus statistcs are calculated and displayed.) ///
-														onselchangelist(bonus_action)*/
 	CHECKBOX ck_deltagap	@		_ss 	100		., label("Delta-gap") option(deltagap) tooltip("Calculate the delta-gap.") ///
 														onclickon(script deltagap_on) onclickoff(script deltagap_off)
-	CHECKBOX ck_fdrisk		150		@		100		., label("Fdrisk") option(fdrisk) tooltip("Calculate the false discovery risk (fdr).") ///
+	CHECKBOX ck_fdrisk		90		@		50		., label("Fdrisk") option(fdrisk) tooltip("Calculate the false discovery risk (fdr).") ///
 														onclickon(script fdrisk_on) onclickoff(script fdrisk_off)
-	CHECKBOX ck_all			300		@		50		., label("All") option(all) tooltip("Calculate both the delta-gap and the false discovery risk.") ///
+	CHECKBOX ck_all			150		@		50		., label("All") option(all) tooltip("Calculate both the delta-gap and the false discovery risk.") ///
 														onclickon(script all_on) onclickoff(script all_off)
 	
 	TEXT     tx_format    	15    	+25     200    .,   label(Format result matrix elements:) 
@@ -156,37 +116,19 @@ BEGIN
 													 tooltip("Specify the format for displaying the individual elements of the result matrix.   This option is NOT identical to the option above, but works independently of it. Setting the format option via the option above overrides the setting here and also changes the format of the column names.")
 	BUTTON   bu_format    350  @       60      .,    label(resource LBL_BU_CREATE) onpush(script showFormatDialog) tooltip(resource LBL_CREATE_DISPLAY_FORMAT)
 	
-	GROUPBOX gb_fdrisk 	 _top	200	405 	190, label("Fdrisk options")
-	//TEXT tx_nullspace      15   +10    200    ., label("Null hypothesis parameter space:")
-	//EXP ex_nullspace       15    _ss    400    ., option(nullspace) error(Nullspace) label("Expression") tooltip("Support of the null probability distribution.")
+	GROUPBOX gb_fdrisk 	 _top	220	405 	120, label("Fdrisk options")
+	CHECKBOX ck_truncnormal 	15	_ls 	200		., label("Truncated Normal distribution") option(truncnormal) ///
+													tooltip("Use the truncated normal distribution for the nullspace and alternative parameter space.")
+	EDIT ed_pi0              200  	@      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
+	TEXT tx_pi0           	+55 	@    	120   ., label("Prior probability of H0")
 	
-	//TEXT tx_nullweights     15    _ls    150    ., label("Null hypothesis distribution:")
-	//COMBOBOX cb_nullweights @    _ss     100    ., dropdownlist content(nullweights_list) option(nullweights) error(Nullweights) default(Point) ///
-													// tooltip("The probability distribution for the null parameter space.")
+	CHECKBOX ck_likelihood 	15	_ls 	150	., 	label("Likelihood support interval") option(likelihood) ///
+													onclickon(script likelihood_on) onclickoff(script likelihood_off) ///
+													tooltip("Set if a likelihood support interval (LSI) level 1/k was used to calculate ")
+	EDIT ed_likelihood      15  _ss      @    ., option(likelihood) error(No Interval level for the Likelihood-Support-Interval set) ///
+													tooltip("Set the interval level for the Likelihood-Support-Interval(LSI). The level should be set equal to the level of the LSI which was used to calculate the lower and upper bound of the estimated coefficients for the supplied matrix.")											
+	
 
-	CHECKBOX ck_truncnormal 	15	+10 	200		., label("Truncated Normal distribution") option(truncnormal) ///
-													tooltip("Use the truncated normal distribution for nullspace and alternative parameter space.")
-	
-	//TEXT tx_altweights      15   +10      170    ., label("Alternative hypothesis distribution:")
-	//COMBOBOX cb_altweights  @   _ss      100    ., dropdownlist content(altweights_list) option(altweights) error(Altweights) default(Uniform) ///
-												tooltip("Probability distribution for the alternative parameter space")
-	
-	//TEXT tx_inttpye       180  @      @    ., label("Interval type:")
-	//COMBOBOX cb_inttype     @  _ss      @    ., 	dropdownlist content(inttype_list) option(inttype) error(Interval type) default(confidence)
-	
-	//TEXT tx_level 		 @  	_ls      @    ., 	label("Interval level:")
-	//EDIT ed_level        @  	_ss      @    ., 	option(intlevel) error(Interval level) default(0.05)
-	
-	
-	//COMBOBOX  sp_level    	15      _ls      _spwd   .,  	dropdown label(resource LBL_TX_LEVEL) default(c(level)) /// 
-														contents(levels) option(level)
-	//TEXT     tx_level     _spsep  @       _spr2		., label(Interval level) tooltip()
-	  
-	//CHECKBOX ck_likelihood 	15	_ls 	@	., 	label("Likelihood support interval") option(likelihood) tooltip("")
-
-	
-	TEXT tx_pi0           +120  	@    	 120   ., label("Prior probability of H0:")
-	EDIT ed_pi0              @  	_ss      50   ., option(pi0) default(0.5) numonly tooltip("This value can be only between 0 and 1 (exclusive).")
 
 END
 
@@ -196,7 +138,7 @@ SCRIPT showFormatDialog
 BEGIN
         create CHILD format_chooser
         format_chooser.setExitString formatString
-        format_chooser.setExitAction "further.ed_format.setvalue class formatString.value"
+        format_chooser.setExitAction "rpt.ed_format.setvalue class formatString.value"
 END
 
 
@@ -219,6 +161,7 @@ BEGIN
 	main.cb_estimate.disable
 	main.cb_matrix.enable
 	main.ed_cmd.disable
+	rpt.ck_likelihood.enable
 END
 
 SCRIPT cmd_on
@@ -228,70 +171,72 @@ BEGIN
 	main.ed_cmd.enable
 END
 
+SCRIPT likelihood_on
+BEGIN
+	rpt.ed_likelihood.enable
+	rpt.sp_level.disable
+END
+
+SCRIPT likelihood_off
+BEGIN
+	rpt.ed_likelihood.disable
+	rpt.sp_level.enable
+END
 
 //(De-)activate display of bonus statistic options  
 
-
 SCRIPT deltagap_on
 BEGIN
-	further.ck_fdrisk.disable
-	further.ck_all.disable
+	rpt.ck_fdrisk.disable
+	rpt.ck_all.disable
 END
 
 SCRIPT deltagap_off
 BEGIN
-	further.ck_all.enable
-	further.ck_fdrisk.enable
+	rpt.ck_all.enable
+	rpt.ck_fdrisk.enable
 END
 
 SCRIPT fdrisk_on
 BEGIN
-	further.ck_deltagap.disable
-	further.ck_all.disable
+	rpt.ck_deltagap.disable
+	rpt.ck_all.disable
 	script fdrisk_options_on
 END
 
 SCRIPT fdrisk_off
 BEGIN
-	further.ck_deltagap.enable
-	further.ck_all.enable
+	rpt.ck_deltagap.enable
+	rpt.ck_all.enable
 	script fdrisk_options_off
 END
 
 SCRIPT all_on
 BEGIN
-	further.ck_deltagap.disable
-	further.ck_fdrisk.disable
+	rpt.ck_deltagap.disable
+	rpt.ck_fdrisk.disable
 	script fdrisk_options_on
 END
 
 SCRIPT all_off
 BEGIN
 	script fdrisk_options_off
-	further.ck_deltagap.enable
-	further.ck_fdrisk.enable
+	rpt.ck_deltagap.enable
+	rpt.ck_fdrisk.enable
 END
 
 SCRIPT fdrisk_options_on
 BEGIN
-	//further.ex_nullspace.enable
-	//further.cb_altweights.enable
-	//further.cb_nullweights.enable
-	further.ck_truncnormal.enable
-	further.ck_likelihood.enable
-	further.sp_level.enable
-	further.ed_pi0.enable
+	rpt.ck_truncnormal.enable
+	rpt.ck_likelihood.enable
+	rpt.ed_pi0.enable
 END
 
 SCRIPT fdrisk_options_off
 BEGIN
-	//further.ex_nullspace.disable
-	//further.cb_altweights.disable
-	//further.cb_nullweights.disable
-	further.ck_truncnormal.disable
-	further.ck_likelihood.disable
-	further.sp_level.disable
-	further.ed_pi0.disable
+	rpt.ck_truncnormal.disable
+	rpt.ck_likelihood.disable
+	rpt.ed_pi0.disable
 END
 
 
@@ -310,26 +255,19 @@ BEGIN
 		optionarg /hidedefault main.ed_nullhi
 		optionarg /hidedefault main.ed_nulllo
 		
-		option further.ck_quiet
-		option further.ck_nonull
+		option rpt.ck_quiet
+		option rpt.ck_nonull
 		
-		optionarg further.ed_matlist
-		*optionarg /hidedefault further.cb_bonus
-		option further.ck_deltagap
-		option further.ck_fdrisk
-		option further.ck_all
-		optionarg /hidedefault further.ed_format
+		optionarg rpt.ed_matlist
+		option rpt.ck_deltagap
+		option rpt.ck_fdrisk
+		option rpt.ck_all
+		optionarg /hidedefault rpt.ed_format
 		
-		*optionarg further.ex_nullspace
-		*optionarg /hidedefault further.cb_nullweights 
-		*optionarg further.ex_altspace
-		*option further.truncnormal
-		*option further.likelihood
-		*optionarg /hidedefault further.sp_level
-		*optionarg /hidedefault further.cb_altweights 
-		*optionarg /hidedefault further.cb_inttype 
-		*optionarg /hidedefault further.ed_intlevel
-		optionarg /hidedefault further.ed_pi0
+		option rpt.ck_truncnormal
+		optionarg rpt.ed_likelihood
+		optionarg /hidedefault rpt.sp_level
+		optionarg /hidedefault rpt.ed_pi0
 	endoptions
 END
 
