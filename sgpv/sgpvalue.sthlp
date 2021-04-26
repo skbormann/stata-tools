@@ -97,7 +97,7 @@ If multiple bounds are used, the number of upper bounds must match the number of
  The number of lower bounds must always match the number of upper bounds in option {it:nulllo}.
 
 {marker boundlist}{...}
-	{it:boundlist} is:
+	A {it:boundlist} is:
 		# [# ...]
 		{help exp} [{help exp}]
 

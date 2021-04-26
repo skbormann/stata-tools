@@ -82,7 +82,7 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {opt nullhi(#)}     the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 
 {phang}
-{opt l:evel(#)} use a confidence interval with level (1-α)100%. The default is {cmd:level(95)} if option {cmd:likelihood} or another confidence level is not set. 
+{opt l:evel(#)} use a confidence interval with level (1-α)100%. The default is {cmd:level(95)} or as set by {helpb set level} if option {cmd:likelihood} or another confidence level is not set. 
 
 {phang}
 {opt lik:elihood(#)} use a likelihood support interval with level 1/k. 

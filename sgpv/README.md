@@ -39,8 +39,8 @@ General remarks if updates come in larger "packages".
   * Changed the syntax of the command to match more closely Stata standards, the old syntax still works. 
   * Option sgpval became one option 'fcr'. The default is to calculate the Fdr.
   * Option nullweights became option 'nulltruncnormal'. The former option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default distribution. 
- * Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default distribution. ///
- * Options inttype and intlevel became options level(#) and likelihood(#). If no option is set then the confidence interval with the default confidence interval level is used. 
+  * Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default distribution. 
+  * Options inttype and intlevel became options level(#) and likelihood(#). If no option is set then the confidence interval with the default confidence interval level is used. 
 * Version 1.04 09.11.2020 : Changed in the dialog the option sgpval (Set Fdr/Fcr) to display "Fdr" or "Fcr" instead of numerical values.
 * Version 1.03 24.05.2020 : Added more input checks 
 * Version 1.02 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practises
@@ -92,9 +92,10 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.2a 01.02.2021 : Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 * Version 1.2 27.12.2020 : 
   * Changed the name of the option permament to permdialog to clarify the meaning of the option. 
-  * Fixed the format option in the Dialog box 
+  * Fixed the format option in the Dialog box. 
   * Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
   * Renamed the dialog tab "Display" to "Reporting". Moved the options from the dialog tab "Fdrisk" to dialog tab "Reporting". 
   * Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.
@@ -110,7 +111,7 @@ General remarks if updates come in larger "packages".
   * Added support for multiple null hypotheses. 
   * Added a noconstant-option to remove the constant from the list of coefficients. 
   * Fixed an error in the perm-option of the "sgpv menu"-subcommand.
-  * Fixed a confusion in the help-file about the nulllo and nullhi options .
+  * Fixed a confusion in the help-file about the nulllo and nullhi options.
   *	Added an experimental, undocumented option to enter the null interval -> option "null" with syntax "(lower_bound1,upper_bound2) (lower2,upper2) ... " 
   * Should allow now to use expressions for options "nulllo" and "nullhi" without having to run the expression parser first.
   * Removed unused "altspace" option from the syntax, help file and dialog box -> "altspace" is automatically set with lower and upper bounds of confidence intervals -> fixed remarks related to default values for altspace and nullspace.
@@ -127,10 +128,10 @@ General remarks if updates come in larger "packages".
   * Fixed: the Fdr's are now displayed when using the bonus-option with the values "fdrisk" or "all"
 * Version 1.02 03.05.2020 :
 	* Changed name of option 'perm' to 'permanent' to be inline with Standard Stata names of options
-	* Removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented)
-	* Enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying 
-	* Shortened subcommand menuInstall to menu
-	* Added parsing of subcommands as a convenience feature
+	* Removed some inconsistencies between help file and command file (missing abbreviation of pi0-option, format-option was already documented).
+	* Enforced and fixed the exclusivity of 'matrix', 'estimate' and prefix-command -> take precedence over replaying .
+	* Shortened subcommand menuInstall to menu.
+	* Added parsing of subcommands as a convenience feature.
 	* Allow now more flexible parsing of coefficient names -> make it easier to select coefficients for the same variable across different equations -> only the coefficient name is now required not the equation name anymore -> implemented what is "promised" by the dialog box text 
 	* changed the default behaviour of the bonus option from nobonus to bonus -> bonus statistics only shown when requested 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
@@ -142,7 +143,7 @@ General remarks if updates come in larger "packages".
 * Version 0.98 : Added a subcommand to install the dialog boxes to the User's menubar. Fixed an incorrect references to the leukemia example in the help file.
 * Version 0.97 : Further sanity checks of the input to avoid conflict between different options, added possibility to install dialog box into the User menubar.
 * Version 0.96 : Added an example how to calculate all statistics for the leukemia dataset; minor fixes in the documentation of all commands and better handling of the matrix option.
-* Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented
+* Version 0.95 : Fixed minor mistakes in the documentation, added more information about SGPVs and more example use cases; minor bugfixes; changed the way the results are presented.
 * Version 0.90 : Initial Github release
 
 ### sgpvalue

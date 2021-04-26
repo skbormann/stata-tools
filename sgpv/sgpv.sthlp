@@ -121,7 +121,7 @@ The formulas for the Second-Generation P-Values can be found {help sgpv##formula
     This is mostly a convenience feature so that the help-files for the individual commands should be consulted for the options of these commands.
     Supported subcommands are: {help sgpvalue:value}, {help sgpower:power}, {help fdrisk:risk}, {help plotsgpv:plot} and {help sgpv##menuInstall:menu}.
     Two examples how to use the subcommands are given {help sgpv##subcmds_example:here}.
-	Using the subcommands directly is comparable to the immediate form of other Stata commands, like {help ttesti:ttesti}.
+	Using the individual commands directly is comparable to the immediate form of other Stata commands, like {help ttesti:ttesti}.
 
 {marker options}{...}
 {title:Options}
@@ -159,10 +159,10 @@ Multiple coefficients must be separated with a space.
 You can also select only an equation by using "eq:" or select a specific equation and variable "eq:var". See{help sgpv##multiple-equations-example: the multiple equations example} for an example and the definition of {it:coeflist} below.
 
 {marker coeflist}{...}
-        {it:coeflist} is
+        A {it:coeflist} is:
             {it:coef} [{it:coef} ...]
-            {cmd:[}{it:eq}{cmd:]}{it:coef} [{cmd:[}{it:eq}{cmd:]}{it:coef}...]
-            {cmd:eq:}
+            {it:eq:}{it:coef} [{it:eq:}{it:coef} ...]
+            {cmd:eq:} [{cmd:eq:}]
 
 
 {phang}
@@ -186,8 +186,7 @@ The default is 0 (the same bound as for the usually reported p-values). Missing 
 More than one null-hypothesis is also supported. Each upper bound must be separated with a space.
 The number of upper bounds must match the number of arguments set in the {cmd:coefficient}-option.
 The number of lower and upper bounds must also match. 
-See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. 
-
+See {help sgpv##multiple-null-hypotheses-example:these examples} for a demonstration. {p_end}
 {marker boundlist}{...}
 	{pstd}A {it:boundlist} is:{p_end}
 	{phang2}	# [# ...]{p_end}
@@ -200,7 +199,7 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!{p
 {dlgtab:Reporting}
 {phang}
 {opt l:evel(#)} set the level of the confidence interval. 
-The default is {cmd:level(95)}. See also {helpb estimation options##level():[R] estimation options}. 
+The default is {cmd:level(95)} or as set by {helpb set level}. See also {helpb estimation options##level():[R] estimation options}. 
 This option overwrites the same named option of an estimation command.   
 A warning is displayed in the beginning if this happens.
 
@@ -231,22 +230,21 @@ Using both options together has the same effect as using this option alone.
 This option is {bf:NOT} identical to the same named option of {cmd:matlist}, but works independently of it. 
 Setting the format option via {cmd:matlistopt()} overrides the setting here and also changes the format of the column names.
 
-{pstd}The following options are only needed for the calculations of the False Discovery Risk (fdr).
+{phang}The following options are only needed for the calculations of the {bf:False Discovery Risk} (fdr).
  More information about each option can be found in the help for {help fdrisk}. 
 {p_end} 
-
-{phang}
+{phang2}
 {opt trunc:normal} use the truncated normal distribution as the probability distribution for the null and alternative parameter space. 
 The default is to use the uniform distribution as the probability distribution for the null and alternative parameter space.
+The mean and standard deviation of the distribution are automatically set based on the estimated coefficient.
 
-{phang}
+{phang2}
 {opt lik:elihood(#)} use a 1/k likelihood support interval (LSI) instead of a (1-α)100% confidence interval to calculate the Fdr. 
 This option works only in combination with the option {cmd:matrix()} for a user supplied matrix. 
 The level should be set equal to the level of the LSI which was used to calculate the lower and upper bound of the estimated coefficients.
-
 No official Stata command reports likelihood support intervals.
 
-{phang}
+{phang2}
 {opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
 A prior probability outside of this interval is not sensible. 
 The default value assumes that both hypotheses are equally likely.

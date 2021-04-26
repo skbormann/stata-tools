@@ -89,8 +89,8 @@ The default is to calculate the false discovery risk, when the observed second-g
 {opt lik:elihood(#)} likelihood support interval with level 1/k was used to calculated the SGPV. 
 
 {phang}
-{opt nulls:pace(string)}  support of the null probability distribution.
- The "nullspace" can contain either one or two numbers. These numbers can be also formulas which must enclosed in " ".
+{opt nulls:pace(lower_bound upper_bound)}  support of the null probability distribution.
+The "nullspace" can contain either one or two numbers. These numbers can be also formulas which must enclosed in " ".
 If "nullspace" is one number, then no distribution for the null parameter space is used. 
 If "nullspace" contains two numbers separated by a space, then the distribution for the null parameter space are either the Uniform-distribution or the Truncated-Normal-distribution (option {cmd:nulltruncnormal}).
 The Uniform-distribution is used as the default.
@@ -99,7 +99,7 @@ The Uniform-distribution is used as the default.
 {opt nullt:runcnormal} use the Truncated-Normal-distribution as the probability distribution for the null parameter space with the mean being the middlepoint of the nullspace and standard deviation given by option {cmd:stderr}.
 
 {phang}
-{opt alts:pace(string)}  support for the alternative probability distribution. 
+{opt alts:pace(lower_bound upper_bound)}  support for the alternative probability distribution. 
 The "altspace" can contain either one or two numbers. These numbers can be also formulas which must enclosed in " ".
 If "altspace" is one number, then no distribution for the alternative parameter space is used. 
 If "altspace" contains two numbers separated by a space, then the distribution for the alternative parameter space are either the Uniform-distribution  or the Truncated-Normal-distribution (option {cmd:alttruncnormal}).
@@ -109,7 +109,8 @@ The Uniform-distribution is used as the default.
 {opt altt:runcnormal} use Truncated-Normal-distribution as the probability distribution for the alternative parameter space with the mean being the middlepoint of the altspace and the standard deviation given by option {cmd:stderr}.
 
 {phang}
-{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
+{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. 
+This value can be only between 0 and 1 (exclusive). 
 A prior probability outside of this interval is not sensible. 
 The default value assumes that both hypotheses are equally likely.
 
@@ -122,7 +123,7 @@ To download the file together with the rest of the examples {net "get sgpv.pkg, 
 	. fdrisk,  nulllo(log(1/1.1)) nullhi(log(1.1)) stderr(0.8)   nullspace(log(1/1.1) log(1.1))  
 		   altspace("2-1*invnorm(1-0.05/2)*0.8" "2+1*invnorm(1-0.05/2)*0.8") level(95)
 		  
-	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata do fdrisk-examples.do example2a:run} the example.){break}
+	{pstd}{bf:False discovery risk with 1/8 likelihood support level:}(Click to {stata run fdrisk-examples.do example2a:run} the example.){break}
 	. fdrisk, nulllo(log(1/1.1)) nullhi(log(1.1)) stderr(0.8) nullspace(0) 
 		 altspace("2-1*invnorm(1-0.041/2)*0.8" "2+1*invnorm(1-0.041/2)*0.8")  likelihood(0.125)
 	
@@ -157,7 +158,7 @@ Sven-Kristjan Bormann, School of Economics and Business Administration, Universi
 
 {title:Bug Reporting}
 {psee}
-Please submit bugs, comments and suggestions via email to:	{browse "mailto:sven-kristjan@gmx.de":sven-kristjan@gmx.de}{p_end}
+Please submit bugs, comments and suggestions via email to: {browse "mailto:sven-kristjan@gmx.de":sven-kristjan@gmx.de}{p_end}
 {psee}
 Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools}{p_end}
 

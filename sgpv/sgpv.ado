@@ -1,5 +1,6 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.2a 01.02.2021: Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 *!Version 1.2 27.12.2020 : Changed the name of the option permament to permdialog to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box. /// 
 							Added a remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
@@ -326,15 +327,25 @@ if "`bonus'"=="all"| "`all'"=="all"{
 }
 
 **Estimation command
+local cmd = ustrltrim("`cmd'") // Remove trailing whitespaces which could make the second comparison fail
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
 if "`cmd'"!=""{
 	//Remove any level option set for the estimation command by the one for the sgpv command 
 	gettoken com opt:cmd,parse(,)
-	local opt:list uniq opt // assuming that options are allowed to appear only once
-	if ustrregexm("`opt'","level\(\d+\)") disp "The level option of your estimation command is overwritten by the level option of the {cmd:sgpv} command."
-	local opt = cond(ustrregexm("`opt'","level\(\d+\)"),ustrregexrf("`opt'","level\(\d+\)","level(`level')"),"`opt' level(`level')") 
-	local cmd `com'`opt'
-	`quietly' `cmd'
+	if "`com'"!="`cmd'"{
+		local opt:list uniq opt // assuming that options are allowed to appear only once
+		if ustrregexm("`opt'","level\(\d+\)"){
+			disp "The level option of your estimation command is overwritten by the level option of the {cmd:sgpv} command." 
+		}
+		
+		local opt = cond(ustrregexm("`opt'","level\(\d+\)"),ustrregexrf("`opt'","level\(\d+\)","level(`level')"),"`opt' level(`level')") 
+		local cmd `com' `opt'
+		`quietly' `cmd'
+	}
+	else{
+		`quietly' `cmd', level(`level')
+	}
+	
 }
 else if "`e(cmd)'"!=""{ // Replay previous estimation
 	quietly `e(cmd)' , level(`level')
