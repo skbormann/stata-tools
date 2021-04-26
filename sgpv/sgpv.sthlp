@@ -415,7 +415,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {title:Subcommands examples} 
   {pstd}The subcommands can be used in case you want to use only one command instead remembering the names of the other commands of this package:{break}
 	{stata . sgpv value, estlo(log(1.3)) esthi(.) nulllo(.) nullhi(log(1.1)) }{break}
-	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1) inttype("confidence") intlevel(0.05)}{p_end}
+	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1)}{p_end}
 {marker menuInstall}{...}
   {pstd}Install the dialog boxes permanently in the User menubar: User -> Statistics {break}
 	{stata . sgpv menu, perm}{p_end}
