@@ -9,6 +9,7 @@
 {viewerjumpto "Syntax" "sgpvalue##syntax"}{...}
 {viewerjumpto "Description" "sgpvalue##description"}{...}
 {viewerjumpto "Options" "sgpvalue##options"}{...}
+{viewerjumpto "Stored Results" "sgpvalue##stored"}{...}
 {viewerjumpto "Formulas/Remarks" "sgpvalue##formulas"}{...}
 {viewerjumpto "Examples" "sgpvalue##examples"}{...}
 {title:Title}
@@ -99,7 +100,7 @@ If multiple bounds are used, the number of upper bounds must match the number of
 {marker boundlist}{...}
 	A {it:boundlist} is:
 		# [# ...]
-		{help exp} [{help exp}]
+		{help exp} [{help exp} ...]
 
 {dlgtab:Display}
 {phang}
@@ -159,7 +160,7 @@ The following examples are based on the original documentation for the R-code, b
 	{phang2}	. local ci2 = (`r(mu_1)'-`r(mu_2)')+ `r(se)'*invt(`=_N-2',0.975){p_end}
 	{phang2}	. sgpvalue, estlo(`ci1') esthi(`ci2') nulllo(-1) nullhi(1){p_end}
 	 
-	 {pstd}{bf:Simulated two-group dichotomous data for different parameters:}{p_end}
+	{pstd}{bf:Simulated two-group dichotomous data for different parameters:}{p_end}
 	{phang2}	. set seed 1492 {p_end}
 	{phang2}	. local n 30{p_end}
 	{phang2}	. local x1 = rbinomial(30,0.15){p_end}
@@ -180,12 +181,11 @@ The following examples are based on the original documentation for the R-code, b
 	{phang2}	{stata . mat table = r(table)}  //Copies the regression results into a new matrix for the next calculations{p_end}
 	{phang2}	{stata . mat ub = table[6,1..3]} //Copy the upper bounds of the confidence interval into a separate matrix{p_end}
 	{phang2}	{stata . mat lb = table[5,1..3]} //Copy the lower bounds of the confidence interval into a separate matrix{p_end}
-		
-		
+			
 	{pstd}The numbers for the options could be also copied by hand, we use here directly the matrices.{break}
 		{stata . sgpvalue, esthi(ub) estlo(lb) nullhi(0) nulllo(0)} 
 		 
-
+{marker stored}{...}
 {title:Stored results}
 
 {synoptset 15 tabbed}{...}
@@ -254,7 +254,7 @@ Blume JD, Greevy RA Jr., Welty VF, Smith JR, Dupont WD (2019). An Introduction t
 
 
 {title:Author}
-{p}
+{psee}
 Sven-Kristjan Bormann, School of Economics and Business Administration, University of Tartu.
 
 {title:Bug Reporting}
@@ -264,6 +264,7 @@ Please submit bugs, comments and suggestions via email to:	{browse "mailto:sven-
 Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools}{p_end}
 
 {title:See Also}
+{pstd}
 Related commands:
 {help plotsgpv}, {help sgpower}, {help fdrisk}, {help sgpv}
 

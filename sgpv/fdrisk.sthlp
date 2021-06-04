@@ -11,6 +11,7 @@
 {viewerjumpto "Options" "fdrisk##options"}{...}
 {* viewerjumpto "Remarks" "fdrisk##remarks"}{...}
 {viewerjumpto "Examples" "fdrisk##examples"}{...}
+{viewerjumpto "Stored Results" "fdrisk##stored"}{...}
 {title:Title}
 {phang}
 {bf:fdrisk} {hline 2} False Discovery or Confirmation Risk for Second-Generation P-Values (SGPV)
@@ -31,9 +32,9 @@
 {synopt:{opt std:err(#)}}  standard error of the point estimate.{p_end}
 {synopt:{opt l:evel(#)}} confidence interval with the specified level was used to calculated the SGPV; default is {cmd:level(95)}.{p_end}
 {synopt:{opt lik:elihood(#)}} likelihood support interval with level 1/k was used to calculate the SGPV.{p_end}
-{synopt:{opt nulls:pace(string)}}  support of the null probability distribution.{p_end}
+{synopt:{opt nulls:pace(# #)}}  support of the null probability distribution.{p_end}
 {synopt:{opt nullt:runcnormal}} use Truncated-Normal-distribution as the probability distribution for the null parameter space.{p_end}
-{synopt:{opt alts:pace(string)}}  support for the alternative probability distribution.{p_end}
+{synopt:{opt alts:pace(# #)}}  support for the alternative probability distribution.{p_end}
 {synopt:{opt altt:runcnormal}} use Truncated-Normal-distribution as the probability distribution for the alternative parameter space.{p_end}
 {synopt:{opt p:i0(#)}}  prior probability of the null hypothesis.{p_end}
 {synoptline}
@@ -137,6 +138,7 @@ To download the file together with the rest of the examples {net "get sgpv.pkg, 
 	{pstd}{bf:False confirmation risk example:}(Click to {stata run fdrisk-examples.do example4:run} the example.){break}
 	. fdrisk, fcr nulllo(log(1/1.5)) nullhi(log(1.5)) stderr(0.15) nullspace("0.01-1*invnorm(1-0.041/2)*0.15" "0.01+1*invnorm(1-0.041/2)*0.15")  altspace(log(1.5) 1.25*log(1.5)) likelihood(0.125) 
  
+ {marker stored}{...}
 {title:Stored results}
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Scalars}{p_end}
@@ -163,6 +165,7 @@ Please submit bugs, comments and suggestions via email to: {browse "mailto:sven-
 Further Stata programs and development versions can be found under {browse "https://github.com/skbormann/stata-tools":https://github.com/skbormann/stata-tools}{p_end}
 
 {title:See Also}
-Related commands:
+{pstd}
+Related commands:{break}
  {help plotsgpv}, {help sgpvalue}, {help sgpower}, {help sgpv}  
 

@@ -10,6 +10,8 @@
 {viewerjumpto "Description" "sgpv##description"}{...}
 {viewerjumpto "Options" "sgpv##options"}{...}
 {viewerjumpto "Examples" "sgpv##examples"}{...}
+{viewerjumpto "Stored Results" "sgpv##stored"}{...}
+{viewerjumpto "Formulas" "sgpv##formulas"}{...}
 {title:Title}
 {phang}
 {bf:sgpv} {hline 2} Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands.  
@@ -108,7 +110,7 @@ An example of how to interpret the result from {cmd:sgpv} can be found in the {h
 
 {pstd}
 The formulas for the Second-Generation P-Values can be found {help sgpv##formulas:here}.{p_end}
-    {pstd}The sgpv-package consists of: sgpv {space 4}- the main command to calculate SGPVs, {help sgpvalue} and {help fdrisk}, to be used after estimations commands{break}
+    {pstd}The sgpv-package consists of: sgpv {space 4}- the main command to calculate SGPVs, delta-gaps and false discovery risks after an estimation.{break}
     {space 29}		  {help sgpvalue}   - calculate the SGPVs.{break}
     {space 29}	  {help sgpower} {space 1}- power functions for the SGPVs.{break}
     {space 29}	  {help fdrisk} {space 2}- false confirmation/discovery risks for the SGPVs.{break}
@@ -132,7 +134,7 @@ The replay-option is only available in the {dialog sgpv:dialog box}.
 {cmd:sgpv} behaves like any other estimation command (e.g. {helpb regress}) which replays the previous results when run without a varlist.
 Currently, the results from previous runs of {cmd:sgpv} are {bf:not} used to display the results. 
 Instead, the results are calculated fresh on every run of {cmd:sgpv}.{break}
-To see the results from a previous run of {cmd:sgpv} without recalculation with the command {stata matlist r(comparison)} 
+To see the results from a previous run of {cmd:sgpv} without recalculation, use the command {stata matlist r(comparison)} 
 if no other commands were run after {cmd:sgpv}.
 
 {phang} ONLY one thing can be used to calculate the SGPVs: an estimation command, the results from the previous estimation command, a stored estimation result or a matrix with the necessary information.
@@ -162,7 +164,7 @@ You can also select only an equation by using "eq:" or select a specific equatio
         A {it:coeflist} is:
             {it:coef} [{it:coef} ...]
             {it:eq:}{it:coef} [{it:eq:}{it:coef} ...]
-            {cmd:eq:} [{cmd:eq:}]
+            {cmd:eq:} [{cmd:eq:} ...]
 
 
 {phang}
@@ -204,7 +206,7 @@ This option overwrites the same named option of an estimation command.
 A warning is displayed in the beginning if this happens.
 
 {phang}
-{opt q:uietly}     suppress the output of the estimation command.
+{opt q:uietly} suppress the output of the estimation command.
 
 {phang}
 {opt nonull:warnings} disable warning messages when the default point 0 null-hypothesis is used for calculating the SGPVs. 
@@ -212,7 +214,7 @@ You should disable these warning messages only if using the default point 0 null
 what you want to do and you understand the consequences of doing so.
 
 {phang}
-{opt matl:istopt(string)}     change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
+{opt matl:istopt(string)} change the format of the displayed matrix. The same options as for {helpb matlist} can be used.
 
 {phang}
 {opt delta:gap} calculate and display the delta-gap if the SGPV is 0.
@@ -245,7 +247,7 @@ The level should be set equal to the level of the LSI which was used to calculat
 No official Stata command reports likelihood support intervals.
 
 {phang2}
-{opt p:i0(#)}     prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
+{opt p:i0(#)}  prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 
 A prior probability outside of this interval is not sensible. 
 The default value assumes that both hypotheses are equally likely.
 
@@ -324,8 +326,8 @@ Otherwise, the option returns an error and will not delete the menu entries.
   This is the standard null-hypothesis of no effect.	
   You will usually have a more relastic interval which is larger than 0 due to measurement errors, scientific relevance, etc. 
   The delta-gap can be used to compare two different studies for the same model/estimation when both report second-generation p-values of zero (p_δ = 0).
-  So for this example, the delta-gap is not needed, but still provides information about the distance between either the upper or the lower bound of the confidence interval and 0.
-  Finally, the False Discovery Risk (Fdr) tells you there is a roughly a 5% chance that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
+  So for this example, the delta-gap is not needed, but it still provides information about the distance between either the upper or the lower bound of the confidence interval and 0.
+  Finally, the False Discovery Risk (Fdr) tells you that there is a roughly a 5% chance that the null-hypothesis is true although you calculated a second-generation p-value of zero (p_δ = 0).
   Whether 5% is much, is for you to decide.
   
   {pstd}{bf:NB}: Note that the given interpretations are based on my understanding of Blume et.al (2018,2019).
@@ -335,11 +337,10 @@ Otherwise, the option returns an error and will not delete the menu entries.
   {marker exporting_results}
   {title:Exporting results}
   {pstd}
-  You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout,replace:here}.{break}
-  {stata . postrtoe} //transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier{break}
-  {stata . estout e(comparison)} //display the results{break} 
-  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} //export results for later use in a LaTeX-document{p_end}
-  
+  You can export the results with the help of Ben Jann's {help estout}-command. If you have not installed it yet, then you can do so by clicking {stata scc install estout, replace:here}.{break}
+  {stata . postrtoe} // Transfer the matrix r(comparison) to e(comparison) to make repeat usage of estout easier.{break}
+  {stata . estout e(comparison)} // Display the results.{break} 
+  {stata . estout e(comparison) using sgpv-results.tex, style(tex) replace} // Export results for later use in a LaTeX-document.{p_end}
   
   {marker stored_estimations}{...} 
   {title:Using stored estimations}
@@ -361,7 +362,7 @@ Otherwise, the option returns an error and will not delete the menu entries.
   At first the SGPVs are calculated for a 99% confidence interval:{break}
   {stata ". sgpv, all level(99): regress price mpg weight foreign"}{p_end}
   {pstd}Then for the stored quantile regression results also for 99% confidence level{break}
-  {stata . sgpv ,estimate(quantile) level(99) all} {p_end}
+  {stata . sgpv, estimate(quantile) level(99) all} {p_end}
     
   {marker alternative_null-hypothesis}{...}
   {title:Setting a different null-hypothesis}
@@ -383,9 +384,9 @@ Otherwise, the option returns an error and will not delete the menu entries.
   
 {pstd}  To set a separate/different null-hypothesis for each coefficient, you need to separate the individual lower or upper bounds of the null hypotheses  with a space. 
   The number of coefficients set in the {cmd:coefficient}-option needs to match the number of lower and upper bounds set in the {cmd:nulllo} and {cmd:nullhi}-options.{break}
-	{space 4}{stata ". sgpv ,coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
+	{space 4}{stata ". sgpv, coefficient(mpg weight foreign) nulllo(20 2 3000) nullhi(40 4 6000) quietly: regress price mpg weight foreign"}{p_end}
   {pstd}The same null hypotheses but this time one null-hypothesis for each selected equation or quantile:{break}
-	{space 4}{stata ". sgpv ,coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
+	{space 4}{stata ". sgpv, coefficient(q10: q50: q90:) nulllo(20 2 3000) nullhi(40 4 6000) quietly: sqreg price mpg rep78 foreign weight, q(10 25 50 75 90)"}{p_end}
 	
   {marker multiple-equations-example}
   {title:Selecting coefficients}	
@@ -397,7 +398,6 @@ Otherwise, the option returns an error and will not delete the menu entries.
 	{space 4} {stata ". sgpv, coefficient(q10: q50: q90:)"}  {p_end}
   {pstd}Select only the 50% quantile equation and foreign coefficient for sgpv calculation{break}
 	 {space 4} {stata ". sgpv, coefficient(q50:foreign)"} {p_end}
-
 
   {marker leukemia-example}
   {title:Calculating SGPVs for a large dataset of estimation or t-test results}
@@ -418,14 +418,14 @@ Otherwise, the option returns an error and will not delete the menu entries.
 	{stata . sgpv power, true(2) nulllo(-1) nullhi(1) stderr(1)}{p_end}
 {marker menuInstall}{...}
   {pstd}Install the dialog boxes permanently in the User menubar: User -> Statistics {break}
-	{stata . sgpv menu, perm}{p_end}
+	{stata . sgpv menu, permdialog}{p_end}
 {marker menuRemove}{...}
 {pstd}Remove the installed dialog boxes (permanently) from the User menubar:{break}
 {stata . sgpv menu, remove}{p_end}
 	
-
+{marker stored}{...}
 {title:Stored results}
-{cmd:sgpv} stores the following in r();
+{cmd:sgpv} stores the following in r():
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2:Scalars}{p_end}
 {synopt:{cmd:r(level)}}  confidence level {p_end}
@@ -506,6 +506,6 @@ Further Stata programs and development versions can be found under {browse "http
 
 
 {title:See Also}
-{pstd}Related commands:{break}
+{pstd}Related commands:
  {help plotsgpv}, {help sgpvalue}, {help sgpower}, {help fdrisk}  
 

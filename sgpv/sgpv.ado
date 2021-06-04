@@ -8,11 +8,11 @@
 							Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported. ///
 							Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix -> Without the option, the example ends with a matrix error. ///
 							Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the null and alternative space. ///
-							Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option overwrites the level option of an estimation command. ///
+							Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation commands. It sets the level of the confidence interval. This option overwrites the level option of an estimation command. ///
 							The likelihood-option is meant to be used together with the matrix-option. ///
-							The previous inttype and intlevel options did not work as intended. ///
+							The previous "inttype" and "intlevel" options did not work as intended. They did not set interval type and level for the Fdrs correctly. ///
 							The title for results matrix now shows the level and type which was used to calculate the SGPVs (, delta-gaps and Fdrs). ///
-							Calculating SGPVs for stored estimations will only show the SGPV results and not the saved estimation results.
+							Calculating SGPVs for stored estimations will only show the SGPV results and not the saved estimation results anymore.
 *Version 1.1a 08.07.2020 : Changed the subcommand "fdrisk" to "risk" to be in line with the Python code.
 *Version 1.1  09.06.2020 : Added support for multiple null hypotheses; ///
 							added a noconstant-option to remove constant from list of coefficients; ///
@@ -122,8 +122,8 @@ else{
 
 **Define here options
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
- Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings    DELTAgap FDrisk all  /// display-options
-  nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and rather experimental change
+ Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings  DELTAgap FDrisk all  /// display-options
+  nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and a rather experimental change
   TRUNCnormal  /*set truncated normal distribution for nullspace*/ Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/ ///
 	/*depreciated options*/ Bonus(string) NULLSpace(string asis) NULLWeights(string) ALTWeights(string) ALTSpace(string asis) INTLevel(string) INTType(string) 	] 
@@ -238,7 +238,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	if "`inttype'"==""{ // Make confidence the default interval type
 		local inttype "confidence"
 	}
-	if "`likelihood'"!="" & "`matrix'"!="" { // Allow likelihood intervals only for matrices, because likelihood intervals are not used by standard estimation commands.
+	if "`likelihood'"!="" & "`matrix'"!=""{ // Allow likelihood intervals only for matrices, because likelihood intervals are not used by standard estimation commands.
 		local inttype "likelihood"
 	}
 	else if "`likelihood'"!="" & "`matrix'"==""{
@@ -269,7 +269,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 	*Nullweights: 21.11.2020 -> Depreciated nullspace and nullweights option but left the code in place to not break existing code. Will be removed in another release for clearer code.
 	*Not properly tested yet
-	if "`nullweights'"!=""  {
+	if "`nullweights'"!=""{
 		local nullweights `nullweights'
 	}
 	else if  "`nullweights'"=="" & "`nullspace'"=="`nulllo'"{
@@ -355,7 +355,6 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 if r(level)!=`level'{
 	local intlevel = 1-0.01*r(level)
 }
- 
  
 * disp "Start calculating SGPV"
  *Create input vectors
@@ -576,7 +575,7 @@ program define ParseCoef, rclass
  }
  
  *Save specified case : 
- * looking for the equations only needed if case 1 and set to 0 for case 2 & 3
+ *Looking for the equations only needed if case 1 and set to 0 for case 2 & 3
  if (wordcount("`eqcoefspec'")>0 | wordcount("`eqspec'")>0) local coleqnumb 0
 	if wordcount(`"`coefficient'"')==wordcount("`coefspec'"){ 
 		local coleq : coleq `matrix'
@@ -747,9 +746,9 @@ program define menu
 			file read `fh' line
 			while r(eof)==0{ // Skip the lines containing the window commands and write only the others back to a new file, then rename the original file to profile.do.bak and rename the new file as profile.do
 				if `"`line'"'==`"`start_line'"'{
-				while r(eof)==0 & `"`line'"' != `"`end_line'"'{
+					while r(eof)==0 & `"`line'"' != `"`end_line'"'{
 					file read `fh' line
-				}
+					}
 				
 				}
 				file write `fh2' `"`line'"' _n

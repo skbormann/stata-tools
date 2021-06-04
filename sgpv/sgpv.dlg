@@ -2,6 +2,7 @@
 To-Do/further improvements: 	
 								Add another tab to launch the other dialogs for the other commands to make SGPV the central dialog.
 								Add input checks for the options nullhi and nulllo together with the coefficient-option to support better multiple null-hypotheses.
+								Enable likelihood option only if Matrix option is selected.
 */
 /*
 sgpv dialog version 1.2, 27.12.2020, Sven-Kristjan Bormann
@@ -124,7 +125,7 @@ BEGIN
 	
 	CHECKBOX ck_likelihood 	15	_ls 	150	., 	label("Likelihood support interval") option(likelihood) ///
 													onclickon(script likelihood_on) onclickoff(script likelihood_off) ///
-													tooltip("Set if a likelihood support interval (LSI) level 1/k was used to calculate ")
+													tooltip("Set if a likelihood support interval (LSI) with level 1/k was used to calculate the interval estimated.")
 	EDIT ed_likelihood      15  _ss      @    ., option(likelihood) error(No Interval level for the Likelihood-Support-Interval set) ///
 													tooltip("Set the interval level for the Likelihood-Support-Interval(LSI). The level should be set equal to the level of the LSI which was used to calculate the lower and upper bound of the estimated coefficients for the supplied matrix.")											
 	
@@ -215,7 +216,7 @@ SCRIPT all_on
 BEGIN
 	rpt.ck_deltagap.disable
 	rpt.ck_fdrisk.disable
-	script fdrisk_options_on
+	program fdrisk_options_on
 END
 
 SCRIPT all_off
@@ -225,9 +226,12 @@ BEGIN
 	rpt.ck_fdrisk.enable
 END
 
-SCRIPT fdrisk_options_on
+PROGRAM fdrisk_options_on
 BEGIN
 	rpt.ck_truncnormal.enable
+	/*if !main.cb_matrix.isenabled() {
+		 rpt.ck_likelihood.disable
+	}*/
 	rpt.ck_likelihood.enable
 	rpt.ed_pi0.enable
 END

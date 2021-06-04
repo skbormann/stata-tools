@@ -1,5 +1,6 @@
 {smcl}
 {* *! version 1.02  10 Jul 2020}{...}
+{viewerdialog sgpower "dialog sgpower"}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "SGPV (Main Command)" "help sgpv"}{...}
 {vieweralsosee "SGPV Value Calculations" "help sgpvalue"}{...}
@@ -10,6 +11,7 @@
 {viewerjumpto "Options" "sgpower##options"}{...}
 {* viewerjumpto "Remarks" "sgpower##remarks"}{...}
 {viewerjumpto "Examples" "sgpower##examples"}{...}
+{viewerjumpto "Stored Results" "sgpower##stored"}{...}
 {title:Title}
 {phang}
 {bf:sgpower} {hline 2} Power functions for Second-Generation P-Values
@@ -31,9 +33,9 @@
 {p_end}
 {synopt:{opt nullhi(#)}}  the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 {p_end}
-{synopt:{opt l:evel(#)}} use confidence interval with the specified level; default is {cmd:level(95)}.
+{synopt:{opt l:evel(#)}}  confidence interval with the specified level was used to calculated the SGPV; default is {cmd:level(95)}.
 {p_end}
-{synopt:{opt lik:elihood(#)}} use likelihood support interval with level was used to calculate the SGPV.
+{synopt:{opt lik:elihood(#)}} likelihood support interval with level 1/k was used to calculate the SGPV.
 {p_end}
 
 {syntab:Further options}
@@ -82,10 +84,10 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 {opt nullhi(#)}     the upper bound for the indifference zone (null interval) upon which the second-generation {it:p}-value is based.
 
 {phang}
-{opt l:evel(#)} use a confidence interval with level (1-α)100%. The default is {cmd:level(95)} or as set by {helpb set level} if option {cmd:likelihood} or another confidence level is not set. 
+{opt l:evel(#)} confidence interval with level (1-α)100% was used to calculated the SGPV. The default is {cmd:level(95)} or as set by {helpb set level} if option {cmd:likelihood} or another confidence level is not set. 
 
 {phang}
-{opt lik:elihood(#)} use a likelihood support interval with level 1/k. 
+{opt lik:elihood(#)} likelihood support interval with level 1/k was used to calculate the SGPV. 
 				
 {pstd}
 {p_end}
@@ -114,7 +116,7 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 To download the file together with the rest of the examples click {net "get sgpv.pkg, replace":here}.{break}
 {stata . do sgpower-plot-example.do}
 
-
+{marker stored}{...}
 {title:Stored results}
 
 {synoptset 15 tabbed}{...}
@@ -154,6 +156,7 @@ Further Stata programs and development versions can be found under {browse "http
 
 
 {title:See Also}
-Related commands:
+{pstd}
+Related commands:{break}
  {help fdrisk}, {help plotsgpv}, {help sgpvalue}, {help sgpv}
 
