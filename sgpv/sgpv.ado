@@ -1,5 +1,6 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
 *!Version 1.2a 01.02.2021: Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 *!Version 1.2 27.12.2020 : Changed the name of the option permament to permdialog to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box. /// 
@@ -124,12 +125,21 @@ else{
 syntax [anything(name=subcmd)] [,   Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings  DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and a rather experimental change
-  TRUNCnormal  /*set truncated normal distribution for nullspace*/ Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) /// fdrisk-options
+  TRUNCnormal  /*set truncated normal distribution for nullspace*/ Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) nomata /// fdrisk-options
     debug  /*Display additional debug messages: undocumented*/ ///
 	/*depreciated options*/ Bonus(string) NULLSpace(string asis) NULLWeights(string) ALTWeights(string) ALTSpace(string asis) INTLevel(string) INTType(string) 	] 
 
 
 ***Option parsing
+*Check Mata option for fdrisk
+if "`mata'"=="mata"{
+	capt findfile lmoremata.mlib
+	if _rc {
+		di as error "-moremata- is required to use the -mata- option; type {stata ssc install moremata}"
+		error 499
+	}
+}
+**Check for what SGPVs should be calculated for
 if "`cmd'"!="" & ("`estimate'"!="" | "`matrix'"!=""){
 	disp as error "Options 'matrix' and 'estimate' cannot be used in combination with a new estimation command."
 	exit 198
@@ -417,12 +427,12 @@ if "`fdrisk_stat'"=="fdrisk"{
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
 		if wordcount("`nullhi'")==1{
-			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(0) pi0(`pi0')
+			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') pi0(`pi0') `mata'
 			}
 		else if wordcount("`nullhi'")>1{			
 			qui fdrisk, nullhi(`=word("`nullhi'",`i')') nulllo(`=word("`nulllo'",`i')') ///
 			stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') ///
-			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') sgpval(0) pi0(`pi0') 	
+			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') pi0(`pi0') `mata'
 			}			
 			capture confirm scalar r(fdr)
 			if !_rc mat `fdrisk'[`i',1] = r(fdr)

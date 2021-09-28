@@ -10,7 +10,7 @@ Not all programs are not yet available via the SSC, but will be in the future.
 * expandIhlp - Integrates .ihlp files into normal help files to allow repeated usage of text without the need to ship the .ihlp-file(s) itself. This is mainly a convience tool other programmers.
 * getperc - Returns the relative frequency of categorical variable for further processing. 
 * multif - Constructs multiple if-restrictions. It allows to apply the same if-restriction(s) to different variables for the same command.
-   Mainly delevoped and used for the *count* command, but it works for other scenarios as well 
+   Mainly delevoped and used for the *count* command, but it works for other scenarios as well. 
 * num2base26 - An interface to the *numbase26()* function of Mata. Converts a number to a letter. 
   Useful when creating Excel tables in Stata
 * [sgpv](https://github.com/skbormann/stata-tools/tree/master/sgpv) -  Calculate Second Generation P-Values (SGPV) based on the R-code by  Jeffrey D. Blume and Valerie F. Welty available [here](https://github.com/weltybiostat/sgpv) 

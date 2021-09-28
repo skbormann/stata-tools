@@ -8,7 +8,7 @@ The changelog is taken from the ado-files and slightly modified.
 ### General
 General remarks if updates come in larger "packages".
 * 27.12.2020:
-  * Made the syntax of most commands more Stata like and less R-like. Removed several options and replaced by them with default settings. 
+  * Made the syntax of most commands more Stata like and less R-like. Removed several options and replaced by them with default settings. The old syntax still works.
   * Certification scripts for each command are now available but not part of the package distribution. For now only the accuracy of the results is tested but later tests for input errors might be added.
 
 * 17.05.2020:
@@ -36,7 +36,6 @@ General remarks if updates come in larger "packages".
 
 ### fdrisk
 * Version 1.1  24.12.2020 : 
-  * Changed the syntax of the command to match more closely Stata standards, the old syntax still works. 
   * Option sgpval became one option 'fcr'. The default is to calculate the Fdr.
   * Option nullweights became option 'nulltruncnormal'. The former option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default distribution. 
   * Option altweights became 'alttruncnormal'. The option altweights("Point") is automatically selected if option altspace contains only one element. If option altspace contains two elements then the Uniform distribution is used as the default distribution. 
@@ -80,9 +79,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpower
-* Version 1.05 24.12.2020 : 
-  * Changed the syntax to set interval type and interval level to be more in line with Stata standard. The old syntax still works.
-  * Options "inttype" and "intlevel" became new options "level" and "likelihood".
+* Version 1.05 24.12.2020 : Options "inttype" and "intlevel" were renamed to "level" and "likelihood". The old syntax still works.
 * Version 1.02 10.07.2020 : Fixed a missing bonus statistic ('at 0') in the help-file and the code.
 * Version 1.01 14.05.2020 : Changed type of returned results from macro to scalar to be more inline with standard practise
 * Version 1.00  : Initial SSC release, no changes compared to the last Github version.
@@ -96,9 +93,9 @@ General remarks if updates come in larger "packages".
 * Version 1.2 27.12.2020 : 
   * Changed the name of the option permament to permdialog to clarify the meaning of the option. 
   * Fixed the format option in the Dialog box. 
-  * Added remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
+  * Added a remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog.
   * Renamed the dialog tab "Display" to "Reporting". Moved the options from the dialog tab "Fdrisk" to dialog tab "Reporting". 
-  * Decpreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.
+  * Depreciated the option bonus() and replaced it with the new options "deltagap", "fdrisk" and "all" which have the same effect as the previous bonus() option. This way is more in line with standard Stata praxis. The bonus option still works but is no longer supported.
   * Added a forgotten option to calculate the bonus statistics in the example file sgpv-leukemia-example.do and fixed the size of the final matrix. 
   * Removed the fdrisk-options "nullspace" and "nullweights" because they were redudant and added a new option "truncnormal" to request the truncated Normal distribution for the null and alternative space. 
   * Renamed the options "intlevel" and "inttype" to "level" and "likelihood". The level-option works like the same named option in other estimation command. It sets the level of the confidence interval. This option overwrites the level option of an estimation command. 

@@ -3,7 +3,7 @@ d multif - Constructs multiple if-restrictions.
 d It allows to apply the same if-restriction(s) to different variables for the same command. 
 d Mainly delevoped and used for the count command, but it works for other scenarios as well.
 d Author: Sven-Kristjan Bormann
-d Distribution-Date: 20180811
+d Distribution-Date: 20210928
 f multif/multif.ado
 f multif/multif.dlg
 f multif/multif.sthlp

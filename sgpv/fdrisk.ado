@@ -31,9 +31,21 @@ syntax, nulllo(string) nullhi(string) STDerr(real)   ///
 		NULLSpace(string asis)  ALTSpace(string asis) ///
 		[ Pi0(real 0.5) ///
 		/*Depreciated options */  NULLWeights(string)  ALTWeights(string) INTType(string) INTLevel(string) SGPVal(integer 0) ///
-		/*Newly added options to replace existing ones*/  fcr Level(cilevel) LIKelihood(numlist min=1 max=2)  NULLTruncnormal ALTTruncnormal]
+		/*Newly added options to replace existing ones*/  fcr Level(cilevel) LIKelihood(numlist min=1 max=2)  NULLTruncnormal ALTTruncnormal] ///
+		[nomata] /* Test options for Mata integration */
 *Syntax parsing
-local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
+*local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
+
+if "`mata'" != "nomata" local integrate nomataInt
+else if "`mata'"=="mata"{
+	/*capt findfile lmoremata.mlib
+	if _rc {
+		di as error "-moremata- is required to use the -mata- option; type {stata ssc install moremata}"
+		error 499
+	}*/
+	local integrate mataInt
+} 
+*local integrate  // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
 
 *New syntax(checks)---------------------------
@@ -303,27 +315,35 @@ end
 
 *Check if the input is valid
 program define isValid
-args valid optname i
-if real("`=`valid''")==.{
-	if "`i'"!=.{
-		disp as error "`valid' in option {cmd:`optname'} on position `i'  is not a number nor . (missing value) nor empty."
-	}
-	else{
-		disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
-	} 
-	exit 198
+	args valid optname i
+	if real("`=`valid''")==.{
+		if "`i'"!=.{
+			disp as error "`valid' in option {cmd:`optname'} on position `i'  is not a number nor . (missing value) nor empty."
 		}
-		
+		else{
+			disp as error "`valid' in option {cmd:`optname'}  is not a number nor . (missing value) nor empty."
+		} 
+		exit 198
+			}		
 end
 
 *Shortcut to the Stata integration command, same syntax as the user-provided integrate-command.
 program define nomataInt, rclass
-syntax , Lower(real) Upper(real) Function(string) [*]
-preserve
-range x `lower' `upper' 1000
-gen y  = `function'
-integ y x
-return local integral `r(integral)'
-restore
+	syntax , Lower(real) Upper(real) Function(string)
+	preserve
+	range x `lower' `upper' 1000
+	gen y  = `function'
+	integ y x
+	return local integral `r(integral)'
+	restore
  
 end
+
+program define mataInt, rclass
+syntax , Lower(real) Upper(real) Function(string)
+
+	mata: function myf(x) return(st_local("function"))
+	mata: st_local("integral", mm_integrate_sr(&myf(),st_local("lower"), st_local("upper"),1000,1))
+	return local integral `integral'
+end
+
