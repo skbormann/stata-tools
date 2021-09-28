@@ -34,7 +34,6 @@ syntax, nulllo(string) nullhi(string) STDerr(real)   ///
 		/*Newly added options to replace existing ones*/  fcr Level(cilevel) LIKelihood(numlist min=1 max=2)  NULLTruncnormal ALTTruncnormal] ///
 		[nomata] /* Test options for Mata integration */
 *Syntax parsing
-*local integrate nomataInt // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
 if "`mata'" != "nomata" local integrate nomataInt
 else if "`mata'"=="mata"{
@@ -45,7 +44,6 @@ else if "`mata'"=="mata"{
 	}*/
 	local integrate mataInt
 } 
-*local integrate  // Keep this macro in case I offer a Mata-based solution for the integration at some future point.
 
 
 *New syntax(checks)---------------------------
@@ -339,6 +337,7 @@ program define nomataInt, rclass
  
 end
 
+*Use Mata for integration using Ben Jann's moremata package
 program define mataInt, rclass
 syntax , Lower(real) Upper(real) Function(string)
 
