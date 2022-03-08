@@ -35,6 +35,7 @@ General remarks if updates come in larger "packages".
   * Added dialog boxes for all commands except for the sgpv-command. Instructions how to add the dialogs to the menubar can be found inside the respective **command**.dlg file.
 
 ### fdrisk
+* Version 1.2  22.02.2022 : Depreciated the old syntax. The old syntax did not work as intended after the switch to the new syntax.
 * Version 1.1  24.12.2020 : 
   * Option sgpval became one option 'fcr'. The default is to calculate the Fdr.
   * Option nullweights became option 'nulltruncnormal'. The former option nullweights("Point") is automatically selected if option nullspace contains only one element. If option nullspace contains two elements then the Uniform distribution is used as the default distribution. 
@@ -55,13 +56,14 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### plotsgpv
+* Version 1.05 31.12.2021 : Fixed/improved handling of situations with low number of observations.
 * Version 1.04 02.07.2020 : 
 	* Fixed/improved the support for matrices as input for options "esthi" and "estlo".
 	* Removed noshow-option because it was never needed. The results of the sgpv-calculations were never shown even without this option set. 
 	* Fixed non working combinations of variables as inputs and the nomata-option.
 	* Changed the legend slightly to be more in line with R-code.
-* Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code
-* Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals
+* Version 1.03 18.06.2020 : Changed the order in the legend to match the order in the R-code.
+* Version 1.02 05.06.2020 : nomata-option will now be set correctly if variables are used as inputs for estimated intervals.
 * Version 1.01 29.03.2020 : Added code for the cornercase that the ordering is set "sgpv", no variables as inputs are used and the matrix size exceeds c(matsize) -> uses Ben Jann's mm_cond() function (necessary code is included to avoid having the moremata-package installed ) -> not tested the code yet due to lack of test cases 
 * Version 1.00 : Initial SSC release, no changes compared to the last Github version.
 * Version 0.98a: 
@@ -89,6 +91,8 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option.  Support for Mata to calculate Fdrs has been removed, because it did not work as intended and offered no significant speed advantage.
+* Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann.
 * Version 1.2a 01.02.2021 : Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 * Version 1.2 27.12.2020 : 
   * Changed the name of the option permament to permdialog to clarify the meaning of the option. 
@@ -144,9 +148,12 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+*Version 1.06  13.02.2022: 
+	* Fixed a bug when variables as input with only one null-hypothesis is used, but only a few observations exist. ///
+	* Fixed a bug which prevented one of the examples from the help file to run.
 * Version 1.05  01.11.2020: 
-  * Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals.
-  * Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
+    * Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals.
+    * Fixed a bug which set delta incorrectly when calculating the deltagap for one-sided intervals. 
 * Version 1.04  01.07.2020: 
 	* Added/improved support matrices as inputs for options "esthi" and "estlo".
 	* Noshow-option now works as expected.  
