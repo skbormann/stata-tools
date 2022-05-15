@@ -1,7 +1,6 @@
 *!Second Generation P-Values Calculations
 *!Based on the R-code for sgpvalue.R from the sgpv-package from https://github.com/weltybiostat/sgpv
-*!Version 1.07	15.05.2022: Found a bug so that running sgpvalue with matrices larger than c(matsize) and nomata-option returns no results [TO BE FIXED]  ///
-							Found a bug/missing feature so that running sgpvalue with matrices larger than c(matsize) does not work the underlying Mata function "sgpv" does not yet work with matrices but only with variables. [TO BE FIXED/IMPLEMENTED] 
+*!Version 1.07	15.05.2022: Handling of larger inputs and nomata-option should work now as intended. Previously, not all possible combinations of large inputs and nomata-option have been supported correctly. 
 *!Version 1.06  13.02.2022: Fixed a bug when variables as input with only one null-hypothesis is used, but only a few observations exist. ///
 							Fixed a bug which prevented one of the examples from the help file to run.
 *Version 1.05  01.11.2020: Fixed a bug in an input check which made it impossible to use missing values as input for one-sided intervals. ///
@@ -114,11 +113,11 @@ syntax, estlo(string) esthi(string)  nulllo(string) nullhi(string) [NOWARNings I
 
 
 *Check if estint is larger than the current matsize
- *if _N > c(matsize) | `=wordcount("`esthi'")' > c(matsize) | rowsof(`esthi') > c(matsize){
 if `estint'>c(matsize){ //Assuming here that this condition is only true if variables used as inputs -> The maximum length of the esthi() and estlo() should not be as large as c(matsize).
 	*An alternative based on variables if inputs are variables.
 	local nodeltagap `deltagap'
-	if "`mata'"=="nomata" & `variablefound'==1{
+	*if "`mata'"=="nomata" & "`variablefound'"=="1"{
+	if "`mata'"=="nomata"{
 		local nulllo = real(trim("`nulllo'"))
 		local nullhi = real(trim("`nullhi'"))
 		if wordcount("`nulllo'") >1 | wordcount("`nullhi'") > 1{
@@ -133,7 +132,12 @@ if `estint'>c(matsize){ //Assuming here that this condition is only true if vari
 		}
 		if "`variablefound'"=="1" local type "variable"
 		if "`matrixfound'"=="1" local type "matrix"
-		if "`variablefound'"=="0" & "`matrixfound'"=="0" local type "macro"
+		if "`variablefound'"=="0" & "`matrixfound'"=="0"{
+			disp as error "Local macros used in the options esthi and estlo contain more than `=c(matsize)' entries."
+			disp as error "Such large macros are not yet supported."
+			disp as error "Please convert the macros to matrices or variables."
+			exit 198
+		} 
 		*mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', `infcorrection' , "`nodeltagap'") // Only one null interval allowed.
 		mata: sgpv("`estlo' `esthi'", "results", `nulllo', `nullhi', "`type'" , `infcorrection' , "`nodeltagap'")
 		*The same return as before but this time for the Mata function -> not the best solution yet.
@@ -358,7 +362,27 @@ end
 
 *Use new variables to store and calculate the SGPVs -> Do I properly deal with one-sided intervals yet?
 program define sgpv_var, rclass
- syntax ,esthi(varname) estlo(varname) nullhi(string) nulllo(string) [replace nodeltagap infcorrection(real 1e-5)]
+ syntax ,esthi(name) estlo(name) nullhi(string) nulllo(string) [replace nodeltagap infcorrection(real 1e-5)]
+ 
+ * Allow handling of matrices
+ * Not sure yet how to remove the new variables at the end of the program, since using tempvar does not work well in connection with svmat.
+ * For now will not document this creation of new variables in the help file until a sufficient solution has been found.
+ capture confirm matrix `esthi' `estlo'
+ if !_rc{
+	capture confirm variable `esthi' `estlo'
+	if !_rc{
+		disp as error "Variables with the same name as the matrices `esthi', `estlo' in options esthi and estlo already exist."
+		disp as error "Please rename either the variables or matrices, so that there is no naming conflict."
+		exit 198
+	}
+	local matrixfound 1
+	svmat `esthi', name(`esthi')
+	rename `esthi'1 `esthi'
+	svmat `estlo', name(`estlo')
+	rename `estlo'1 `estlo'
+ } 
+ 
+
  if "`replace'"=="replace"{
 	capture drop pdelta
 	capture drop dg
@@ -410,7 +434,10 @@ program define sgpv_var, rclass
 		label variable pdelta "SGPV"
 		
 		}
- 
+	if "`matrixfound'"=="1"{	// Remove variables created when using matrices as input
+	capture drop `esthi'
+	capture drop `estlo'
+	}
  exit 
 end
 
@@ -419,13 +446,13 @@ mata:
 version 12.0
 //void function sgpv(string varlist, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, real scalar infcorrection ,| string scalar nodeltagap){ 
  void function sgpv(string list, string scalar sgpvmat, real scalar nulllo, real scalar nullhi, string scalar type, real scalar infcorrection ,| string scalar nodeltagap){ 
-/*How to extend the function so that it accepts macros, matrices and variables as inputs and how to handle multiple null-hypotheses*/
+/*How to handle multiple null-hypotheses*/
 /*Allow only one null interval for now*/
 /*Calculate the SGPVs and Delta-Gaps if the desired matrix size is too large for Stata
 Might have to change the way missing values are handled -> For now they are treated as meaning infinite.
 */
 V = tokens(list)
-if (type =="macro" | type=="matrix"){
+if (type=="matrix"){
 	Data=(st_matrix(V[1]), st_matrix(V[2]))
 }
 if (type=="variable"){
@@ -434,12 +461,6 @@ if (type=="variable"){
     st_view(Data,.,V)
 }
 
-	//real matrix Sgpv
-	/*
-	V = st_varindex(tokens(varlist))
-    Data = J(1,1,0)
-    st_view(Data,.,V)
-	*/
 	Sgpv = J(rows(Data),2,.)	
 	null_len = nullhi - nulllo
 	n = rows(Data) 

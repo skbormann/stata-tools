@@ -91,6 +91,11 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.2.1 13.05.2022: 
+	* Fixed a bug introduced by removing the support for the original R-syntax for fdrisk, so that the options fdrisk and all did not work anymore.   
+	* Removed the code to support the original R-syntax for fdrisk. 
+	* Removed the support for the already depreciated bonus option. 
+	* Fixed a bug that the deltagap has always been calculated and displayed even if the deltagap-option or the all-option had not been set.
 * Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option.  Support for Mata to calculate Fdrs has been removed, because it did not work as intended and offered no significant speed advantage.
 * Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann.
 * Version 1.2a 01.02.2021 : Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
@@ -148,6 +153,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.07	15.05.2022: Handling of larger inputs and nomata-option should work now as intended. Previously, not all possible combinations of large inputs and nomata-option have been supported correctly.
 *Version 1.06  13.02.2022: 
 	* Fixed a bug when variables as input with only one null-hypothesis is used, but only a few observations exist. ///
 	* Fixed a bug which prevented one of the examples from the help file to run.
