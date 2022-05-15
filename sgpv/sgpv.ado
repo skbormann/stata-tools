@@ -1,5 +1,6 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.2d 13.05.2022: Fixed a bug introduced by removing the support for the original syntax for fdrisk.
 *!Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option. ///
 							Support for Mata to calculate Fdrs has been removed, because it did not work as intended and offered no significant speed advantage. 
 *!Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
@@ -123,7 +124,7 @@ else{
 }
 
 
-**Define here options
+**Define options here
 syntax [anything(name=subcmd)] [, Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings  DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string) Null(string)  /// null hypotheses  -> option "null" unifies nulllo and nullhi for easier entering the intervals -> not documented and a rather experimental change
@@ -237,7 +238,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	
 	**Set the interval type for Fdrisk Inttype
 	* Depreciated approach based on R -> will be removed after two releases
-	if "`inttype'"!="" & inlist("`inttype'", "confidence","likelihood"){
+	/*if "`inttype'"!="" & inlist("`inttype'", "confidence","likelihood"){
 		local inttype `inttype'
 	}
 	else if "`inttype'"!="" & !inlist("`inttype'", "confidence","likelihood"){
@@ -246,7 +247,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	else{
 		local inttype "confidence"
 	}
-	
+	*/
 	* More Stata-like documented approach
 	if "`inttype'"==""{ // Make confidence the default interval type
 		local inttype "confidence"
