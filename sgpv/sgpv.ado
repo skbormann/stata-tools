@@ -279,35 +279,7 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 	if !(`pi0'>0 & `pi0'<1){
 		stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
 	}
-	
-	
-**Parse bonus option
-*Changed the default behaviour so that the option is now a bit confusing, at least the code for it.
-*02.11.2020: Changed these options from one singular option to multiple optionally_on options;
-*old code is kept to avoid breaking existing code,  
-*no checks implemented on ensure that only one of the optionally_on options is used.
-if !inlist("`bonus'","deltagap","fdrisk","all","none",""){
-	stop `"Option 'bonus' is incorrectly specified. It takes only values `"none"', `"deltagap"', `"fdrisk"' or `"all"'. "'
-}
-
-if "`bonus'"=="" | "`bonus'"=="none"{ 	
-	local nodeltagap nodeltagap
-	local fdrisk_stat 
-}
-
-if "`bonus'"=="deltagap" | "`deltagap'"=="deltagap" {
-	local nodeltagap 
-	}
-	
-if "`bonus'"=="fdrisk" | "`fdrisk'"=="fdrisk" {
-	local fdrisk_stat fdrisk
-}
-
-if "`bonus'"=="all"| "`all'"=="all"{
-	local fdrisk_stat fdrisk
-	local nodeltagap 
-}
-
+		
 **Estimation command
 local cmd = ustrltrim("`cmd'") // Remove trailing whitespaces which could make the second comparison fail
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
