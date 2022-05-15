@@ -1,10 +1,12 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.2d 13.05.2022: Fixed a bug introduced by removing the support for the original syntax for fdrisk. Removed the support for the already depreciated bonus option.
-*!Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option. ///
+*!Version 1.2.4 13.05.2022: Fixed a bug introduced by removing the support for the original syntax for fdrisk. [SHOULD BE DONE] ///
+							Removed the support for the already depreciated bonus option. ///
+							Fixed a bug that the deltagap has always been calculated and displayed even if the deltagap-option or the all-option had not been set.
+*!Version 1.2.3 14.02.2022: 	Fixed a bug when using the coefficient-option together with noconstant-option. ///
 							Support for Mata to calculate Fdrs has been removed, because it did not work as intended and offered no significant speed advantage. 
-*!Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
-*Version 1.2a 01.02.2021: Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
+*!Version 1.2.2 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
+*Version 1.2.1 01.02.2021: Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 *Version 1.2 27.12.2020 : Changed the name of the option permament to permdialog to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box. /// 
 							Added a remove option for the menu subcommand to remove the entries in the profile.do created by the option permdialog. ///
@@ -215,71 +217,39 @@ else if "`estimate'"!="" & "`matrix'"!=""{
 		local nullspace `nulllo'
 	}
 	
-	**Set the interval type for Fdrisk Inttype
-	* More Stata-like documented approach
-	if "`inttype'"==""{ // Make confidence the default interval type
-		local inttype "confidence"
-	}
-	if "`likelihood'"!="" & "`matrix'"!=""{ // Allow likelihood intervals only for matrices, because likelihood intervals are not used by standard estimation commands.
-		local inttype "likelihood"
-	}
-	else if "`likelihood'"!="" & "`matrix'"==""{
+	if "`likelihood'"!="" & "`matrix'"==""{ // Allow likelihood intervals only for matrices, because likelihood intervals are not used by standard estimation commands.
 		stop "Option 'likelihood' is only allowed together with the option 'matrix'."
 	}
-	
-	
-	**Set the level of the confidence or likelihood interval: 
-	*Only needed when calculating the fdr, but setting them here regardless of Fdr-calculations does not hurt.
-	*Depreciated approach based on R
-	if "`intlevel'"!=""{
-		local intlevel = `intlevel'
-	}
 		
-	*More Stata like approach
-	if "`likelihood'"==""{
-			if "`level'"!=""{
-			local intlevel = 1 - 0.01*`level'
-			}
-			else{
-				local intlevel 0.05
-			}
-	}
-	else{
-		local intlevel = `likelihood'
-	}
-
-	
 	*Nullweights: 21.11.2020 -> Depreciated nullspace and nullweights option but left the code in place to not break existing code. Will be removed in another release for clearer code.
-	*Not properly tested yet
-	if "`nullweights'"!=""{
-		local nullweights `nullweights'
+	if "`truncnormal'"!=""{
+		local nulltruncnormal nulltruncnormal
+		local alttruncnormal alttruncnormal
 	}
-	else if  "`nullweights'"=="" & "`nullspace'"=="`nulllo'"{
-		local nullweights "Point"
-	}
-	else if "`nullweights'"=="" & mod(`=wordcount("`nullspace'")',2)==0{ //Assuming that Uniform is good default nullweights for a nullspace with two values -> TruncNormal will be chosen only if explicitly set.	
-		local nullweights "Uniform" 
-	} 
-	else if "`truncnormal'"!="" & mod(`=wordcount("`nullspace'")',2)==0{
-		local nullweights "TruncNormal"
-	}
-	
-	*Altweights
-	if "`altweights'"!="" & inlist("`altweights'", "Uniform", "TruncNormal"){
-		local altweights `altweights'
-	}
-	else if "`truncnormal'"!=""{ // Set altweights and nullweights to same distribution -> not strictly required by Blume et. al. but makes the code a bit shorter.
-		local altweights "TruncNormal"	
-	}
-	else{
-		local altweights "Uniform"
-	}
-	
 	*Pi0
 	if !(`pi0'>0 & `pi0'<1){
 		stop "Values for pi0 need to lie within the exclusive 0 - 1 interval. A prior probability outside of this interval is not sensible. The default value assumes that both hypotheses are equally likely."
 	}
-		
+	
+	
+**Parse bonus statistic options
+if "`deltagap'"=="" | "`all'"=="" local nodeltagap nodeltagap
+
+if  "`deltagap'"=="deltagap" {
+	local nodeltagap 
+	}
+	
+if  "`fdrisk'"=="fdrisk" {
+	local fdrisk_stat fdrisk
+	local nodeltagap nodeltagap
+}
+
+if "`all'"=="all"{
+	local fdrisk_stat fdrisk
+	local nodeltagap 
+}
+
+
 **Estimation command
 local cmd = ustrltrim("`cmd'") // Remove trailing whitespaces which could make the second comparison fail
 *Assuming that any estimation command will report a matrix named "r(table)" and a macro named "e(cmd)"
@@ -305,11 +275,6 @@ else if "`e(cmd)'"!=""{ // Replay previous estimation
 	quietly `e(cmd)' , level(`level')
 }
 
-*Check if the confidence level for the estimation command is different than set in the level()-option and overwrite the previously set option
-if r(level)!=`level'{
-	local intlevel = 1-0.01*r(level)
-}
- 
 * disp "Start calculating SGPV"
  *Create input vectors
   tempname input  input_new sgpv pval comp rest fdrisk 
@@ -372,12 +337,15 @@ if "`fdrisk_stat'"=="fdrisk"{
 	forvalues i=1/`:word count `rownames''{
 		if `=`comp'[`i',1]'==0{
 		if wordcount("`nullhi'")==1{
-			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') nullspace(`nullspace') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') pi0(`pi0') `mata'
+			 qui fdrisk, nullhi(`nullhi') nulllo(`nulllo') stderr(`=`input_new'[2,`i']')  level(`level') likelihood(`likelihood') ///
+			 nullspace(`nullspace')  altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') ///
+			 `nulltruncnormal' `alttruncnormal' pi0(`pi0') 
 			}
 		else if wordcount("`nullhi'")>1{			
 			qui fdrisk, nullhi(`=word("`nullhi'",`i')') nulllo(`=word("`nulllo'",`i')') ///
-			stderr(`=`input_new'[2,`i']') inttype(`inttype') intlevel(`intlevel') ///
-			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')') 	nullweights(`nullweights') altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') altweights(`altweights') pi0(`pi0') `mata'
+			stderr(`=`input_new'[2,`i']')  level(`level') likelihood(`likelihood') ///
+			nullspace(`=word("`nulllo'",`i')' `=word("`nullhi'",`i')')  altspace(`=`input_new'[5,`i']' `=`input_new'[6,`i']') ///
+			`nulltruncnormal' `alttruncnormal' pi0(`pi0') 
 			}			
 			capture confirm scalar r(fdr)
 			if !_rc mat `fdrisk'[`i',1] = r(fdr)
@@ -419,7 +387,7 @@ if wordcount("`nulllo'")>1{
  if wordcount("`nulllo'")==1{
 	local interval_name = cond(`nullhi'==`nulllo',"point","interval")
 	local null_interval = cond(`nullhi'==`nulllo',"`nullhi'","[`nulllo',`nullhi']")
-	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' based on a `=cond("`inttype'"=="confidence","`: display %6.4g 100*(1-`intlevel')'%",cond("`inttype'"=="likelihood","`intlevel'",""))' `inttype' `=cond("`inttype'"=="likelihood","support","")' interval"') rowtitle(Variables) `matlistopt'
+	matlist r(display_mat) , title(`"Comparison of ordinary P-Values and Second Generation P-Values for a`=cond(substr("`interval_name'",1,1)=="p","","n")'  `interval_name' Null-Hypothesis of `null_interval' based on a `=cond("`likelihood'"=="","`: display %6.4g `level''%",cond("`likelihood'"!="","`likelihood'",""))'  `=cond("`likelihood'"!="","likelihood support","confidence")' interval"') rowtitle(Variables) `matlistopt'
  }
 
 
