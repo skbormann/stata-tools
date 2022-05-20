@@ -1,12 +1,13 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
+*!Version 1.2.2 20.05.2022: Fixed a bug which prevented the subcommands from running under some circumstances. Fixed a bug which did not remove all entries added by the command sgpv menu, permdialog from the profile.do [WIP]
 *!Version 1.2.1 13.05.2022: Fixed a bug introduced by removing the support for the original R-syntax for fdrisk, so that the options fdrisk and all did not work anymore.  ///  
 							Removed the code to support the original R-syntax for fdrisk. ///
 							Removed the support for the already depreciated bonus option. ///
 							Fixed a bug that the deltagap has always been calculated and displayed even if the deltagap-option or the all-option had not been set.
-*!Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option. ///
+*Version 1.2c 14.02.2022: Fixed a bug when using the coefficient-option together with noconstant-option. ///
 							Support for Mata to calculate Fdrs has been removed, because it did not work as intended and offered no significant speed advantage. 
-*!Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
+*Version 1.2b 10.06.2021: Added option to use Mata to calculate the Fdrs; requires the moremata-package by Ben Jann
 *Version 1.2a 01.02.2021: Fixed a bug with the level option. Fixed a bug with regards to leading whitespaces when prefixing sgpv.
 *Version 1.2 27.12.2020 : Changed the name of the option permament to permdialog to clarify the meaning of the option. ///
 							Fixed the format option in the Dialog box. /// 
@@ -83,7 +84,16 @@ version 12.0
 capture  _on_colon_parse `0'
 
 *Check if anything to calculate is given
-if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist("`: word 1 of `0''","value","power","risk","plot", "menu" ) { // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
+/* Does not work as intended!
+Move the sucommand parsing part after the syntax command
+Ignore _rc for _on_colon_parse
+Check for content of `cmd' or `s(after)' happens anyway after the syntax command
+*/
+
+if _rc & "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) ///
+	& (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) ///
+	/*& !inlist("`: word 1 of `0''","value","power","risk","plot", "menu" ) */ ///
+	& (!ustrregexm(`"`0'"',"value")) & (!ustrregexm(`"`0'"',"power")) & (!ustrregexm(`"`0'"',"risk")) & (!ustrregexm(`"`0'"',"plot")) & (!ustrregexm(`"`0'"',"menu"))	{ // If the command was not prefixed and no previous estimation exists. -> There should be a more elegant solution to this problem 
 	disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
 	disp as error "No subcommand found either."
 	disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
@@ -644,7 +654,7 @@ program define menu
 			file read `fh' line
 			while r(eof)==0{ // Skip the lines containing the window commands and write only the others back to a new file, then rename the original file to profile.do.bak and rename the new file as profile.do
 				if `"`line'"'==`"`start_line'"'{
-					while r(eof)==0 & `"`line'"' != `"`end_line'"'{
+					while r(eof)==0 & `"`line'"' != `"`end_line'"'{ // does not remove yet the end_line from the file!
 					file read `fh' line
 					}
 				
