@@ -1,7 +1,6 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
 *!Version 1.2.2 20.05.2022: Fixed a bug which prevented the subcommands from running under some circumstances. ///
-							New behaviour: Incorrectly spelt options are silently ignored to make the code for parsing the subcommands shorter. This might change in the future if the new behaviour causes too many problems. ///
 							Fixed a bug which did not remove all entries added by the command sgpv menu, permdialog from the profile.do ///
 							Added an explanation to the help file how to remove the entries manually if the remove option fails.
 *!Version 1.2.1 13.05.2022: Fixed a bug introduced by removing the support for the original R-syntax for fdrisk, so that the options fdrisk and all did not work anymore.  ///  
@@ -87,7 +86,35 @@ version 12.0
 capture  _on_colon_parse `0'
 
 if _rc{
-	local 0 `0'
+	*local 0 `0'
+	
+	gettoken before after:0 ,parse(",")
+	if inlist(`"`before'"',"value","power","risk","plot", "menu" ){
+	if ("`before'"=="value"){
+		local 0 sgp`0'
+	} 
+	if ("`before'"=="power"){
+		local 0 sg`0'
+	} 
+	if ("`before'"=="plot"){
+		local 0 = subinstr(`"`0'"',"plot","plotsgpv",1)
+	} 
+	if ("`before'"=="risk"){
+		local 0 fd`0'
+	}
+	`0'
+	exit	
+	}
+	*if !inlist(`"`before'"',"value","power","risk","plot", "menu" ) & "`before'"=="," 
+	if "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist(`"`before'"',"value","power","risk","plot", "menu" ) {
+		disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
+		disp as error "No subcommand found either."
+		disp as error "Make sure that the matrix option is correctly specified as 'matrix(matrixname)' or 'm(matrixname)' . "
+		disp as error "Make sure that the estimate option is correctly specified as 'estimate(stored estimate name)' or 'e(stored estimate name)' . "
+		disp as error "The currently available subcommands are 'value', 'power', 'fdrisk', 'plot' and 'menu'."
+		exit 198
+	}
+	
 }
 
 if !_rc{
@@ -100,31 +127,8 @@ syntax [anything(name=subcmd)] [, Estimate(name)  Matrix(name)  Coefficient(stri
  Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings  DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string)   /// null hypotheses 
   TRUNCnormal Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) /// fdrisk-options
-	/*new possible options, not implemented yet */ /*Plot*/  *] 
-	// Had to add "*" to allow arbitrary options to simplify the parsing of the subcommands. Might lead to unexpected results because incorrectly spelt options are silently ignored instead of throwing an error message.
-	//Might change the behaviour later by using instead an explicit subcmd_opt(...) option if the current behaviour shows to be too problematic.
-
-***Parsing of subcommands -> A convenience feature to use only one command for SGPV calculation -> no further input checks of acceptable options
-* Potential subcommands: value, power, fdrisk, plot, menu
-if inlist(`"`subcmd'"',"value","power","risk","plot", "menu" ){ // Change the code to allow shorter subcommand names? Look at the code for estpost.ado for one way how to do it
-	if "`cmd'"!="" stop "Subcommands cannot be used when prefixing an estimation command."
-
-	if ("`subcmd'"=="value"){
-		local 0 sgp`0'
-	} 
-	if ("`subcmd'"=="power"){
-		local 0 sg`0'
-	} 
-	if ("`subcmd'"=="plot"){
-		local 0 = subinstr(`"`0'"',"plot","plotsgpv",1)
-	} 
-	if ("`subcmd'"=="risk"){
-		local 0 fd`0'
-	}
-	`0'
-	exit	
-
-
+	/*new possible options, not implemented yet */ /*Plot*/] 
+	
 ***Option parsing
 **Check for what SGPVs should be calculated for
 if "`cmd'"!="" & ("`estimate'"!="" | "`matrix'"!=""){

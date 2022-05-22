@@ -93,7 +93,6 @@ General remarks if updates come in larger "packages".
 ### sgpv
 * Version 1.2.2 20.05.2022: 
 	* Fixed a bug which prevented the subcommands from running under some circumstances. 
-	* New behaviour: Incorrectly spelt options are silently ignored to make the code for parsing the subcommands shorter. This might change in the future if the new behaviour causes too many problems. 
 	* Fixed a bug which did not remove all entries added by the command sgpv menu, permdialog from the profile.do. 
 	* Added an explanation to the help file how to remove the entries manually if the remove option fails.
 * Version 1.2.1 13.05.2022: 
