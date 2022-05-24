@@ -664,7 +664,7 @@ program define menu
 		
 	}
 	else{ // Not testable on my system
-		!mv  "`path'/`filename'" `"`path'/`filename'.bak"'
+		!mv  "`path'/`filename'" `path'/`filename'.bak
 		!mv "`profile_new'" `path'/`filename'
 	}
   exit
