@@ -91,6 +91,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 	: Initial Github Release
 
 ### sgpv
+* Version 1.2.3 25.05.2022: Fixed a bug when running "sgpv menu, remove" under Linux.
 * Version 1.2.2 20.05.2022: 
 	* Fixed a bug which prevented the subcommands from running under some circumstances. 
 	* Fixed a bug which did not remove all entries added by the command sgpv menu, permdialog from the profile.do. 

@@ -1,9 +1,10 @@
 *!Calculate the Second-Generation P-Value(s)(SGPV) and their associated diagnosis statistics after common estimation commands based on Blume et al. 2018,2019
 *!Author: Sven-Kristjan Bormann
-*!Version 1.2.2 20.05.2022: Fixed a bug which prevented the subcommands from running under some circumstances. ///
+*!Version 1.2.3 25.05.2022: Fixed a bug when running "sgpv menu, remove" under Linux.
+*Version 1.2.2 20.05.2022: Fixed a bug which prevented the subcommands from running under some circumstances. ///
 							Fixed a bug which did not remove all entries added by the command sgpv menu, permdialog from the profile.do ///
 							Added an explanation to the help file how to remove the entries manually if the remove option fails.
-*!Version 1.2.1 13.05.2022: Fixed a bug introduced by removing the support for the original R-syntax for fdrisk, so that the options fdrisk and all did not work anymore.  ///  
+*Version 1.2.1 13.05.2022: Fixed a bug introduced by removing the support for the original R-syntax for fdrisk, so that the options fdrisk and all did not work anymore.  ///  
 							Removed the code to support the original R-syntax for fdrisk. ///
 							Removed the support for the already depreciated bonus option. ///
 							Fixed a bug that the deltagap has always been calculated and displayed even if the deltagap-option or the all-option had not been set.
@@ -664,7 +665,7 @@ program define menu
 	}
 	else{ // Not testable on my system
 		!mv  "`path'/`filename'" `"`path'/`filename'.bak"'
-		!mv "`profile_new'" "`path'/`filename'"
+		!mv "`profile_new'" `path'/`filename'
 	}
   exit
  }
