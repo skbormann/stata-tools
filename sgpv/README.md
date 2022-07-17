@@ -157,6 +157,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.07a 13.07.2022: Fixed the example "Simulated two-group dichotomous data for different parameters" in the help file. No actual code changes.
 * Version 1.07	15.05.2022: Handling of larger inputs and nomata-option should work now as intended. Previously, not all possible combinations of large inputs and nomata-option have been supported correctly.
 *Version 1.06  13.02.2022: 
 	* Fixed a bug when variables as input with only one null-hypothesis is used, but only a few observations exist. ///

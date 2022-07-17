@@ -126,7 +126,7 @@ if !_rc{
 syntax [anything(name=subcmd)] [, Estimate(name)  Matrix(name)  Coefficient(string asis) NOCONStant   /// input-options
  Quietly MATListopt(string asis)  FORmat(str) NONULLwarnings  DELTAgap FDrisk all  /// display-options
   nulllo(string) nullhi(string)   /// null hypotheses 
-  TRUNCnormal Level(cilevel) LIKelihood(numlist min=1 max=2) Pi0(real 0.5) /// fdrisk-options
+  TRUNCnormal Level(cilevel) LIKelihood(numlist min=1 max=1) Pi0(real 0.5) /// fdrisk-options
 	/*new possible options, not implemented yet */ /*Plot*/] 
 	
 ***Option parsing
