@@ -88,7 +88,8 @@ from {browse "https://journals.plos.org/plosone/article/file?id=10.1371/journal.
 
 {phang}
 {opt lik:elihood(#)} likelihood support interval with level 1/k was used to calculate the SGPV. 
-				
+For technical reasons, a fraction like 1/8 as the level must be converted to a real number like 0.125 first, when used for this option.	
+			
 {pstd}
 {p_end}
 

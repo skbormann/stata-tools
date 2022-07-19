@@ -44,7 +44,7 @@
 {p_end}
 
 {syntab:Reporting}
-{synopt:{opt l:evel(#)}} set confidence level for ...; default is {cmd:level(95)}
+{synopt:{opt l:evel(#)}} set confidence level; default is {cmd:level(95)}
 {p_end}
 {synopt:{opt q:uietly}}  suppress the output of the estimation command.
 {p_end}
@@ -200,7 +200,7 @@ Using this default value will always result in having SGPVs of value 0 or 0.5!{p
 
 {dlgtab:Reporting}
 {phang}
-{opt l:evel(#)} set the level of the confidence interval. 
+{opt l:evel(#)} set the confidence level, as a percentage, for the confidence interval(s). 
 The default is {cmd:level(95)} or as set by {helpb set level}. See also {helpb estimation options##level():[R] estimation options}. 
 This option overwrites the same named option of an estimation command.   
 A warning is displayed in the beginning if this happens.
@@ -244,7 +244,8 @@ The mean and standard deviation of the distribution are automatically set based 
 {opt lik:elihood(#)} use a 1/k likelihood support interval (LSI) instead of a (1-α)100% confidence interval to calculate the Fdr. 
 This option works only in combination with the option {cmd:matrix()} for a user supplied matrix. 
 The level should be set equal to the level of the LSI which was used to calculate the lower and upper bound of the estimated coefficients.
-No official Stata command reports likelihood support intervals.
+For technical reasons, a fraction like 1/8 as the level must be converted to a real number like 0.125 first, when used for this option.	
+No official Stata command reports likelihood support intervals yet.
 
 {phang2}
 {opt p:i0(#)}  prior probability of the null hypothesis. Default is 0.5. This value can be only between 0 and 1 (exclusive). 

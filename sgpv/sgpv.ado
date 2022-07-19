@@ -86,7 +86,6 @@ version 12.0
 capture  _on_colon_parse `0'
 
 if _rc{
-	*local 0 `0'
 	
 	gettoken before after:0 ,parse(",")
 	if inlist(`"`before'"',"value","power","risk","plot", "menu" ){
@@ -105,7 +104,7 @@ if _rc{
 	`0'
 	exit	
 	}
-	*if !inlist(`"`before'"',"value","power","risk","plot", "menu" ) & "`before'"=="," 
+ 
 	if "`e(cmd)'"=="" & (!ustrregexm(`"`0'"',"matrix\(\w+\)") & !ustrregexm(`"`0'"',"m\(\w+\)") ) & (!ustrregexm(`"`0'"',"estimate\(\w+\)") & !ustrregexm(`"`0'"',"e\(\w+\)") ) & !inlist(`"`before'"',"value","power","risk","plot", "menu" ) {
 		disp as error "No last estimate or matrix, saved estimate for calculating SGPV found."
 		disp as error "No subcommand found either."
@@ -570,6 +569,7 @@ program define FormatDisplay, rclass
 	return matrix display_mat = `display_mat' 
 
 end
+
 
 *Simulate the behaviour of the R-function with the same name 
 program define stop
