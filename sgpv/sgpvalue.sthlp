@@ -19,7 +19,7 @@
 {marker syntax}{...}
 {title:Syntax}
 {p 8 17 2}
-{cmdab:sgpvalue} {cmd:,} 
+{cmdab:sgpvalue}{cmd:,} 
 {cmd:estlo({it:{help sgpvalue##boundlist:boundlist}})} {cmd:esthi({it:{help sgpvalue##boundlist:boundlist}})} {cmd:nulllo({it:{help sgpvalue##boundlist:boundlist}})} {cmd:nullhi({it:{help sgpvalue##boundlist:boundlist}})}
 [{it:options}]
 

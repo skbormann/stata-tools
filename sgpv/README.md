@@ -7,6 +7,8 @@ The changelog is taken from the ado-files and slightly modified.
 
 ### General
 General remarks if updates come in larger "packages".
+* 03.08.2022: Various changes to all help files to be in line with the Stata Journal article.
+
 * 27.12.2020:
   * Made the syntax of most commands more Stata like and less R-like. Removed several options and replaced by them with default settings. The old syntax still works.
   * Certification scripts for each command are now available but not part of the package distribution. For now only the accuracy of the results is tested but later tests for input errors might be added.
