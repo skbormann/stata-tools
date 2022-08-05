@@ -7,6 +7,8 @@ The changelog is taken from the ado-files and slightly modified.
 
 ### General
 General remarks if updates come in larger "packages".
+* 03.08.2022: Various changes to all help files to be in line with the Stata Journal article.
+
 * 27.12.2020:
   * Made the syntax of most commands more Stata like and less R-like. Removed several options and replaced by them with default settings. The old syntax still works.
   * Certification scripts for each command are now available but not part of the package distribution. For now only the accuracy of the results is tested but later tests for input errors might be added.
@@ -158,6 +160,7 @@ General remarks if updates come in larger "packages".
 * Version 0.90 : Initial Github release
 
 ### sgpvalue
+* Version 1.07a 13.07.2022: Fixed the example "Simulated two-group dichotomous data for different parameters" in the help file. No actual code changes.
 * Version 1.07	15.05.2022: Handling of larger inputs and nomata-option should work now as intended. Previously, not all possible combinations of large inputs and nomata-option have been supported correctly.
 *Version 1.06  13.02.2022: 
 	* Fixed a bug when variables as input with only one null-hypothesis is used, but only a few observations exist. ///
